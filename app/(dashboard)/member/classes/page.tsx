@@ -1,0 +1,417 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Calendar } from "@/components/ui/calendar"
+import { format, isToday, isTomorrow, addDays } from "date-fns"
+import { Clock, Users, MapPin, Check, X, CalendarDays, ChevronLeft, ChevronRight, Sparkles } from "lucide-react"
+
+interface ClassSchedule {
+  id: number
+  dayOfWeek: number
+  startTime: string
+  room: string
+  class: {
+    id: number
+    name: string
+    description: string
+    maxCapacity: number
+    durationMinutes: number
+    color: string
+  }
+  trainer?: { id: number }
+  bookingsCount: number
+  availableSpots: number
+  isFull: boolean
+  isBooked: boolean
+}
+
+interface ClassBooking {
+  id: number
+  scheduleId: number
+  bookingDate: string
+  status: string
+  schedule: ClassSchedule
+}
+
+export default function MemberClassesPage() {
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [schedule, setSchedule] = useState<ClassSchedule[]>([])
+  const [myBookings, setMyBookings] = useState<ClassBooking[]>([])
+  const [loading, setLoading] = useState(true)
+  const [bookingLoading, setBookingLoading] = useState<number | null>(null)
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/classes/schedule").then(r => r.json()),
+      fetch("/api/member/class-bookings").then(r => r.json()),
+    ]).then(([scheduleData, bookingsData]) => {
+      if (scheduleData.schedule) {
+        setSchedule(scheduleData.schedule)
+      }
+      if (bookingsData.bookings) {
+        setMyBookings(bookingsData.bookings)
+      }
+    }).catch(err => console.error("Failed to load classes:", err))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const dayOfWeek = selectedDate.getDay()
+  
+  const classesForDay = schedule.filter(s => s.dayOfWeek === dayOfWeek)
+    .sort((a, b) => a.startTime.localeCompare(b.startTime))
+
+  const upcomingBookings = myBookings
+    .filter(b => new Date(b.bookingDate) >= new Date())
+    .sort((a, b) => new Date(a.bookingDate).getTime() - new Date(b.bookingDate).getTime())
+
+  const handleBookClass = async (scheduleId: number) => {
+    setBookingLoading(scheduleId)
+    try {
+      const response = await fetch("/api/member/class-bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scheduleId,
+          bookingDate: format(selectedDate, "yyyy-MM-dd"),
+        }),
+      })
+
+      if (response.ok) {
+        const bookingsRes = await fetch("/api/member/class-bookings")
+        const bookingsData = await bookingsRes.json()
+        if (bookingsData.bookings) {
+          setMyBookings(bookingsData.bookings)
+        }
+        
+        setSchedule(schedule.map(s => 
+          s.id === scheduleId 
+            ? { ...s, isBooked: true, bookingsCount: s.bookingsCount + 1, availableSpots: s.availableSpots - 1 }
+            : s
+        ))
+      } else {
+        const error = await response.json()
+        alert(error.error || "Failed to book class")
+      }
+    } catch (err) {
+      console.error("Booking error:", err)
+      alert("Failed to book class")
+    } finally {
+      setBookingLoading(null)
+    }
+  }
+
+  const handleCancelBooking = async (bookingId: number, scheduleId: number) => {
+    if (!confirm("Are you sure you want to cancel this booking?")) return
+
+    try {
+      const response = await fetch(`/api/member/class-bookings?id=${bookingId}`, {
+        method: "DELETE",
+      })
+
+      if (response.ok) {
+        setMyBookings(myBookings.filter(b => b.id !== bookingId))
+        
+        setSchedule(schedule.map(s => 
+          s.id === scheduleId 
+            ? { ...s, isBooked: false, bookingsCount: s.bookingsCount - 1, availableSpots: s.availableSpots + 1 }
+            : s
+        ))
+      }
+    } catch (err) {
+      console.error("Cancel error:", err)
+      alert("Failed to cancel booking")
+    }
+  }
+
+  const navigateDate = (direction: 'prev' | 'next') => {
+    setSelectedDate(prev => {
+      const newDate = new Date(prev)
+      newDate.setDate(prev.getDate() + (direction === 'next' ? 1 : -1))
+      return newDate
+    })
+  }
+
+  const getDateLabel = (date: Date) => {
+    if (isToday(date)) return "Today"
+    if (isTomorrow(date)) return "Tomorrow"
+    return format(date, "EEEE")
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="text-center">
+          <div className="relative inline-block">
+            <div className="h-12 w-12 rounded-full border-4 border-zinc-200"></div>
+            <div className="absolute top-0 left-0 h-12 w-12 rounded-full border-4 border-zinc-900 border-t-transparent animate-spin"></div>
+          </div>
+          <p className="text-zinc-500 mt-4">Loading classes...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold text-zinc-900">Class Schedule</h1>
+        <p className="text-zinc-500 mt-1">Book classes and manage your gym schedule</p>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="space-y-6">
+          <Card className="border-zinc-200 shadow-sm">
+            <CardHeader className="pb-3 border-b border-zinc-100">
+              <CardTitle className="text-base font-semibold text-zinc-900 flex items-center gap-2">
+                <CalendarDays className="h-5 w-5 text-zinc-600" />
+                Select Date
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => date && setSelectedDate(date)}
+                className="rounded-md border-zinc-200"
+              />
+            </CardContent>
+          </Card>
+
+          <Card className="border-zinc-200 shadow-sm">
+            <CardHeader className="pb-3 border-b border-zinc-100">
+              <CardTitle className="text-base font-semibold text-zinc-900">My Upcoming Classes</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4">
+              {upcomingBookings.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="w-14 h-14 mx-auto bg-zinc-100 rounded-full flex items-center justify-center mb-3">
+                    <CalendarDays className="h-7 w-7 text-zinc-400" />
+                  </div>
+                  <p className="text-zinc-500 text-sm">No upcoming classes</p>
+                  <p className="text-zinc-400 text-xs mt-1">Book a class to get started</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {upcomingBookings.slice(0, 5).map((booking) => (
+                    <div
+                      key={booking.id}
+                      className="flex items-center justify-between p-3 bg-zinc-50 rounded-lg border border-zinc-100 hover:border-zinc-200 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className="w-2 h-10 rounded-full"
+                          style={{ backgroundColor: booking.schedule.class.color }}
+                        />
+                        <div>
+                          <p className="font-medium text-zinc-900 text-sm">{booking.schedule.class.name}</p>
+                          <p className="text-xs text-zinc-500">
+                            {format(new Date(booking.bookingDate), "MMM d")} at {booking.schedule.startTime.slice(0, 5)}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleCancelBooking(booking.id, booking.scheduleId)}
+                        className="h-8 w-8 text-zinc-400 hover:text-red-500 hover:bg-red-50"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  {upcomingBookings.length > 5 && (
+                    <p className="text-xs text-zinc-400 text-center pt-2">
+                      +{upcomingBookings.length - 5} more bookings
+                    </p>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="lg:col-span-2">
+          <Card className="border-zinc-200 shadow-sm">
+            <CardHeader className="border-b border-zinc-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-base font-semibold text-zinc-900">
+                    {getDateLabel(selectedDate)}
+                  </CardTitle>
+                  <p className="text-sm text-zinc-500 mt-0.5">
+                    {format(selectedDate, "MMMM d, yyyy")}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => navigateDate('prev')}>
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 px-3 text-xs"
+                    onClick={() => setSelectedDate(new Date())}
+                  >
+                    Today
+                  </Button>
+                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => navigateDate('next')}>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-6">
+              {classesForDay.length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="w-16 h-16 mx-auto bg-zinc-100 rounded-full flex items-center justify-center mb-4">
+                    <CalendarDays className="h-8 w-8 text-zinc-400" />
+                  </div>
+                  <p className="text-zinc-500 font-medium">No classes scheduled</p>
+                  <p className="text-zinc-400 text-sm mt-1">Try selecting a different date</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {classesForDay.map((classSchedule) => {
+                    const startMinutes = parseInt(classSchedule.startTime.split(":")[0]) * 60 + 
+                                      parseInt(classSchedule.startTime.split(":")[1])
+                    const endMinutes = startMinutes + classSchedule.class.durationMinutes
+                    const endTime = `${Math.floor(endMinutes / 60).toString().padStart(2, "0")}:${(endMinutes % 60).toString().padStart(2, "0")}`
+                    const capacityPercent = (classSchedule.bookingsCount / classSchedule.class.maxCapacity) * 100
+                    
+                    return (
+                      <div
+                        key={classSchedule.id}
+                        className={`group border border-zinc-200 rounded-xl overflow-hidden hover:shadow-md transition-all ${
+                          classSchedule.isBooked ? "ring-2 ring-emerald-500 ring-offset-2" : ""
+                        }`}
+                      >
+                        <div className="flex">
+                          <div 
+                            className="w-2 flex-shrink-0"
+                            style={{ backgroundColor: classSchedule.class.color }}
+                          />
+                          <div className="flex-1 p-5">
+                            <div className="flex items-start justify-between mb-3">
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h3 className="font-semibold text-zinc-900">{classSchedule.class.name}</h3>
+                                  {classSchedule.isBooked && (
+                                    <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">
+                                      <Check className="h-3 w-3 mr-1" />
+                                      Booked
+                                    </Badge>
+                                  )}
+                                </div>
+                                {classSchedule.class.description && (
+                                  <p className="text-sm text-zinc-500 mt-1">{classSchedule.class.description}</p>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-4 text-sm text-zinc-500 mb-4">
+                              <span className="flex items-center gap-1.5">
+                                <Clock className="h-4 w-4 text-zinc-400" />
+                                <span>{classSchedule.startTime.slice(0, 5)} - {endTime}</span>
+                              </span>
+                              <span className="flex items-center gap-1.5">
+                                <MapPin className="h-4 w-4 text-zinc-400" />
+                                <span>{classSchedule.room}</span>
+                              </span>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2">
+                                  <Users className="h-4 w-4 text-zinc-400" />
+                                  <span className="text-sm text-zinc-600">
+                                    {classSchedule.bookingsCount}/{classSchedule.class.maxCapacity}
+                                  </span>
+                                </div>
+                                <div className="w-24 h-2 bg-zinc-100 rounded-full overflow-hidden">
+                                  <div 
+                                    className={`h-full rounded-full transition-all ${
+                                      capacityPercent >= 100 ? "bg-red-500" : 
+                                      capacityPercent >= 80 ? "bg-amber-500" : 
+                                      "bg-emerald-500"
+                                    }`}
+                                    style={{ width: `${Math.min(capacityPercent, 100)}%` }}
+                                  />
+                                </div>
+                                {classSchedule.isFull && !classSchedule.isBooked && (
+                                  <span className="text-xs text-red-500 font-medium">Full</span>
+                                )}
+                              </div>
+
+                              {classSchedule.isBooked ? (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const booking = myBookings.find(
+                                      b => b.scheduleId === classSchedule.id && 
+                                      format(new Date(b.bookingDate), "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
+                                    )
+                                    if (booking) {
+                                      handleCancelBooking(booking.id, classSchedule.id)
+                                    }
+                                  }}
+                                  className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                                >
+                                  <X className="h-4 w-4 mr-1.5" />
+                                  Cancel
+                                </Button>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleBookClass(classSchedule.id)}
+                                  disabled={classSchedule.isFull || bookingLoading === classSchedule.id}
+                                  className="bg-zinc-900 hover:bg-zinc-800 text-white"
+                                >
+                                  {bookingLoading === classSchedule.id ? (
+                                    <>
+                                      <div className="h-4 w-4 mr-1.5 border-2 border-white/30 border-t-white animate-spin rounded-full" />
+                                      Booking...
+                                    </>
+                                  ) : classSchedule.isFull ? (
+                                    "Class Full"
+                                  ) : (
+                                    <>
+                                      <Sparkles className="h-4 w-4 mr-1.5" />
+                                      Book Class
+                                    </>
+                                  )}
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="mt-4 flex items-center gap-4 text-xs text-zinc-400">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+              <span>Available</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+              <span>Almost Full</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-red-500"></div>
+              <span>Full</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
