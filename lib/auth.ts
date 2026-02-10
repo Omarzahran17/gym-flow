@@ -11,7 +11,13 @@ const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2026-01-28.clover",
 });
 
+const getBaseUrl = () => {
+    const url = process.env.NEXT_PUBLIC_APP_URL || process.env.BETTER_AUTH_URL || "http://localhost:3000"
+    return url.startsWith("http") ? url : `https://${url}`
+}
+
 export const auth = betterAuth({
+    baseURL: getBaseUrl(),
     emailAndPassword: {
         enabled: true,
     },
