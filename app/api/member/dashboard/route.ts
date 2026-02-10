@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { members, memberSubscriptions, classBookings, classSchedules, classes, trainers } from "@/lib/db/schema"
-import { eq, and, gte, lte } from "drizzle-orm"
+import { members, memberSubscriptions, classBookings, classSchedules } from "@/lib/db/schema"
+import { eq, and, gte } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
@@ -23,13 +23,9 @@ export async function GET(request: NextRequest) {
     }
 
     const today = new Date()
-    const dayOfWeek = today.getDay()
     const startOfWeek = new Date(today)
     startOfWeek.setDate(today.getDate() - today.getDay())
     startOfWeek.setHours(0, 0, 0, 0)
-    const endOfWeek = new Date(startOfWeek)
-    endOfWeek.setDate(startOfWeek.getDate() + 6)
-    endOfWeek.setHours(23, 59, 59, 999)
 
     const weeklyBookings = await db.query.classBookings.findMany({
       where: and(
@@ -39,8 +35,15 @@ export async function GET(request: NextRequest) {
       with: {
         schedule: {
           with: {
-            class: true,
-            trainer: true,
+            class: {
+              with: {
+                trainer: {
+                  with: {
+                    user: true,
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -53,9 +56,7 @@ export async function GET(request: NextRequest) {
         name: booking.schedule!.class!.name,
         time: booking.schedule!.startTime.slice(0, 5),
         day: getDayName(booking.schedule!.dayOfWeek),
-        trainer: booking.schedule!.trainer
-          ? `${booking.schedule!.trainer.firstName || ""} ${booking.schedule!.trainer.lastName || ""}`.trim() || booking.schedule!.trainer.userId
-          : "TBD",
+        trainer: booking.schedule!.class!.trainer?.user?.name || "TBD",
         room: booking.schedule!.room,
       }))
       .slice(0, 5)

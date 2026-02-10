@@ -1,12 +1,13 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Calendar } from "@/components/ui/calendar"
 import { format, isToday, isTomorrow, addDays } from "date-fns"
-import { Clock, Users, MapPin, Check, X, CalendarDays, ChevronLeft, ChevronRight, Sparkles } from "lucide-react"
+import { Clock, Users, MapPin, Check, X, CalendarDays, ChevronLeft, ChevronRight, Sparkles, CreditCard, AlertCircle } from "lucide-react"
 
 interface ClassSchedule {
   id: number
@@ -36,10 +37,35 @@ interface ClassBooking {
   schedule: ClassSchedule
 }
 
+interface SubscriptionStatus {
+  hasSubscription: boolean
+  isActive: boolean
+  plan?: {
+    id: number
+    name: string
+    tier: string
+    maxClassesPerWeek: number
+    maxCheckInsPerDay: number
+    hasTrainerAccess: boolean
+    hasPersonalTraining: boolean
+    hasProgressTracking: boolean
+    hasAchievements: boolean
+  }
+  usage?: {
+    classesThisWeek: number
+    checkInsToday: number
+  }
+  limits?: {
+    classesRemaining: number
+    canCheckIn: boolean
+  }
+}
+
 export default function MemberClassesPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [schedule, setSchedule] = useState<ClassSchedule[]>([])
   const [myBookings, setMyBookings] = useState<ClassBooking[]>([])
+  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null)
   const [loading, setLoading] = useState(true)
   const [bookingLoading, setBookingLoading] = useState<number | null>(null)
 
@@ -47,13 +73,15 @@ export default function MemberClassesPage() {
     Promise.all([
       fetch("/api/classes/schedule").then(r => r.json()),
       fetch("/api/member/class-bookings").then(r => r.json()),
-    ]).then(([scheduleData, bookingsData]) => {
+      fetch("/api/member/subscription-status").then(r => r.json()),
+    ]).then(([scheduleData, bookingsData, subData]) => {
       if (scheduleData.schedule) {
         setSchedule(scheduleData.schedule)
       }
       if (bookingsData.bookings) {
         setMyBookings(bookingsData.bookings)
       }
+      setSubscriptionStatus(subData)
     }).catch(err => console.error("Failed to load classes:", err))
       .finally(() => setLoading(false))
   }, [])
@@ -160,6 +188,82 @@ export default function MemberClassesPage() {
         <h1 className="text-2xl font-bold text-zinc-900">Class Schedule</h1>
         <p className="text-zinc-500 mt-1">Book classes and manage your gym schedule</p>
       </div>
+
+      {!subscriptionStatus?.hasSubscription && (
+        <Card className="border-amber-200 bg-amber-50">
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <AlertCircle className="h-5 w-5 text-amber-600" />
+                <div>
+                  <p className="font-medium text-amber-800">Subscription Required</p>
+                  <p className="text-sm text-amber-700">You need an active subscription to book classes</p>
+                </div>
+              </div>
+              <Link href="/member/subscription">
+                <Button className="bg-amber-600 hover:bg-amber-700 text-white">
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Subscribe Now
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {subscriptionStatus?.hasSubscription && subscriptionStatus?.plan && (
+        <Card className="border-zinc-200 shadow-sm">
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-2.5 bg-blue-50 rounded-lg">
+                  <CalendarDays className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-zinc-900">{subscriptionStatus.plan.name} Plan</p>
+                    <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">Active</Badge>
+                  </div>
+                  <p className="text-sm text-zinc-500">
+                    {subscriptionStatus.usage?.classesThisWeek || 0} of {subscriptionStatus.plan.maxClassesPerWeek === 999 ? "∞" : subscriptionStatus.plan.maxClassesPerWeek} classes used this week
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                {subscriptionStatus.limits && subscriptionStatus.plan.maxClassesPerWeek !== 999 && (
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-zinc-900">{subscriptionStatus.limits.classesRemaining}</p>
+                    <p className="text-xs text-zinc-500">classes remaining</p>
+                  </div>
+                )}
+                {subscriptionStatus.limits && subscriptionStatus.plan.maxClassesPerWeek === 999 && (
+                  <Badge className="bg-purple-50 text-purple-700 border-purple-200">Unlimited Classes</Badge>
+                )}
+              </div>
+            </div>
+            {subscriptionStatus.plan.maxClassesPerWeek !== 999 && (
+              <div className="mt-4">
+                <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full rounded-full transition-all ${
+                      (subscriptionStatus.usage?.classesThisWeek || 0) >= subscriptionStatus.plan.maxClassesPerWeek ? "bg-red-500" :
+                      (subscriptionStatus.usage?.classesThisWeek || 0) >= subscriptionStatus.plan.maxClassesPerWeek * 0.8 ? "bg-amber-500" : 
+                      "bg-emerald-500"
+                    }`}
+                    style={{ width: `${Math.min(((subscriptionStatus.usage?.classesThisWeek || 0) / subscriptionStatus.plan.maxClassesPerWeek) * 100, 100)}%` }}
+                  />
+                </div>
+                {subscriptionStatus.limits?.classesRemaining === 0 && (
+                  <p className="text-sm text-amber-600 mt-2 flex items-center gap-1">
+                    <AlertCircle className="h-4 w-4" />
+                    You&apos;ve reached your weekly limit. <Link href="/member/subscription" className="underline font-medium">Upgrade your plan</Link> for more classes.
+                  </p>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6">
@@ -367,14 +471,23 @@ export default function MemberClassesPage() {
                                 <Button
                                   size="sm"
                                   onClick={() => handleBookClass(classSchedule.id)}
-                                  disabled={classSchedule.isFull || bookingLoading === classSchedule.id}
-                                  className="bg-zinc-900 hover:bg-zinc-800 text-white"
+                                  disabled={
+                                    classSchedule.isFull || 
+                                    bookingLoading === classSchedule.id ||
+                                    !subscriptionStatus?.hasSubscription ||
+                                    (subscriptionStatus?.limits?.classesRemaining === 0 && subscriptionStatus?.plan?.maxClassesPerWeek !== 999)
+                                  }
+                                  className="bg-zinc-900 hover:bg-zinc-800 text-white disabled:bg-zinc-300"
                                 >
                                   {bookingLoading === classSchedule.id ? (
                                     <>
                                       <div className="h-4 w-4 mr-1.5 border-2 border-white/30 border-t-white animate-spin rounded-full" />
                                       Booking...
                                     </>
+                                  ) : !subscriptionStatus?.hasSubscription ? (
+                                    "Subscribe to Book"
+                                  ) : subscriptionStatus?.limits?.classesRemaining === 0 && subscriptionStatus?.plan?.maxClassesPerWeek !== 999 ? (
+                                    "Limit Reached"
                                   ) : classSchedule.isFull ? (
                                     "Class Full"
                                   ) : (

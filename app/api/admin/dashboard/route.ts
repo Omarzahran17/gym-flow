@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { members, memberSubscriptions, classes, classSchedules, trainers } from "@/lib/db/schema"
-import { eq, desc, and, gte, sql } from "drizzle-orm"
+import { members, memberSubscriptions, classSchedules } from "@/lib/db/schema"
+import { eq, desc } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
@@ -15,17 +15,16 @@ export async function GET(request: NextRequest) {
     }
 
     const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const todayStr = today.toISOString().split('T')[0]
     const dayOfWeek = today.getDay()
 
-    // Get recent members (last 10 joined)
     const recentMembers = await db.query.members.findMany({
       orderBy: [desc(members.joinDate)],
       limit: 5,
+      with: {
+        user: true,
+      },
     })
 
-    // Get member details with subscriptions
     const membersWithDetails = await Promise.all(
       recentMembers.map(async (member) => {
         const subscription = await db.query.memberSubscriptions.findFirst({
@@ -33,49 +32,44 @@ export async function GET(request: NextRequest) {
         })
         return {
           id: member.id,
-          userId: member.userId,
-          firstName: member.firstName,
-          lastName: member.lastName,
-          email: member.email,
+          name: member.user?.name || member.userId,
+          email: member.user?.email || "No email",
           joinDate: member.joinDate,
           subscriptionStatus: subscription?.status || "inactive",
         }
       })
     )
 
-    // Get today's classes
     const todaySchedules = await db.query.classSchedules.findMany({
       where: eq(classSchedules.dayOfWeek, dayOfWeek),
       with: {
-        class: true,
-        trainer: true,
+        class: {
+          with: {
+            trainer: {
+              with: {
+                user: true,
+              },
+            },
+          },
+        },
       },
     })
 
     const todayClasses = todaySchedules
-      .filter(s => s.class && s.class.isActive)
+      .filter(s => s.class)
       .map(schedule => ({
         id: schedule.class!.id,
         name: schedule.class!.name,
         time: schedule.startTime.slice(0, 5),
         room: schedule.room,
-        trainerName: schedule.trainer 
-          ? `${schedule.trainer.firstName || ""} ${schedule.trainer.lastName || ""}`.trim() 
-          : schedule.trainer?.userId || "TBD",
+        trainerName: schedule.class!.trainer?.user?.name || "TBD",
         color: schedule.class!.color,
         maxCapacity: schedule.class!.maxCapacity,
       }))
       .sort((a, b) => a.time.localeCompare(b.time))
 
     return NextResponse.json({
-      recentMembers: membersWithDetails.map(m => ({
-        id: m.id,
-        name: m.firstName && m.lastName 
-          ? `${m.firstName} ${m.lastName}` 
-          : m.userId,
-        email: m.email || "No email",
-        joinDate: m.joinDate,
-      })),
+      recentMembers: membersWithDetails,
       todayClasses,
     })
   } catch (error) {

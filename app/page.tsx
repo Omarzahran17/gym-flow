@@ -90,22 +90,20 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Dashboard Preview */}
           <div className="mt-20 relative">
             <div className="absolute inset-0 bg-gradient-to-t from-zinc-50 to-transparent z-10 pointer-events-none" />
             <div className="relative bg-zinc-900 rounded-2xl p-2 shadow-2xl">
               <div className="bg-zinc-800 rounded-xl p-6">
                 <div className="grid grid-cols-4 gap-4 mb-6">
                   {[
-                    { label: "Members", value: "2,847", change: "+12%" },
-                    { label: "Revenue", value: "$48,290", change: "+8%" },
-                    { label: "Classes", value: "156", change: "+5%" },
-                    { label: "Retention", value: "94.2%", change: "+2%" },
+                    { label: "Members", icon: <Users className="h-5 w-5 text-blue-400" /> },
+                    { label: "Revenue", icon: <CreditCard className="h-5 w-5 text-green-400" /> },
+                    { label: "Classes", icon: <Calendar className="h-5 w-5 text-purple-400" /> },
+                    { label: "Retention", icon: <TrendingUp className="h-5 w-5 text-orange-400" /> },
                   ].map((stat, i) => (
-                    <div key={i} className="bg-zinc-700/50 rounded-lg p-4">
-                      <p className="text-xs text-zinc-400 mb-1">{stat.label}</p>
-                      <p className="text-2xl font-bold text-white">{stat.value}</p>
-                      <p className="text-xs text-green-400 mt-1">{stat.change}</p>
+                    <div key={i} className="bg-zinc-700/50 rounded-lg p-4 text-center">
+                      <div className="flex justify-center mb-2">{stat.icon}</div>
+                      <p className="text-xs text-zinc-400">{stat.label}</p>
                     </div>
                   ))}
                 </div>

@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { trainers, members, users, workoutPlans, classSchedules, classes } from "@/lib/db/schema"
+import { trainers, workoutPlans, classSchedules } from "@/lib/db/schema"
 import { eq, and, desc } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -47,8 +47,8 @@ export async function GET(request: NextRequest) {
           name: member.user?.name || member.userId,
           email: member.user?.email || null,
           planName: plan.name,
-          lastActive: plan.updatedAt 
-            ? getTimeAgo(new Date(plan.updatedAt))
+          lastActive: plan.createdAt 
+            ? getTimeAgo(new Date(plan.createdAt))
             : "Never",
         }
       })
@@ -57,17 +57,14 @@ export async function GET(request: NextRequest) {
     const dayOfWeek = today.getDay()
 
     const todaySchedules = await db.query.classSchedules.findMany({
-      where: and(
-        eq(classSchedules.dayOfWeek, dayOfWeek),
-        eq(classSchedules.trainerId, trainer.id)
-      ),
+      where: eq(classSchedules.dayOfWeek, dayOfWeek),
       with: {
         class: true,
       },
     })
 
     const todaysSchedule = todaySchedules
-      .filter(s => s.class && s.class.isActive !== false)
+      .filter(s => s.class && s.class.trainerId === trainer.id)
       .map(schedule => ({
         id: schedule.class!.id,
         time: schedule.startTime.slice(0, 5),

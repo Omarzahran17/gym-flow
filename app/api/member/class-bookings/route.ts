@@ -4,6 +4,7 @@ import { classBookings, classSchedules, classes, members } from "@/lib/db/schema
 import { eq, and, count } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 import { addDays, startOfWeek } from "date-fns"
+import { checkMemberSubscription } from "@/lib/subscription"
 
 export async function GET(request: NextRequest) {
   try {
@@ -95,6 +96,27 @@ export async function POST(request: NextRequest) {
 
     if (!member) {
       return NextResponse.json({ error: "Member not found" }, { status: 404 })
+    }
+
+    const subscriptionCheck = await checkMemberSubscription(member.id)
+    
+    if (!subscriptionCheck.hasSubscription || !subscriptionCheck.isActive) {
+      return NextResponse.json(
+        { error: "Active subscription required", code: "SUBSCRIPTION_REQUIRED" },
+        { status: 403 }
+      )
+    }
+
+    if (subscriptionCheck.limits && subscriptionCheck.limits.classesRemaining <= 0) {
+      return NextResponse.json(
+        { 
+          error: `You've reached your weekly class limit (${subscriptionCheck.plan?.maxClassesPerWeek} classes). Upgrade your plan for more access.`,
+          code: "CLASS_LIMIT_REACHED",
+          limit: subscriptionCheck.plan?.maxClassesPerWeek,
+          used: subscriptionCheck.usage?.classesThisWeek
+        },
+        { status: 403 }
+      )
     }
 
     const body = await request.json()

@@ -53,7 +53,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, description, price, interval, stripePriceId, stripeAnnualPriceId, features } = body
+    const { 
+      name, description, price, interval, stripePriceId, stripeAnnualPriceId, features,
+      tier, maxClassesPerWeek, maxCheckInsPerDay, hasTrainerAccess, hasPersonalTraining,
+      hasProgressTracking, hasAchievements 
+    } = body
 
     const [plan] = await db.insert(subscriptionPlans).values({
       name,
@@ -64,6 +68,13 @@ export async function POST(request: NextRequest) {
       stripeAnnualPriceId,
       features: features || [],
       isActive: true,
+      tier: tier || "basic",
+      maxClassesPerWeek: maxClassesPerWeek ?? 3,
+      maxCheckInsPerDay: maxCheckInsPerDay ?? 1,
+      hasTrainerAccess: hasTrainerAccess ?? false,
+      hasPersonalTraining: hasPersonalTraining ?? false,
+      hasProgressTracking: hasProgressTracking ?? true,
+      hasAchievements: hasAchievements ?? true,
     }).returning()
 
     return NextResponse.json({ plan }, { status: 201 })

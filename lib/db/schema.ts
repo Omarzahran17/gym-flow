@@ -135,6 +135,13 @@ export const subscriptionPlans = pgTable('subscription_plans', {
   price: decimal('price', { precision: 10, scale: 2 }),
   features: jsonb('features').default([]),
   isActive: boolean('is_active').default(true),
+  tier: varchar('tier', { length: 50 }).default('basic'),
+  maxClassesPerWeek: integer('max_classes_per_week').default(3),
+  maxCheckInsPerDay: integer('max_check_ins_per_day').default(1),
+  hasTrainerAccess: boolean('has_trainer_access').default(false),
+  hasPersonalTraining: boolean('has_personal_training').default(false),
+  hasProgressTracking: boolean('has_progress_tracking').default(true),
+  hasAchievements: boolean('has_achievements').default(true),
   createdAt: timestamp('created_at').defaultNow(),
 });
 

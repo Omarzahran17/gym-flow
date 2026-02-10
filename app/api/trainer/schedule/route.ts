@@ -1,7 +1,6 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { trainers, classSchedules, classes, classBookings } from "@/lib/db/schema"
-import { eq } from "drizzle-orm"
+import { trainers, classSchedules, classBookings } from "@/lib/db/schema"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
@@ -15,7 +14,7 @@ export async function GET(request: NextRequest) {
     }
 
     const trainer = await db.query.trainers.findFirst({
-      where: eq(trainers.userId, session.user.id),
+      where: (trainers, { eq }) => eq(trainers.userId, session.user.id),
     })
 
     if (!trainer) {
@@ -23,7 +22,6 @@ export async function GET(request: NextRequest) {
     }
 
     const schedules = await db.query.classSchedules.findMany({
-      where: eq(classSchedules.trainerId, trainer.id),
       with: {
         class: true,
       },
@@ -32,7 +30,7 @@ export async function GET(request: NextRequest) {
     const bookings = await db.query.classBookings.findMany()
 
     const schedule = schedules
-      .filter((s) => s.class)
+      .filter((s) => s.class && s.class.trainerId === trainer.id)
       .map((s) => {
         const bookedCount = bookings.filter(
           (b) => b.scheduleId === s.id
@@ -44,7 +42,6 @@ export async function GET(request: NextRequest) {
           className: s.class!.name,
           dayOfWeek: s.dayOfWeek,
           startTime: s.startTime,
-          endTime: s.endTime || "",
           room: s.room,
           maxCapacity: s.class!.maxCapacity || 20,
           bookedCount,

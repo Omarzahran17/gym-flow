@@ -16,6 +16,13 @@ interface SubscriptionPlan {
   features: string[]
   isActive: boolean
   memberCount: number
+  tier?: string
+  maxClassesPerWeek?: number
+  maxCheckInsPerDay?: number
+  hasTrainerAccess?: boolean
+  hasPersonalTraining?: boolean
+  hasProgressTracking?: boolean
+  hasAchievements?: boolean
 }
 
 export default function SubscriptionsPage() {
@@ -31,6 +38,13 @@ export default function SubscriptionsPage() {
     stripePriceId: "",
     stripeAnnualPriceId: "",
     features: "",
+    tier: "basic",
+    maxClassesPerWeek: "3",
+    maxCheckInsPerDay: "1",
+    hasTrainerAccess: false,
+    hasPersonalTraining: false,
+    hasProgressTracking: true,
+    hasAchievements: true,
   })
 
   useEffect(() => {
@@ -74,6 +88,13 @@ export default function SubscriptionsPage() {
           stripePriceId: "",
           stripeAnnualPriceId: "",
           features: "",
+          tier: "basic",
+          maxClassesPerWeek: "3",
+          maxCheckInsPerDay: "1",
+          hasTrainerAccess: false,
+          hasPersonalTraining: false,
+          hasProgressTracking: true,
+          hasAchievements: true,
         })
         fetchPlans()
       } else {
@@ -268,6 +289,71 @@ export default function SubscriptionsPage() {
                   placeholder="Unlimited access, Personal training, Nutrition plan"
                   className="bg-zinc-50 border-zinc-200 focus:border-zinc-900 focus:ring-zinc-900"
                 />
+              </div>
+
+              <div className="border-t border-zinc-200 pt-6">
+                <h4 className="text-sm font-medium text-zinc-900 mb-4">Plan Limits</h4>
+                <div className="grid gap-4 md:grid-cols-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="tier">Tier</Label>
+                    <select
+                      id="tier"
+                      value={formData.tier}
+                      onChange={(e) => setFormData({ ...formData, tier: e.target.value })}
+                      className="w-full p-2.5 bg-zinc-50 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900"
+                    >
+                      <option value="basic">Basic</option>
+                      <option value="pro">Pro</option>
+                      <option value="premium">Premium</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="maxClassesPerWeek">Classes/Week</Label>
+                    <Input
+                      id="maxClassesPerWeek"
+                      type="number"
+                      value={formData.maxClassesPerWeek}
+                      onChange={(e) => setFormData({ ...formData, maxClassesPerWeek: e.target.value })}
+                      placeholder="3"
+                      className="bg-zinc-50 border-zinc-200 focus:border-zinc-900 focus:ring-zinc-900"
+                    />
+                    <p className="text-xs text-zinc-400">Use 999 for unlimited</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="maxCheckInsPerDay">Check-ins/Day</Label>
+                    <Input
+                      id="maxCheckInsPerDay"
+                      type="number"
+                      value={formData.maxCheckInsPerDay}
+                      onChange={(e) => setFormData({ ...formData, maxCheckInsPerDay: e.target.value })}
+                      placeholder="1"
+                      className="bg-zinc-50 border-zinc-200 focus:border-zinc-900 focus:ring-zinc-900"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm">Features</Label>
+                    <div className="space-y-2 pt-1">
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={formData.hasTrainerAccess}
+                          onChange={(e) => setFormData({ ...formData, hasTrainerAccess: e.target.checked })}
+                          className="rounded border-zinc-300"
+                        />
+                        Trainer Access
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={formData.hasPersonalTraining}
+                          onChange={(e) => setFormData({ ...formData, hasPersonalTraining: e.target.checked })}
+                          className="rounded border-zinc-300"
+                        />
+                        Personal Training
+                      </label>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="flex space-x-4 pt-4">

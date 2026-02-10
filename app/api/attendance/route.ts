@@ -1,8 +1,9 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { attendance, members } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, gte } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
+import { checkMemberSubscription } from "@/lib/subscription";
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,25 +15,104 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { memberId, method = "qr_code" } = await request.json();
+    const { memberId, qrCode, method = "qr_code" } = await request.json();
 
-    if (!memberId) {
+    let member;
+
+    if (qrCode) {
+      member = await db.query.members.findFirst({
+        where: eq(members.qrCode, qrCode),
+        with: {
+          user: true,
+        },
+      });
+
+      if (!member) {
+        return NextResponse.json(
+          { error: "Invalid QR code" },
+          { status: 404 }
+        );
+      }
+    } else if (memberId) {
+      member = await db.query.members.findFirst({
+        where: eq(members.id, memberId),
+        with: {
+          user: true,
+        },
+      });
+
+      if (!member) {
+        return NextResponse.json(
+          { error: "Member not found" },
+          { status: 404 }
+        );
+      }
+    } else {
       return NextResponse.json(
-        { error: "Member ID is required" },
+        { error: "Member ID or QR code is required" },
         { status: 400 }
       );
     }
 
-    // Create attendance record
-    const [record] = await db
-      .insert(attendance)
-      .values({
-        memberId,
-        method,
-      })
-      .returning();
+    if (member.status !== "active") {
+      return NextResponse.json(
+        { error: "Member is not active" },
+        { status: 400 }
+      );
+    }
 
-    return NextResponse.json({ success: true, record });
+    const subscriptionCheck = await checkMemberSubscription(member.id);
+    
+    if (!subscriptionCheck.hasSubscription || !subscriptionCheck.isActive) {
+      return NextResponse.json(
+        { error: "Active subscription required for gym access", code: "SUBSCRIPTION_REQUIRED" },
+        { status: 403 }
+      );
+    }
+
+    if (subscriptionCheck.limits && !subscriptionCheck.limits.canCheckIn) {
+      return NextResponse.json(
+        { 
+          error: `Daily check-in limit reached (${subscriptionCheck.plan?.maxCheckInsPerDay} per day)`,
+          code: "CHECKIN_LIMIT_REACHED"
+        },
+        { status: 403 }
+      );
+    }
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const todayStr = today.toISOString().split('T')[0]
+
+    const existingToday = await db.query.attendance.findFirst({
+      where: and(
+        eq(attendance.memberId, member.id),
+        gte(attendance.date, todayStr)
+      ),
+    })
+
+    if (existingToday) {
+      return NextResponse.json(
+        { error: "Already checked in today" },
+        { status: 400 }
+      );
+    }
+
+    await db.insert(attendance).values({
+      memberId: member.id,
+      method,
+    });
+
+    return NextResponse.json({ 
+      success: true, 
+      member: {
+        id: member.id,
+        name: member.user?.name || member.userId,
+        email: member.user?.email,
+        status: member.status,
+        subscription: subscriptionCheck.plan?.name,
+      }
+    });
   } catch (error) {
     console.error("Attendance error:", error);
     return NextResponse.json(

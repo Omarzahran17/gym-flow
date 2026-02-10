@@ -41,9 +41,9 @@ export async function GET(request: NextRequest) {
     let monthlyRevenue = 0
     for (const sub of activeSubscriptions) {
       const plan = allPlans.find(p => p.id === sub.planId)
-      if (plan) {
-        // Convert yearly prices to monthly equivalent
-        const monthlyPrice = plan.interval === "year" ? plan.price / 12 : plan.price
+      if (plan && plan.price) {
+        const priceNum = parseFloat(plan.price)
+        const monthlyPrice = plan.interval === "year" ? priceNum / 12 : priceNum
         monthlyRevenue += monthlyPrice
       }
     }
