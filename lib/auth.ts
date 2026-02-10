@@ -8,7 +8,7 @@ import { members, memberSubscriptions, subscriptionPlans, users, session, accoun
 import { eq, and, isNotNull } from "drizzle-orm";
 
 const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: "2025-02-24.acacia",
+    apiVersion: "2026-01-28.clover",
 });
 
 export const auth = betterAuth({

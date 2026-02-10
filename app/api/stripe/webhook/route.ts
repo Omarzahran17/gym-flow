@@ -6,7 +6,7 @@ import Stripe from "stripe"
 import { headers } from "next/headers"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-02-24.acacia",
+  apiVersion: "2026-01-28.clover",
 })
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
@@ -40,25 +40,25 @@ export async function POST(request: NextRequest) {
       }
 
       case "invoice.payment_succeeded": {
-        const invoice = event.data.object as Stripe.Invoice
+        const invoice = event.data.object as any
         await handleInvoicePaymentSucceeded(invoice)
         break
       }
 
       case "invoice.payment_failed": {
-        const invoice = event.data.object as Stripe.Invoice
+        const invoice = event.data.object as any
         await handleInvoicePaymentFailed(invoice)
         break
       }
 
       case "customer.subscription.updated": {
-        const subscription = event.data.object as Stripe.Subscription
+        const subscription = event.data.object as any
         await handleSubscriptionUpdated(subscription)
         break
       }
 
       case "customer.subscription.deleted": {
-        const subscription = event.data.object as Stripe.Subscription
+        const subscription = event.data.object as any
         await handleSubscriptionDeleted(subscription)
         break
       }
@@ -86,15 +86,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const memberId = parseInt(metadata.memberId)
   const planId = parseInt(metadata.planId)
 
-  // Get subscription details from Stripe
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId) as any
 
-  // Update member status
   await db.update(members)
     .set({ status: "active" })
     .where(eq(members.id, memberId))
 
-  // Create or update subscription record
+  const currentPeriodStart = subscription.current_period_start 
+    ? new Date(Number(subscription.current_period_start) * 1000) 
+    : new Date()
+  const currentPeriodEnd = subscription.current_period_end 
+    ? new Date(Number(subscription.current_period_end) * 1000) 
+    : new Date()
+
   const existingSub = await db.query.memberSubscriptions.findFirst({
     where: eq(memberSubscriptions.stripeSubscriptionId, subscriptionId),
   })
@@ -103,9 +107,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     await db.update(memberSubscriptions)
       .set({
         status: subscription.status,
-        currentPeriodStart: new Date(subscription.current_period_start * 1000),
-        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        currentPeriodStart,
+        currentPeriodEnd,
+        cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
       })
       .where(eq(memberSubscriptions.id, existingSub.id))
   } else {
@@ -114,17 +118,17 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       stripeSubscriptionId: subscriptionId,
       planId,
       status: subscription.status,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      currentPeriodStart,
+      currentPeriodEnd,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
     })
   }
 
   console.log(`Checkout completed for member ${memberId}`)
 }
 
-async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-  const subscriptionId = invoice.subscription as string
+async function handleInvoicePaymentSucceeded(invoice: any) {
+  const subscriptionId = invoice.subscription
   
   if (!subscriptionId) return
 
@@ -135,8 +139,8 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   console.log(`Payment succeeded for subscription ${subscriptionId}`)
 }
 
-async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-  const subscriptionId = invoice.subscription as string
+async function handleInvoicePaymentFailed(invoice: any) {
+  const subscriptionId = invoice.subscription
   
   if (!subscriptionId) return
 
@@ -147,7 +151,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   console.log(`Payment failed for subscription ${subscriptionId}`)
 }
 
-async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
+async function handleSubscriptionUpdated(subscription: any) {
   const existingSub = await db.query.memberSubscriptions.findFirst({
     where: eq(memberSubscriptions.stripeSubscriptionId, subscription.id),
   })
@@ -157,20 +161,30 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     return
   }
 
+  const currentPeriodStart = subscription.current_period_start 
+    ? new Date(Number(subscription.current_period_start) * 1000) 
+    : new Date()
+  const currentPeriodEnd = subscription.current_period_end 
+    ? new Date(Number(subscription.current_period_end) * 1000) 
+    : new Date()
+  const canceledAt = subscription.canceled_at 
+    ? new Date(Number(subscription.canceled_at) * 1000) 
+    : null
+
   await db.update(memberSubscriptions)
     .set({
       status: subscription.status,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : null,
+      currentPeriodStart,
+      currentPeriodEnd,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
+      canceledAt,
     })
     .where(eq(memberSubscriptions.id, existingSub.id))
 
   console.log(`Subscription ${subscription.id} updated`)
 }
 
-async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
+async function handleSubscriptionDeleted(subscription: any) {
   const existingSub = await db.query.memberSubscriptions.findFirst({
     where: eq(memberSubscriptions.stripeSubscriptionId, subscription.id),
   })
@@ -187,7 +201,6 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     })
     .where(eq(memberSubscriptions.id, existingSub.id))
 
-  // Update member status
   if (existingSub.memberId) {
     await db.update(members)
       .set({ status: "inactive" })

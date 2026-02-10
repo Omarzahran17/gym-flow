@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-02-24.acacia",
+  apiVersion: "2026-01-28.clover",
 })
 
 export async function POST(request: NextRequest) {
@@ -54,15 +54,26 @@ export async function POST(request: NextRequest) {
       where: eq(memberSubscriptions.memberId, member.id),
     })
 
+    const subData = activeSubscription as any
+    const currentPeriodStart = subData.current_period_start 
+      ? new Date(Number(subData.current_period_start) * 1000)
+      : new Date()
+    const currentPeriodEnd = subData.current_period_end
+      ? new Date(Number(subData.current_period_end) * 1000)
+      : new Date()
+    const canceledAt = subData.canceled_at
+      ? new Date(Number(subData.canceled_at) * 1000)
+      : null
+
     const subscriptionData = {
       memberId: member.id,
       planId: plan?.id || null,
       stripeSubscriptionId: activeSubscription.id,
-      status: activeSubscription.status,
-      currentPeriodStart: new Date(activeSubscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(activeSubscription.current_period_end * 1000),
-      cancelAtPeriodEnd: activeSubscription.cancel_at_period_end,
-      canceledAt: activeSubscription.canceled_at ? new Date(activeSubscription.canceled_at * 1000) : null,
+      status: activeSubscription.status as string,
+      currentPeriodStart,
+      currentPeriodEnd,
+      cancelAtPeriodEnd: subData.cancel_at_period_end || false,
+      canceledAt,
     }
 
     if (existingSub) {
