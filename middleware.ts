@@ -11,10 +11,14 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Get session token from cookies
-  const sessionToken = request.cookies.get("better-auth.session_token")?.value;
+  // Get session token from cookies - better-auth uses "better-auth.session_token" by default
+  const cookies = request.cookies.getAll();
+  const sessionCookie = cookies.find(cookie => 
+    cookie.name === 'better-auth.session_token' || 
+    cookie.name === '__Secure-better-auth.session_token'
+  );
 
-  if (!sessionToken) {
+  if (!sessionCookie?.value) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

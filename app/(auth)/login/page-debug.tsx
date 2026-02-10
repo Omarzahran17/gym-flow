@@ -21,19 +21,36 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
+      console.log("Starting login process...")
+      
       const result = await authClient.signIn.email({
         email,
         password,
       })
 
+      console.log("Login result:", result)
+
       if (result.error) {
+        console.error("Login error:", result.error)
         setError(result.error.message || "Failed to sign in")
         setLoading(false)
         return
       }
 
-      // Force a hard redirect to ensure middleware picks up the session cookie
-      const user = result.data?.user
+      // Check session after login
+      const session = await authClient.getSession()
+      console.log("Session after login:", session)
+
+      if (!session.data) {
+        setError("Login successful but no session created")
+        setLoading(false)
+        return
+      }
+
+      // Force a hard redirect
+      const user = session.data.user
+      console.log("User role:", user?.role)
+      
       let redirectUrl = "/member"
       if (user?.role === "admin") {
         redirectUrl = "/admin"
@@ -41,15 +58,17 @@ export default function LoginPage() {
         redirectUrl = "/trainer"
       }
       
-      // Use window.location for a full page reload to ensure middleware picks up the session
+      console.log("Redirecting to:", redirectUrl)
       window.location.href = redirectUrl
       
     } catch (err) {
+      console.error("Login exception:", err)
       setError(err instanceof Error ? err.message : "An error occurred")
       setLoading(false)
     }
   }
 
+  // ... rest of the component (JSX)
   return (
     <div className="min-h-screen flex">
       {/* Left Panel - Branding */}
