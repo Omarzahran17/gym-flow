@@ -175,7 +175,7 @@ export default function TrainerSchedulePage() {
                           {classes.map((cls) => (
                             <Link
                               key={cls.id}
-                              href={`/admin/classes/${cls.classId}`}
+                              href={`/trainer/classes/${cls.id}`}
                               className="block p-2 rounded-lg mb-1 last:mb-0 hover:opacity-80 transition-opacity"
                               style={{ backgroundColor: `${cls.color}20`, borderLeft: `3px solid ${cls.color}` }}
                             >
