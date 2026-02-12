@@ -30,14 +30,11 @@ export async function POST(
     }
 
     const { id } = await params
-    const memberId = parseInt(id)
+    const userId = id
 
-    if (isNaN(memberId)) {
-      return NextResponse.json({ error: "Invalid member ID" }, { status: 400 })
-    }
-
+    // Find member by userId
     const member = await db.query.members.findFirst({
-      where: eq(members.id, memberId),
+      where: eq(members.userId, userId),
     })
 
     if (!member) {
@@ -45,7 +42,7 @@ export async function POST(
     }
 
     const existingTrainer = await db.query.trainers.findFirst({
-      where: eq(trainers.userId, member.userId),
+      where: eq(trainers.userId, userId),
     })
 
     if (existingTrainer) {
@@ -53,37 +50,37 @@ export async function POST(
     }
 
     const result = await db.transaction(async (tx) => {
-      console.log("Starting conversion for member:", memberId, "userId:", member.userId)
+      console.log("Starting conversion for member:", member.id, "userId:", userId)
       
       // 1. Create trainer record
-      console.log("Creating trainer record with userId:", member.userId)
+      console.log("Creating trainer record with userId:", userId)
       const [newTrainer] = await tx.insert(trainers).values({
-        userId: member.userId,
+        userId: userId,
         specialization: "General Fitness",
         maxClients: 20,
       }).returning()
       console.log("Trainer created with ID:", newTrainer.id)
 
       // 2. Update user role in users table
-      console.log("Updating user role to trainer for userId:", member.userId)
+      console.log("Updating user role to trainer for userId:", userId)
       await tx.update(users)
         .set({ role: "trainer" })
-        .where(eq(users.id, member.userId))
+        .where(eq(users.id, userId))
 
       // 3. Clean up related records to avoid FK constraints
       console.log("Cleaning up member-related records...")
-      await tx.delete(memberSubscriptions).where(eq(memberSubscriptions.memberId, memberId))
-      await tx.delete(attendance).where(eq(attendance.memberId, memberId))
-      await tx.delete(workoutPlanAssignments).where(eq(workoutPlanAssignments.memberId, memberId))
-      await tx.delete(measurements).where(eq(measurements.memberId, memberId))
-      await tx.delete(progressPhotos).where(eq(progressPhotos.memberId, memberId))
-      await tx.delete(personalRecords).where(eq(personalRecords.memberId, memberId))
-      await tx.delete(memberAchievements).where(eq(memberAchievements.memberId, memberId))
-      await tx.delete(classBookings).where(eq(classBookings.memberId, memberId))
+      await tx.delete(memberSubscriptions).where(eq(memberSubscriptions.memberId, member.id))
+      await tx.delete(attendance).where(eq(attendance.memberId, member.id))
+      await tx.delete(workoutPlanAssignments).where(eq(workoutPlanAssignments.memberId, member.id))
+      await tx.delete(measurements).where(eq(measurements.memberId, member.id))
+      await tx.delete(progressPhotos).where(eq(progressPhotos.memberId, member.id))
+      await tx.delete(personalRecords).where(eq(personalRecords.memberId, member.id))
+      await tx.delete(memberAchievements).where(eq(memberAchievements.memberId, member.id))
+      await tx.delete(classBookings).where(eq(classBookings.memberId, member.id))
 
       // 4. Delete member record
-      console.log("Deleting member record:", memberId)
-      await tx.delete(members).where(eq(members.id, memberId))
+      console.log("Deleting member record:", member.id)
+      await tx.delete(members).where(eq(members.id, member.id))
 
       console.log("Conversion completed successfully")
       return newTrainer

@@ -152,7 +152,7 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
   const SidebarContent = () => (
     <>
       <div className={`p-4 border-b border-zinc-200 dark:border-zinc-800 ${collapsed ? "px-3" : ""}`}>
-        <Link href={getDashboardUrl()} className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/25">
             <Dumbbell className="h-5 w-5 text-white" />
           </div>
@@ -174,11 +174,10 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
               key={item.href}
               href={item.href}
               onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
-                isActive
-                  ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25"
-                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white"
-              } ${collapsed ? "justify-center" : ""}`}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${isActive
+                ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25"
+                : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white"
+                } ${collapsed ? "justify-center" : ""}`}
               title={collapsed ? item.label : undefined}
             >
               <span className={isActive ? "text-white" : ""}>
@@ -257,7 +256,7 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
       <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col transform transition-transform duration-300 md:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="p-4 border-b border-zinc-200 dark:border-zinc-800">
           <div className="flex items-center justify-between">
-            <Link href={getDashboardUrl()} className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25">
                 <Dumbbell className="h-5 w-5 text-white" />
               </div>
@@ -298,7 +297,7 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
             <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)} className="text-zinc-600 dark:text-zinc-400">
               <Menu className="h-5 w-5" />
             </Button>
-            <Link href={getDashboardUrl()} className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/25">
                 <Dumbbell className="h-4 w-4 text-white" />
               </div>

@@ -475,6 +475,13 @@ export const memberAchievementsRelations = relations(memberAchievements, ({ one 
   }),
 }));
 
+export const attendanceRelations = relations(attendance, ({ one }) => ({
+  member: one(members, {
+    fields: [attendance.memberId],
+    references: [members.id],
+  }),
+}));
+
 // Types
 export type Member = typeof members.$inferSelect;
 export type NewMember = typeof members.$inferInsert;

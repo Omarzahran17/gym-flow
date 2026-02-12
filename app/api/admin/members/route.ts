@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { members } from "@/lib/db/schema"
+import { members, users, trainers } from "@/lib/db/schema"
 import { eq, desc } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -14,22 +14,35 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const allMembers = await db.query.members.findMany({
-      orderBy: [desc(members.createdAt)],
-      with: {
-        user: true,
-      },
+    const allUsers = await db.query.users.findMany({
+      orderBy: [desc(users.createdAt)],
     })
 
-    const formattedMembers = allMembers.map((member) => ({
-      ...member,
-      email: member.user?.email || null,
-      role: member.user?.role || "member",
-      firstName: member.user?.name?.split(" ")[0] || null,
-      lastName: member.user?.name?.split(" ").slice(1).join(" ") || null,
-    }))
+    const allMembers = await db.query.members.findMany()
+    const allTrainers = await db.query.trainers.findMany()
 
-    return NextResponse.json({ members: formattedMembers })
+    const memberIds = new Set(allMembers.map(m => m.userId))
+    const trainerIds = new Set(allTrainers.map(t => t.userId))
+
+    const formattedUsers = allUsers
+      .filter(user => user.role === "member" || user.role === "trainer")
+      .map((user) => {
+        const isMember = memberIds.has(user.id)
+        const isTrainer = trainerIds.has(user.id)
+
+        return {
+          id: user.id,
+          userId: user.id,
+          email: user.email || null,
+          name: user.name || null,
+          role: user.role || "member",
+          isMember,
+          isTrainer,
+          createdAt: user.createdAt,
+        }
+      })
+
+    return NextResponse.json({ members: formattedUsers })
   } catch (error) {
     console.error("Get members error:", error)
     return NextResponse.json(

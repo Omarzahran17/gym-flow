@@ -6,14 +6,13 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { Plus, Search, ChevronRight, Mail, Users, UserCog, ArrowRightLeft, Trash2 } from "lucide-react"
+import { Plus, Search, ChevronRight, Mail, Users, UserCog } from "lucide-react"
 
 interface Trainer {
   id: number
   userId: string
-  firstName?: string
-  lastName?: string
-  email?: string
+  name?: string | null
+  email?: string | null
   specialization?: string
   maxClients: number
   bio?: string
@@ -46,31 +45,10 @@ export default function TrainersPage() {
   const filteredTrainers = trainers.filter(
     (trainer) =>
       trainer.email?.toLowerCase().includes(search.toLowerCase()) ||
-      trainer.firstName?.toLowerCase().includes(search.toLowerCase()) ||
+      trainer.name?.toLowerCase().includes(search.toLowerCase()) ||
       trainer.specialization?.toLowerCase().includes(search.toLowerCase()) ||
       trainer.userId.toLowerCase().includes(search.toLowerCase())
   )
-
-  const convertToMember = async (trainerId: number) => {
-    if (!confirm("Are you sure you want to convert this trainer to a member? This will remove their trainer privileges.")) return
-
-    try {
-      const response = await fetch(`/api/admin/trainers/${trainerId}/convert`, {
-        method: "POST",
-      })
-
-      if (response.ok) {
-        // Refresh trainers list
-        fetchTrainers()
-        alert("Trainer has been converted to member successfully!")
-      } else {
-        const data = await response.json()
-        alert(data.error || "Failed to convert trainer to member")
-      }
-    } catch (err) {
-      alert("Failed to convert trainer to member")
-    }
-  }
 
   const toggleTrainerStatus = async (trainerId: number, currentStatus: boolean) => {
     try {
@@ -88,25 +66,6 @@ export default function TrainersPage() {
       }
     } catch (err) {
       alert("Failed to update trainer status")
-    }
-  }
-
-  const deleteTrainer = async (trainerId: number) => {
-    if (!confirm("Are you sure you want to delete this trainer? This action cannot be undone.")) return
-
-    try {
-      const response = await fetch(`/api/admin/trainers/${trainerId}`, {
-        method: "DELETE",
-      })
-
-      if (response.ok) {
-        fetchTrainers()
-      } else {
-        const data = await response.json()
-        alert(data.error || "Failed to delete trainer")
-      }
-    } catch (err) {
-      alert("Failed to delete trainer")
     }
   }
 
@@ -177,15 +136,12 @@ export default function TrainersPage() {
                   <div className="flex items-center space-x-4">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                       <span className="text-white font-semibold">
-                        {trainer.firstName?.[0] || trainer.userId[0]?.toUpperCase()}
-                        {trainer.lastName?.[0] || ""}
+                        {trainer.name?.[0] || trainer.userId[0]?.toUpperCase()}
                       </span>
                     </div>
                     <div>
                       <p className="font-semibold text-foreground dark:text-white">
-                        {trainer.firstName && trainer.lastName
-                          ? `${trainer.firstName} ${trainer.lastName}`
-                          : trainer.userId}
+                        {trainer.name || trainer.userId}
                       </p>
                       <p className="text-sm text-muted-foreground dark:text-muted-foreground flex items-center mt-1">
                         <Mail className="h-3 w-3 mr-1" />
@@ -243,24 +199,6 @@ export default function TrainersPage() {
                     >
                       <UserCog className="h-4 w-4 mr-1" />
                       {trainer.isActive !== false ? "Deactivate" : "Activate"}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => convertToMember(trainer.id)}
-                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20"
-                    >
-                      <ArrowRightLeft className="h-4 w-4 mr-1" />
-                      Convert
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => deleteTrainer(trainer.id)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Delete
                     </Button>
                   </div>
                   <Link href={`/admin/trainers/${trainer.id}`}>

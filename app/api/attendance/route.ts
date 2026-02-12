@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     }
 
     const subscriptionCheck = await checkMemberSubscription(member.id);
-    
+
     if (!subscriptionCheck.hasSubscription || !subscriptionCheck.isActive) {
       return NextResponse.json(
         { error: "Active subscription required for gym access. Please renew your subscription.", code: "SUBSCRIPTION_REQUIRED" },
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     if (subscriptionCheck.limits && !subscriptionCheck.limits.canCheckIn) {
       return NextResponse.json(
-        { 
+        {
           error: `Daily check-in limit reached (${subscriptionCheck.plan?.maxCheckInsPerDay || 1} per day)`,
           code: "CHECKIN_LIMIT_REACHED"
         },
@@ -108,8 +108,8 @@ export async function POST(request: NextRequest) {
       method,
     });
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       member: {
         id: member.id,
         name: member.user?.name || member.userId,
@@ -137,20 +137,27 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const memberId = searchParams.get("memberId");
-    const date = searchParams.get("date");
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    let query = db.query.attendance.findMany({
+    const checkIns = await db.query.attendance.findMany({
+      where: gte(attendance.checkInTime, today),
       with: {
-        member: true,
+        member: {
+          with: {
+            user: true,
+          },
+        },
       },
       orderBy: (attendance, { desc }) => [desc(attendance.checkInTime)],
     });
 
-    // Note: In a real implementation, you'd add filters based on memberId and date
+    const formattedCheckIns = checkIns.map(ci => ({
+      memberName: ci.member?.user?.name || "Unknown Member",
+      time: ci.checkInTime,
+    }));
 
-    return NextResponse.json({ attendance: await query });
+    return NextResponse.json({ attendance: formattedCheckIns });
   } catch (error) {
     console.error("Get attendance error:", error);
     return NextResponse.json(

@@ -23,8 +23,19 @@ export default function CheckInPage() {
   const [qrInput, setQrInput] = useState("")
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<CheckInResult | null>(null)
-  const [recentCheckIns, setRecentCheckIns] = useState<{memberName: string, time: string}[]>([])
+  const [recentCheckIns, setRecentCheckIns] = useState<{ memberName: string, time: string }[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    fetch("/api/attendance")
+      .then(res => res.json())
+      .then(data => {
+        if (data.attendance) {
+          setRecentCheckIns(data.attendance)
+        }
+      })
+      .catch(err => console.error("Failed to fetch recent check-ins:", err))
+  }, [])
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -32,7 +43,7 @@ export default function CheckInPage() {
 
   const handleCheckIn = async (code: string) => {
     if (!code.trim()) return
-    
+
     setLoading(true)
     setResult(null)
 
@@ -51,10 +62,11 @@ export default function CheckInPage() {
           member: data.member,
           message: "Check-in successful!",
         })
-        setRecentCheckIns(prev => [
-          { memberName: data.member.name, time: new Date().toLocaleTimeString() },
-          ...prev.slice(0, 9),
-        ])
+        const newCheckIn = {
+          memberName: data.member.name,
+          time: new Date().toLocaleTimeString()
+        }
+        setRecentCheckIns(prev => [newCheckIn, ...prev].slice(0, 10))
         setQrInput("")
       } else {
         setResult({
@@ -118,11 +130,10 @@ export default function CheckInPage() {
             </form>
 
             {result && (
-              <div className={`mt-6 p-6 rounded-xl border ${
-                result.success 
-                  ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800" 
-                  : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
-              }`}>
+              <div className={`mt-6 p-6 rounded-xl border ${result.success
+                ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800"
+                : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
+                }`}>
                 <div className="flex items-start gap-4">
                   {result.success ? (
                     <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center flex-shrink-0">
@@ -194,7 +205,9 @@ export default function CheckInPage() {
                       </div>
                       <span className="font-medium text-foreground dark:text-white">{checkIn.memberName}</span>
                     </div>
-                    <span className="text-sm text-muted-foreground dark:text-muted-foreground">{checkIn.time}</span>
+                    <span className="text-sm text-muted-foreground dark:text-muted-foreground">
+                      {new Date(checkIn.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
                   </div>
                 ))}
               </div>
