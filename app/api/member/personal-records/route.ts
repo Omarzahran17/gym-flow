@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { personalRecords, members } from "@/lib/db/schema"
+import { checkAchievements } from "@/lib/achievements"
 import { eq, desc } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -77,6 +78,9 @@ export async function POST(request: NextRequest) {
     if (reps) recordData.reps = parseInt(reps)
     
     const [record] = await db.insert(personalRecords).values(recordData).returning()
+
+    // Check for achievements after creating personal record
+    await checkAchievements(member.id)
 
     return NextResponse.json({ record }, { status: 201 })
   } catch (error) {

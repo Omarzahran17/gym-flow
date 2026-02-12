@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { progressPhotos, members } from "@/lib/db/schema"
+import { checkAchievements } from "@/lib/achievements"
 import { eq, desc } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -90,6 +91,9 @@ export async function POST(request: NextRequest) {
     if (notes) photoData.notes = notes
 
     const [photo] = await db.insert(progressPhotos).values(photoData).returning()
+
+    // Check for achievements after uploading progress photo
+    await checkAchievements(targetMemberId)
 
     return NextResponse.json({ photo }, { status: 201 })
   } catch (error) {

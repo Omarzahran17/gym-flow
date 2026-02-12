@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { classBookings, classSchedules, classes, members } from "@/lib/db/schema"
+import { checkAchievements } from "@/lib/achievements"
 import { eq, and, count } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 import { addDays, startOfWeek } from "date-fns"
@@ -195,6 +196,9 @@ export async function POST(request: NextRequest) {
     }
     
     const [booking] = await db.insert(classBookings).values(bookingData).returning()
+
+    // Check for achievements after booking a class (counts as workout)
+    await checkAchievements(member.id)
 
     return NextResponse.json({ booking }, { status: 201 })
   } catch (error) {

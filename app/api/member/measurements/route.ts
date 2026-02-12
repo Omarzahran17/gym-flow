@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { measurements, members } from "@/lib/db/schema"
+import { checkAchievements } from "@/lib/achievements"
 import { eq, desc } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -82,6 +83,9 @@ export async function POST(request: NextRequest) {
     if (notes) measurementData.notes = notes
     
     const [measurement] = await db.insert(measurements).values(measurementData).returning()
+
+    // Check for achievements after logging measurement
+    await checkAchievements(member.id)
 
     return NextResponse.json({ measurement }, { status: 201 })
   } catch (error) {
