@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { 
   members, 
+  users,
   attendance, 
   workoutPlanAssignments,
   memberSubscriptions,
@@ -152,7 +153,16 @@ export async function DELETE(
       return NextResponse.json({ error: "Invalid member ID" }, { status: 400 })
     }
 
-    // Delete all related records first (to handle foreign key constraints)
+    // Get the member first to get the userId
+    const member = await db.query.members.findFirst({
+      where: eq(members.id, memberId),
+    })
+
+    if (!member) {
+      return NextResponse.json({ error: "Member not found" }, { status: 404 })
+    }
+
+    // Delete all related member records first (to handle foreign key constraints)
     await db.delete(memberSubscriptions).where(eq(memberSubscriptions.memberId, memberId))
     await db.delete(attendance).where(eq(attendance.memberId, memberId))
     await db.delete(workoutPlanAssignments).where(eq(workoutPlanAssignments.memberId, memberId))
@@ -162,13 +172,11 @@ export async function DELETE(
     await db.delete(memberAchievements).where(eq(memberAchievements.memberId, memberId))
     await db.delete(classBookings).where(eq(classBookings.memberId, memberId))
 
-    const [deleted] = await db.delete(members)
-      .where(eq(members.id, memberId))
-      .returning()
+    // Delete the member record
+    await db.delete(members).where(eq(members.id, memberId))
 
-    if (!deleted) {
-      return NextResponse.json({ error: "Member not found" }, { status: 404 })
-    }
+    // Delete the user record (this will cascade delete sessions, accounts, etc.)
+    await db.delete(users).where(eq(users.id, member.userId))
 
     return NextResponse.json({ success: true })
   } catch (error) {
