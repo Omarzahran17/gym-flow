@@ -1,15 +1,16 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { authClient } from "@/lib/auth-client"
-import { Dumbbell, ArrowRight, Check, LayoutDashboard } from "lucide-react"
+import { Dumbbell, ArrowRight, Check, LayoutDashboard, Upload, X, User } from "lucide-react"
 
 export default function RegisterPage() {
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -18,9 +19,13 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
   })
+  const [profilePic, setProfilePic] = useState<string | null>(null)
+  const [profilePicFile, setProfilePicFile] = useState<File | null>(null)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [phoneError, setPhoneError] = useState("")
+  const [uploadingPic, setUploadingPic] = useState(false)
 
   useEffect(() => {
     const checkSession = async () => {
@@ -36,6 +41,94 @@ export default function RegisterPage() {
     checkSession()
   }, [])
 
+  const validatePhone = async (phone: string) => {
+    if (!phone) {
+      setPhoneError("")
+      return true
+    }
+
+    // Validate phone format
+    const phoneRegex = /^[\+]?[(]?[0-9]{1,3}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$/
+    if (!phoneRegex.test(phone)) {
+      setPhoneError("Invalid phone format")
+      return false
+    }
+
+    // Check for duplicate phone
+    try {
+      const response = await fetch(`/api/auth/check-phone?phone=${encodeURIComponent(phone)}`)
+      const data = await response.json()
+      if (data.exists) {
+        setPhoneError("Phone number already registered")
+        return false
+      }
+      setPhoneError("")
+      return true
+    } catch (err) {
+      setPhoneError("Failed to validate phone")
+      return false
+    }
+  }
+
+  const handlePhoneChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const phone = e.target.value
+    setFormData({ ...formData, phone })
+    await validatePhone(phone)
+  }
+
+  const handleProfilePicUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    if (!allowedTypes.includes(file.type)) {
+      setError("Invalid file type. Allowed: JPEG, PNG, WEBP, GIF")
+      return
+    }
+
+    const maxSizeMB = 5
+    const sizeMB = file.size / (1024 * 1024)
+    if (sizeMB > maxSizeMB) {
+      setError(`File too large. Maximum size is ${maxSizeMB}MB`)
+      return
+    }
+
+    setUploadingPic(true)
+    setError("")
+
+    try {
+      const uploadFormData = new FormData()
+      uploadFormData.append("file", file)
+
+      const response = await fetch("/api/upload/profile-pic", {
+        method: "POST",
+        body: uploadFormData,
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || "Upload failed")
+      }
+
+      const data = await response.json()
+      setProfilePic(data.url)
+      setProfilePicFile(file)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upload image")
+    } finally {
+      setUploadingPic(false)
+    }
+  }
+
+  const removeProfilePic = () => {
+    setProfilePic(null)
+    setProfilePicFile(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
@@ -50,13 +143,19 @@ export default function RegisterPage() {
       return
     }
 
+    if (formData.phone && phoneError) {
+      setError("Please fix phone number errors")
+      return
+    }
+
     setLoading(true)
 
     try {
-      const { data, error } = await authClient.signUp.email({
+      const { data, error: signUpError } = await authClient.signUp.email({
         email: formData.email,
         password: formData.password,
         name: `${formData.firstName} ${formData.lastName}`.trim(),
+        image: profilePic || undefined,
       }, {
         onRequest: () => {
           setLoading(true)
@@ -69,8 +168,8 @@ export default function RegisterPage() {
         },
       })
 
-      if (error) {
-        setError(error.message || "Failed to create account")
+      if (signUpError) {
+        setError(signUpError.message || "Failed to create account")
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred")
@@ -162,10 +261,8 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex bg-white dark:bg-zinc-950">
-      {/* Left Panel - Form */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
-          {/* Mobile Logo */}
           <div className="lg:hidden flex items-center justify-center space-x-3 mb-8">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
               <Dumbbell className="h-6 w-6 text-white" />
@@ -185,6 +282,49 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="flex justify-center mb-6">
+              <div className="relative">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center overflow-hidden shadow-lg shadow-blue-500/30">
+                  {profilePic ? (
+                    <img src={profilePic} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-10 h-10 text-white" />
+                  )}
+                </div>
+                {profilePic && (
+                  <button
+                    type="button"
+                    onClick={removeProfilePic}
+                    className="absolute -top-1 -right-1 w-7 h-7 bg-red-500 rounded-full flex items-center justify-center text-white hover:bg-red-600 transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={handleProfilePicUpload}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingPic}
+                  className="absolute bottom-0 right-0 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white hover:bg-blue-600 transition-colors shadow-lg"
+                >
+                  {uploadingPic ? (
+                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  ) : (
+                    <Upload className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label htmlFor="firstName" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -238,9 +378,13 @@ export default function RegisterPage() {
                 type="tel"
                 placeholder="+1 (555) 000-0000"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="h-11 bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-blue-500/20 dark:focus:ring-blue-500/30 transition-all"
+                onChange={handlePhoneChange}
+                className={`h-11 bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-blue-500/20 dark:focus:ring-blue-500/30 transition-all ${phoneError ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}`}
               />
+              {phoneError && (
+                <p className="text-xs text-red-500">{phoneError}</p>
+              )}
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">Format: +1 (555) 123-4567 or 0555-123-4567</p>
             </div>
 
             <div className="space-y-2">
@@ -302,7 +446,7 @@ export default function RegisterPage() {
             <Button
               type="submit"
               className="w-full h-11 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all shadow-lg shadow-blue-500/25 active:scale-[0.98] mt-6"
-              disabled={loading}
+              disabled={loading || uploadingPic || !!phoneError}
             >
               {loading ? (
                 <span className="flex items-center justify-center">
@@ -362,7 +506,6 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* Right Panel - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-zinc-950 text-white flex-col justify-center px-12 relative overflow-hidden dark">
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0" style={{

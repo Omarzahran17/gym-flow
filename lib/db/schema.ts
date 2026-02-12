@@ -11,6 +11,7 @@ export const users = pgTable("users", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: varchar("image", { length: 500 }),
+  phone: varchar("phone", { length: 50 }).unique(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
