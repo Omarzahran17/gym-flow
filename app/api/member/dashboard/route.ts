@@ -75,6 +75,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       upcomingClasses,
       goalCompletion,
+      qrCode: member.qrCode,
       stats: {
         workoutsThisWeek: totalWorkouts,
         activeSubscription: !!activeSubscription,

@@ -16,6 +16,8 @@ interface Class {
   trainer?: {
     id: number
     userId: string
+    name?: string | null
+    email?: string | null
   }
   schedules?: {
     id: number
@@ -127,7 +129,7 @@ export default function AdminClassesPage() {
                         <h3 className="font-semibold text-foreground">{classItem.name}</h3>
                         {classItem.trainer && (
                           <p className="text-sm text-muted-foreground">
-                            {classItem.trainer.userId}
+                            {classItem.trainer.name || classItem.trainer.email || classItem.trainer.userId}
                           </p>
                         )}
                       </div>

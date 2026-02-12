@@ -34,10 +34,6 @@ export async function GET(
       ),
     })
 
-    if (memberAssignments.length === 0) {
-      return NextResponse.json({ error: "Member not found or not assigned to you" }, { status: 404 })
-    }
-
     const planIds = memberAssignments.map(a => a.planId).filter((id): id is number => typeof id === 'number')
 
     let memberPlans: any[] = []

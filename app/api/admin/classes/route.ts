@@ -16,12 +16,25 @@ export async function GET(request: NextRequest) {
 
     const allClasses = await db.query.classes.findMany({
       with: {
-        trainer: true,
+        trainer: {
+          with: {
+            user: true,
+          },
+        },
       },
       orderBy: [desc(classes.createdAt)],
     })
 
-    return NextResponse.json({ classes: allClasses })
+    const formattedClasses = allClasses.map(cls => ({
+      ...cls,
+      trainer: cls.trainer ? {
+        ...cls.trainer,
+        name: cls.trainer.user?.name || cls.trainer.userId,
+        email: cls.trainer.user?.email || null,
+      } : null,
+    }))
+
+    return NextResponse.json({ classes: formattedClasses })
   } catch (error) {
     console.error("Get classes error:", error)
     return NextResponse.json(

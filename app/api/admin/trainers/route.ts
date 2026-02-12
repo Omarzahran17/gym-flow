@@ -39,9 +39,8 @@ export async function GET(request: NextRequest) {
 
         return {
           ...trainer,
+          name: trainer.user?.name || null,
           email: trainer.user?.email || null,
-          firstName: trainer.user?.name?.split(" ")[0] || null,
-          lastName: trainer.user?.name?.split(" ").slice(1).join(" ") || null,
           currentClients: uniqueMemberIds.size,
         }
       })

@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
     const formattedMembers = allMembers.map((member) => ({
       ...member,
       email: member.user?.email || null,
+      role: member.user?.role || "member",
       firstName: member.user?.name?.split(" ")[0] || null,
       lastName: member.user?.name?.split(" ").slice(1).join(" ") || null,
     }))

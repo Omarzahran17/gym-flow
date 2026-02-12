@@ -60,7 +60,9 @@ export default function TrainersPage() {
       })
 
       if (response.ok) {
+        // Refresh trainers list
         fetchTrainers()
+        alert("Trainer has been converted to member successfully!")
       } else {
         const data = await response.json()
         alert(data.error || "Failed to convert trainer to member")

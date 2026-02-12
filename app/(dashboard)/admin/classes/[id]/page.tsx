@@ -35,6 +35,8 @@ interface ClassSchedule {
 interface Trainer {
   id: number
   userId: string
+  name?: string | null
+  email?: string | null
   specialization?: string
 }
 
@@ -269,24 +271,25 @@ export default function ClassDetailPage({ params }: { params: Promise<{ id: stri
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="trainerId">Trainer</Label>
-                  <select
-                    id="trainerId"
-                    className="w-full p-2 border rounded-md"
-                    value={classData.trainerId || ""}
-                    onChange={(e) =>
-                      setClassData({
-                        ...classData,
-                        trainerId: e.target.value ? parseInt(e.target.value) : undefined,
-                      })
-                    }
-                  >
-                    <option value="">No trainer assigned</option>
-                    {trainers.map((trainer) => (
-                      <option key={trainer.id} value={trainer.id}>
-                        {trainer.userId} - {trainer.specialization || "No specialization"}
-                      </option>
-                    ))}
-                  </select>
+                    <select
+                      id="trainerId"
+                      className="w-full p-2 border rounded-md"
+                      value={classData.trainerId || ""}
+                      onChange={(e) =>
+                        setClassData({
+                          ...classData,
+                          trainerId: e.target.value ? parseInt(e.target.value) : undefined,
+                        })
+                      }
+                    >
+                      <option value="">No trainer assigned</option>
+                      {trainers.map((trainer) => (
+                        <option key={trainer.id} value={trainer.id}>
+                          {trainer.name || trainer.email || trainer.userId}
+                          {trainer.specialization ? ` - ${trainer.specialization}` : ""}
+                        </option>
+                      ))}
+                    </select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="color">Color</Label>

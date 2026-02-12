@@ -5,7 +5,9 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Dumbbell, Calendar, TrendingUp, CreditCard, ArrowRight, Play, CalendarCheck, Target, Flame } from "lucide-react"
+import { Dumbbell, Calendar, TrendingUp, CreditCard, ArrowRight, Play, CalendarCheck, Target, Flame, QrCode } from "lucide-react"
+import { CheckInQRCode } from "@/components/member/CheckInQRCode"
+import { authClient } from "@/lib/auth-client"
 
 interface MemberStats {
   workoutsThisWeek: number
@@ -31,9 +33,17 @@ export default function MemberDashboardPage() {
     activeSubscription: false,
   })
   const [upcomingClasses, setUpcomingClasses] = useState<UpcomingClass[]>([])
+  const [qrCode, setQrCode] = useState<string>("")
+  const [userName, setUserName] = useState<string>("")
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    authClient.getSession().then(({ data }) => {
+      if (data?.user) {
+        setUserName(data.user.name)
+      }
+    })
+
     Promise.all([
       fetch("/api/member/workout-plan").then(res => res.json()),
       fetch("/api/member/class-bookings").then(res => res.json()),
@@ -48,6 +58,9 @@ export default function MemberDashboardPage() {
         })
         if (dashboardData.upcomingClasses) {
           setUpcomingClasses(dashboardData.upcomingClasses)
+        }
+        if (dashboardData.qrCode) {
+          setQrCode(dashboardData.qrCode)
         }
       })
       .catch(err => console.error("Failed to fetch stats:", err))
@@ -68,12 +81,17 @@ export default function MemberDashboardPage() {
           <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">Welcome back!</h1>
           <p className="mt-1 text-zinc-500 dark:text-zinc-400">Here's your fitness overview for today</p>
         </div>
-        <Link href="/member/workout-plan">
-          <Button className="rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
-            <Play className="h-4 w-4 mr-2" />
-            Start Workout
-          </Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          {qrCode && (
+            <CheckInQRCode qrCode={qrCode} memberName={userName || "Member"} />
+          )}
+          <Link href="/member/workout-plan">
+            <Button className="rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+              <Play className="h-4 w-4 mr-2" />
+              Start Workout
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

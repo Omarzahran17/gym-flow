@@ -53,19 +53,25 @@ export async function POST(
     }
 
     const result = await db.transaction(async (tx) => {
+      console.log("Starting conversion for member:", memberId, "userId:", member.userId)
+      
       // 1. Create trainer record
+      console.log("Creating trainer record with userId:", member.userId)
       const [newTrainer] = await tx.insert(trainers).values({
         userId: member.userId,
         specialization: "General Fitness",
         maxClients: 20,
       }).returning()
+      console.log("Trainer created with ID:", newTrainer.id)
 
       // 2. Update user role in users table
+      console.log("Updating user role to trainer for userId:", member.userId)
       await tx.update(users)
         .set({ role: "trainer" })
         .where(eq(users.id, member.userId))
 
       // 3. Clean up related records to avoid FK constraints
+      console.log("Cleaning up member-related records...")
       await tx.delete(memberSubscriptions).where(eq(memberSubscriptions.memberId, memberId))
       await tx.delete(attendance).where(eq(attendance.memberId, memberId))
       await tx.delete(workoutPlanAssignments).where(eq(workoutPlanAssignments.memberId, memberId))
@@ -76,8 +82,10 @@ export async function POST(
       await tx.delete(classBookings).where(eq(classBookings.memberId, memberId))
 
       // 4. Delete member record
+      console.log("Deleting member record:", memberId)
       await tx.delete(members).where(eq(members.id, memberId))
 
+      console.log("Conversion completed successfully")
       return newTrainer
     })
 

@@ -17,6 +17,7 @@ interface Member {
   status: string
   joinDate: string
   qrCode?: string
+  role?: string
 }
 
 export default function MembersPage() {
@@ -53,13 +54,13 @@ export default function MembersPage() {
       })
 
       if (response.ok) {
-        fetch("/api/admin/members")
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.members) {
-              setMembers(data.members)
-            }
-          })
+        // Refresh members list
+        const membersRes = await fetch("/api/admin/members")
+        const membersData = await membersRes.json()
+        if (membersData.members) {
+          setMembers(membersData.members)
+        }
+        alert(`${memberName} has been successfully promoted to trainer!`)
       } else {
         const data = await response.json()
         alert(data.error || "Failed to promote member to trainer")
@@ -145,6 +146,16 @@ export default function MembersPage() {
                             {member.phone}
                           </span>
                         )}
+                        {member.role === "trainer" && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                            Trainer
+                          </span>
+                        )}
+                        {member.role === "admin" && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
+                            Admin
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -153,8 +164,8 @@ export default function MembersPage() {
                     <div className="text-right">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${member.status === "active"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                            : "bg-muted text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300"
+                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                          : "bg-muted text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300"
                           }`}
                       >
                         {member.status}
@@ -164,30 +175,32 @@ export default function MembersPage() {
                         {new Date(member.joinDate).toLocaleDateString()}
                       </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        const memberName = member.firstName && member.lastName
-                          ? `${member.firstName} ${member.lastName}`
-                          : member.userId
-                        if (confirm(`Are you sure you want to promote ${memberName} to a trainer?`)) {
-                          handlePromoteToTrainer(member.id, memberName)
-                        }
-                      }}
-                      disabled={promotingId === member.id}
-                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20"
-                    >
-                      {promotingId === member.id ? (
-                        <svg className="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                      ) : (
-                        <ArrowUpCircle className="h-4 w-4 mr-1" />
-                      )}
-                      {promotingId === member.id ? "Promoting..." : "Promote to Trainer"}
-                    </Button>
+                    {member.role !== "trainer" && member.role !== "admin" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const memberName = member.firstName && member.lastName
+                            ? `${member.firstName} ${member.lastName}`
+                            : member.userId
+                          if (confirm(`Are you sure you want to promote ${memberName} to a trainer?`)) {
+                            handlePromoteToTrainer(member.id, memberName)
+                          }
+                        }}
+                        disabled={promotingId === member.id}
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20"
+                      >
+                        {promotingId === member.id ? (
+                          <svg className="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        ) : (
+                          <ArrowUpCircle className="h-4 w-4 mr-1" />
+                        )}
+                        {promotingId === member.id ? "Promoting..." : "Promote to Trainer"}
+                      </Button>
+                    )}
                     <ChevronRight className="h-5 w-5 text-muted-foreground" />
                   </div>
                 </div>

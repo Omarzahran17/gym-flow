@@ -23,7 +23,11 @@ export async function GET(
     const classData = await db.query.classes.findFirst({
       where: eq(classes.id, classId),
       with: {
-        trainer: true,
+        trainer: {
+          with: {
+            user: true,
+          },
+        },
       },
     })
 
@@ -31,7 +35,16 @@ export async function GET(
       return NextResponse.json({ error: "Class not found" }, { status: 404 })
     }
 
-    return NextResponse.json({ class: classData })
+    const formattedClass = {
+      ...classData,
+      trainer: classData.trainer ? {
+        ...classData.trainer,
+        name: classData.trainer.user?.name || classData.trainer.userId,
+        email: classData.trainer.user?.email || null,
+      } : null,
+    }
+
+    return NextResponse.json({ class: formattedClass })
   } catch (error) {
     console.error("Get class error:", error)
     return NextResponse.json(

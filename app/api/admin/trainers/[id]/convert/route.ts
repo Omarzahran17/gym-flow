@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { trainers, users, classes } from "@/lib/db/schema"
+import { trainers, users, classes, members } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -28,18 +28,38 @@ export async function POST(
       return NextResponse.json({ error: "Trainer not found" }, { status: 404 })
     }
 
-    // Set trainer_id to null for all classes by this trainer
-    await db.update(classes)
-      .set({ trainerId: null })
-      .where(eq(classes.trainerId, trainerId))
+    const result = await db.transaction(async (tx) => {
+      console.log("Starting conversion for trainer:", trainerId, "userId:", trainer.userId)
+      
+      // 1. Create member record
+      console.log("Creating member record with userId:", trainer.userId)
+      const [newMember] = await tx.insert(members).values({
+        userId: trainer.userId,
+        status: "active",
+      }).returning()
+      console.log("Member created with ID:", newMember.id)
 
-    await db.delete(trainers).where(eq(trainers.id, trainerId))
+      // 2. Update user role in users table
+      console.log("Updating user role to member for userId:", trainer.userId)
+      await tx.update(users)
+        .set({ role: "member" })
+        .where(eq(users.id, trainer.userId))
 
-    await db.update(users)
-      .set({ role: "member" })
-      .where(eq(users.id, trainer.userId))
+      // 3. Set trainer_id to null for all classes by this trainer
+      console.log("Clearing trainer from classes...")
+      await tx.update(classes)
+        .set({ trainerId: null })
+        .where(eq(classes.trainerId, trainerId))
 
-    return NextResponse.json({ success: true })
+      // 4. Delete trainer record
+      console.log("Deleting trainer record:", trainerId)
+      await tx.delete(trainers).where(eq(trainers.id, trainerId))
+
+      console.log("Conversion completed successfully")
+      return newMember
+    })
+
+    return NextResponse.json({ success: true, memberId: result.id })
   } catch (error) {
     console.error("Convert trainer to member error:", error)
     return NextResponse.json(
