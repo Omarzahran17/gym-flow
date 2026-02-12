@@ -83,7 +83,7 @@ export default function AdminDashboardPage() {
   const quickActions = [
     { href: "/admin/classes/new", label: "Schedule Class", icon: Calendar, color: "green", gradient: "from-green-500 to-green-600" },
     { href: "/admin/subscriptions", label: "Manage Plans", icon: CreditCard, color: "orange", gradient: "from-orange-500 to-orange-600" },
-    { href: "/admin/members", label: "Add Member", icon: UserPlus, color: "blue", gradient: "from-blue-500 to-blue-600" },
+    { href: "/admin/members", label: "View Members", icon: Users, color: "blue", gradient: "from-blue-500 to-blue-600" },
     { href: "/admin/reports", label: "View Reports", icon: TrendingUp, color: "purple", gradient: "from-purple-500 to-purple-600" },
   ]
 
