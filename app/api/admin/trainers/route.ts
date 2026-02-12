@@ -28,9 +28,14 @@ export async function GET(request: NextRequest) {
             eq(workoutPlans.trainerId, trainer.id),
             eq(workoutPlans.isActive, true)
           ),
+          with: {
+            assignments: true
+          }
         })
 
-        const uniqueMemberIds = new Set(activePlans.map(p => p.memberId))
+        const uniqueMemberIds = new Set(
+          activePlans.flatMap(p => p.assignments.map((a: any) => a.memberId))
+        )
 
         return {
           ...trainer,

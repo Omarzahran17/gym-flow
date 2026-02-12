@@ -22,6 +22,10 @@ interface Member {
   id: number
   userId: string
   phone?: string
+  user?: {
+    name: string | null
+    email: string | null
+  }
 }
 
 interface PlanExercise {
@@ -45,6 +49,10 @@ interface WorkoutPlan {
   members?: {
     id: number
     userId: string
+    user?: {
+      name: string | null
+      email: string | null
+    }
   }[]
   exercises: {
     id: number
@@ -68,6 +76,7 @@ export default function EditWorkoutPlanPage({ params }: { params: Promise<{ id: 
   const [searchQuery, setSearchQuery] = useState("")
   const [planId, setPlanId] = useState<string | null>(null)
   const [selectedExercises, setSelectedExercises] = useState<PlanExercise[]>([])
+  const [assignedMembers, setAssignedMembers] = useState<Member[]>([])
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -109,6 +118,9 @@ export default function EditWorkoutPlanPage({ params }: { params: Promise<{ id: 
           endDate: planData.plan.endDate ? planData.plan.endDate.split("T")[0] : "",
           isActive: planData.plan.isActive,
         })
+        if (planData.plan.members) {
+          setAssignedMembers(planData.plan.members)
+        }
         setSelectedExercises(planData.plan.exercises.map((ex) => ({
           id: ex.id,
           exerciseId: ex.exerciseId,
@@ -173,7 +185,7 @@ export default function EditWorkoutPlanPage({ params }: { params: Promise<{ id: 
 
     const updated = [...selectedExercises]
     const newIndex = direction === "up" ? index - 1 : index + 1
-    ;[updated[index], updated[newIndex]] = [updated[newIndex], updated[index]]
+      ;[updated[index], updated[newIndex]] = [updated[newIndex], updated[index]]
     setSelectedExercises(updated)
   }
 
@@ -291,11 +303,11 @@ export default function EditWorkoutPlanPage({ params }: { params: Promise<{ id: 
               <div className="space-y-2">
                 <Label>Assigned Members</Label>
                 <div className="p-3 bg-gray-100 rounded-lg text-sm">
-                  {planData.plan?.members && planData.plan.members.length > 0 ? (
+                  {assignedMembers.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
-                      {planData.plan.members.map((m: any) => (
+                      {assignedMembers.map((m) => (
                         <span key={m.id} className="bg-white px-2 py-1 rounded border">
-                          Member #{m.id}
+                          {m.user?.name || `Member #${m.id}`}
                         </span>
                       ))}
                     </div>
@@ -535,13 +547,12 @@ export default function EditWorkoutPlanPage({ params }: { params: Promise<{ id: 
                         )}
                       >
                         <Plus
-                          className={`h-4 w-4 ${
-                            selectedExercises.some(
-                              (e) => e.exerciseId === exercise.id
-                            )
-                              ? "text-gray-400"
-                              : "text-green-600"
-                          }`}
+                          className={`h-4 w-4 ${selectedExercises.some(
+                            (e) => e.exerciseId === exercise.id
+                          )
+                            ? "text-gray-400"
+                            : "text-green-600"
+                            }`}
                         />
                       </Button>
                     </div>

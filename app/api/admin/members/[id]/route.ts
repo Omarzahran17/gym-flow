@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { members, attendance, workoutPlans } from "@/lib/db/schema"
+import { members, attendance, workoutPlanAssignments } from "@/lib/db/schema"
 import { eq, desc, and, sql } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -32,8 +32,8 @@ export async function GET(
     today.setHours(0, 0, 0, 0)
     const todayStr = today.toISOString().split('T')[0]
 
-    const memberWorkouts = await db.query.workoutPlans.findMany({
-      where: eq(workoutPlans.memberId, memberId),
+    const memberWorkouts = await db.query.workoutPlanAssignments.findMany({
+      where: eq(workoutPlanAssignments.memberId, memberId),
     })
 
     const recentAttendance = await db.query.attendance.findMany({
@@ -46,8 +46,8 @@ export async function GET(
     })
 
     const totalWorkouts = memberWorkouts.length
-    const attendanceRate = recentAttendance.length > 0 
-      ? Math.round((recentAttendance.length / 30) * 100) 
+    const attendanceRate = recentAttendance.length > 0
+      ? Math.round((recentAttendance.length / 30) * 100)
       : 0
 
     const joinDate = member.joinDate ? new Date(member.joinDate) : new Date()

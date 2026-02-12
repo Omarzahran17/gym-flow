@@ -47,7 +47,6 @@ export default function LoginPage() {
         return
       }
 
-      // Force a hard redirect to ensure middleware picks up the session cookie
       const user = result.data?.user as { role?: string } | undefined
       let redirectUrl = "/member"
       if (user?.role === "admin") {
@@ -56,7 +55,6 @@ export default function LoginPage() {
         redirectUrl = "/trainer"
       }
 
-      // Use window.location for a full page reload to ensure middleware picks up the session
       window.location.href = redirectUrl
 
     } catch (err) {
@@ -102,16 +100,16 @@ export default function LoginPage() {
               <span className="text-xl font-bold">GymFlow</span>
             </div>
 
-            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-6">
+            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30">
               <LayoutDashboard className="h-10 w-10 text-white" />
             </div>
 
-            <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white mb-4">You&apos;re already signed in</h2>
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">You're already signed in</h2>
             <p className="text-zinc-500 dark:text-zinc-400 mb-8">Go to your dashboard to manage your account</p>
 
             <div className="space-y-3">
               <Link href="/admin" className="block">
-                <Button className="w-full h-11 bg-zinc-900 hover:bg-zinc-800 text-white font-medium rounded-lg transition-colors">
+                <Button className="w-full h-11 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all shadow-lg shadow-blue-500/25">
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   Admin Dashboard
                 </Button>
@@ -136,38 +134,46 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-white dark:bg-zinc-950">
       {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-zinc-950 text-white flex-col justify-center px-12 relative overflow-hidden">
-        {/* Background Pattern */}
+      <div className="hidden lg:flex lg:w-1/2 bg-zinc-950 text-white flex-col justify-center px-12 relative overflow-hidden dark">
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0" style={{
             backgroundImage: `radial-gradient(circle at 25% 25%, #3b82f6 0%, transparent 50%), radial-gradient(circle at 75% 75%, #8b5cf6 0%, transparent 50%)`,
           }} />
         </div>
 
-        {/* Content */}
-        <div className="relative z-10">
-          <div className="flex items-center space-x-3 mb-8">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <Dumbbell className="h-7 w-7 text-white" />
+        <div className="absolute top-6 left-6 right-6 flex justify-between items-center">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+              <Dumbbell className="h-5 w-5 text-white" />
             </div>
-            <span className="text-2xl font-bold tracking-tight">GymFlow</span>
+            <span className="text-lg font-bold tracking-tight">GymFlow</span>
+          </div>
+        </div>
+
+        <div className="relative z-10 mt-12">
+          <div className="flex items-center space-x-3 mb-8">
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+              <Dumbbell className="h-8 w-8 text-white" />
+            </div>
+            <span className="text-3xl font-bold tracking-tight">GymFlow</span>
           </div>
 
-          <h1 className="text-4xl font-bold mb-4 leading-tight">
-            Train smarter.<br />
+          <h1 className="text-5xl font-bold mb-6 leading-tight">
+            Train smarter.
+            <br />
             <span className="text-zinc-400">Get stronger.</span>
           </h1>
 
-          <p className="text-zinc-400 text-lg max-w-md">
+          <p className="text-zinc-400 text-lg max-w-md mb-8">
             The complete gym management platform for trainers, members, and administrators.
           </p>
 
-          <div className="mt-12 flex items-center space-x-4">
+          <div className="flex items-center space-x-4">
             <div className="flex -space-x-2">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="w-10 h-10 rounded-full bg-zinc-800 border-2 border-zinc-950 flex items-center justify-center text-xs font-medium">
+                <div key={i} className="w-10 h-10 rounded-full bg-zinc-800 border-2 border-zinc-950 flex items-center justify-center text-xs font-medium text-white">
                   {String.fromCharCode(64 + i)}
                 </div>
               ))}
@@ -180,30 +186,30 @@ export default function LoginPage() {
       </div>
 
       {/* Right Panel - Form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white dark:bg-zinc-950">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden flex items-center justify-center space-x-3 mb-8">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
               <Dumbbell className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-bold">GymFlow</span>
+            <span className="text-xl font-bold text-zinc-900 dark:text-white">GymFlow</span>
           </div>
 
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-semibold text-zinc-900">Welcome back</h2>
-            <p className="text-zinc-500 mt-2">Enter your credentials to access your account</p>
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">Welcome back</h2>
+            <p className="text-zinc-500 dark:text-zinc-400 mt-2">Enter your credentials to access your account</p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-lg text-sm text-red-600">
+            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-xl text-sm text-red-600 dark:text-red-400">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <label htmlFor="email" className="text-sm font-medium text-zinc-700">
+            <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 Email
               </label>
               <Input
@@ -212,17 +218,17 @@ export default function LoginPage() {
                 placeholder="name@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="h-11 bg-zinc-50 border-zinc-200 focus:border-zinc-900 focus:ring-zinc-900 transition-colors"
+                className="h-11 bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-blue-500/20 dark:focus:ring-blue-500/30 transition-all"
                 required
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="text-sm font-medium text-zinc-700">
+                <label htmlFor="password" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   Password
                 </label>
-                <Link href="/forgot-password" className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors">
+                <Link href="/forgot-password" className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
                   Forgot password?
                 </Link>
               </div>
@@ -232,14 +238,14 @@ export default function LoginPage() {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="h-11 bg-zinc-50 border-zinc-200 focus:border-zinc-900 focus:ring-zinc-900 transition-colors"
+                className="h-11 bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-blue-500/20 dark:focus:ring-blue-500/30 transition-all"
                 required
               />
             </div>
 
             <Button
               type="submit"
-              className="w-full h-11 bg-zinc-900 hover:bg-zinc-800 text-white font-medium rounded-lg transition-colors"
+              className="w-full h-11 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all shadow-lg shadow-blue-500/25 active:scale-[0.98]"
               disabled={loading}
             >
               {loading ? (
@@ -262,17 +268,17 @@ export default function LoginPage() {
           <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-zinc-200" />
+                <div className="w-full border-t border-zinc-200 dark:border-zinc-800" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-zinc-500">Or continue with</span>
+                <span className="px-2 bg-white dark:bg-zinc-950 text-zinc-500">Or continue with</span>
               </div>
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
               <Button
                 variant="outline"
-                className="h-11 bg-white border-zinc-200 hover:bg-zinc-50 text-zinc-900 font-medium rounded-lg transition-colors"
+                className="h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-900 dark:text-white font-medium rounded-lg transition-colors"
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                   <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" />
@@ -281,7 +287,7 @@ export default function LoginPage() {
               </Button>
               <Button
                 variant="outline"
-                className="h-11 bg-white border-zinc-200 hover:bg-zinc-50 text-zinc-900 font-medium rounded-lg transition-colors"
+                className="h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-900 dark:text-white font-medium rounded-lg transition-colors"
               >
                 <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
@@ -291,9 +297,9 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <p className="mt-8 text-center text-sm text-zinc-500">
-            Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-medium text-zinc-900 hover:text-zinc-700 transition-colors">
+          <p className="mt-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
+            Don't have an account?{" "}
+            <Link href="/register" className="font-medium text-zinc-900 hover:text-zinc-700 dark:text-white dark:hover:text-zinc-300 transition-colors">
               Sign up
             </Link>
           </p>

@@ -151,15 +151,15 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
 
   const SidebarContent = () => (
     <>
-      <div className={`p-4 border-b border-sidebar-border ${collapsed ? "px-3" : ""}`}>
+      <div className={`p-4 border-b border-zinc-200 dark:border-zinc-800 ${collapsed ? "px-3" : ""}`}>
         <Link href={getDashboardUrl()} className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-            <Dumbbell className="h-5 w-5 text-primary" />
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/25">
+            <Dumbbell className="h-5 w-5 text-white" />
           </div>
           {!collapsed && (
             <div>
-              <span className="text-lg font-bold text-sidebar-foreground">GymFlow</span>
-              <p className="text-xs text-sidebar-foreground/60 capitalize">{userRole} portal</p>
+              <span className="text-lg font-bold text-zinc-900 dark:text-white">GymFlow</span>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 capitalize">{userRole} portal</p>
             </div>
           )}
         </Link>
@@ -174,13 +174,14 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
               key={item.href}
               href={item.href}
               onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${isActive
-                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                : "text-sidebar-foreground/60 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                } ${collapsed ? "justify-center" : ""}`}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+                isActive
+                  ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white"
+              } ${collapsed ? "justify-center" : ""}`}
               title={collapsed ? item.label : undefined}
             >
-              <span className={isActive ? "text-sidebar-accent-foreground" : "text-sidebar-foreground/60"}>
+              <span className={isActive ? "text-white" : ""}>
                 {iconMap[item.icon]}
               </span>
               {!collapsed && (
@@ -191,89 +192,100 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
         })}
       </nav>
 
-      <div className={`p-3 border-t border-sidebar-border ${collapsed ? "px-2" : ""}`}>
+      <div className={`p-3 border-t border-zinc-200 dark:border-zinc-800 ${collapsed ? "px-2" : ""}`}>
         {!collapsed && (
-          <div className="flex items-center gap-3 p-2 mb-2 rounded-lg bg-sidebar-accent/50">
-            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <span className="text-sm font-semibold text-primary">{userInitials}</span>
+          <div className="flex items-center gap-3 p-3 mb-2 rounded-xl bg-zinc-100 dark:bg-zinc-800/50">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/25">
+              <span className="text-sm font-bold text-white">{userInitials}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-sm text-sidebar-foreground truncate">{user?.name || "User"}</p>
-              <p className="text-xs text-sidebar-foreground/60 truncate">{user?.email}</p>
+              <p className="font-semibold text-sm text-zinc-900 dark:text-white truncate">{user?.name || "User"}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">{user?.email}</p>
             </div>
           </div>
         )}
 
         {collapsed && (
           <div className="flex justify-center mb-2">
-            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-sm font-semibold text-primary">{userInitials}</span>
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+              <span className="text-sm font-bold text-white">{userInitials}</span>
             </div>
           </div>
         )}
 
-        <Button
-          variant="ghost"
-          className={`w-full text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 ${collapsed ? "px-2" : ""}`}
-          onClick={toggleTheme}
-        >
-          {mounted && theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          {!collapsed && <span className="ml-2">{mounted && theme === "dark" ? "Light Mode" : "Dark Mode"}</span>}
-        </Button>
+        <div className="space-y-1">
+          <button
+            onClick={toggleTheme}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white ${collapsed ? "justify-center" : ""}`}
+          >
+            {mounted && theme === "dark" ? (
+              <>
+                <Sun className="h-5 w-5 text-amber-500" />
+                {!collapsed && <span className="font-medium text-sm">Light Mode</span>}
+              </>
+            ) : (
+              <>
+                <Moon className="h-5 w-5 text-indigo-500" />
+                {!collapsed && <span className="font-medium text-sm">Dark Mode</span>}
+              </>
+            )}
+          </button>
 
-        <Button
-          variant="ghost"
-          className={`w-full text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 ${collapsed ? "px-2" : ""}`}
-          onClick={handleLogout}
-        >
-          <LogOut className="h-4 w-4" />
-          {!collapsed && <span className="ml-2">Sign Out</span>}
-        </Button>
+          <button
+            onClick={handleLogout}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-zinc-600 dark:text-zinc-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 ${collapsed ? "justify-center" : ""}`}
+          >
+            <LogOut className="h-5 w-5" />
+            {!collapsed && <span className="font-medium text-sm">Sign Out</span>}
+          </button>
+        </div>
       </div>
     </>
   )
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex">
       {/* Mobile Overlay */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       {/* Mobile Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border flex flex-col transform transition-transform duration-200 md:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}>
-        <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
-          <Link href={getDashboardUrl()} className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-              <Dumbbell className="h-5 w-5 text-primary" />
-            </div>
-            <span className="text-lg font-bold text-sidebar-foreground">GymFlow</span>
-          </Link>
-          <Button variant="ghost" size="icon" onClick={() => setMobileOpen(false)}>
-            <X className="h-5 w-5" />
-          </Button>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col transform transition-transform duration-300 md:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <div className="p-4 border-b border-zinc-200 dark:border-zinc-800">
+          <div className="flex items-center justify-between">
+            <Link href={getDashboardUrl()} className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25">
+                <Dumbbell className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-lg font-bold text-zinc-900 dark:text-white">GymFlow</span>
+            </Link>
+            <Button variant="ghost" size="icon" onClick={() => setMobileOpen(false)} className="text-zinc-500">
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
-        <SidebarContent />
+        <div className="flex-1 overflow-y-auto">
+          <SidebarContent />
+        </div>
       </aside>
 
       {/* Desktop Sidebar */}
-      <aside className={`hidden md:flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-200 ${collapsed ? "w-[72px]" : "w-64"
-        }`}>
+      <aside className={`hidden md:flex flex-col bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 transition-all duration-300 ${collapsed ? "w-[72px]" : "w-64"}`}>
         <SidebarContent />
 
         {/* Collapse Toggle */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="absolute top-1/2 -right-3 w-6 h-6 bg-background border border-border rounded-full flex items-center justify-center shadow-sm hover:bg-accent transition-colors hidden md:flex"
+          className="absolute top-1/2 -right-3 w-8 h-8 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-full flex items-center justify-center shadow-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-all duration-200 z-20"
         >
           {collapsed ? (
-            <ChevronRight className="h-3 w-3 text-muted-foreground" />
+            <ChevronRight className="h-4 w-4 text-zinc-500" />
           ) : (
-            <ChevronLeft className="h-3 w-3 text-muted-foreground" />
+            <ChevronLeft className="h-4 w-4 text-zinc-500" />
           )}
         </button>
       </aside>
@@ -281,19 +293,19 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Mobile Header */}
-        <header className="md:hidden bg-background border-b border-border sticky top-0 z-30">
+        <header className="md:hidden bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-30">
           <div className="flex items-center justify-between px-4 py-3">
-            <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}>
+            <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)} className="text-zinc-600 dark:text-zinc-400">
               <Menu className="h-5 w-5" />
             </Button>
             <Link href={getDashboardUrl()} className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                <Dumbbell className="h-4 w-4 text-primary" />
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/25">
+                <Dumbbell className="h-4 w-4 text-white" />
               </div>
-              <span className="text-lg font-bold text-foreground">GymFlow</span>
+              <span className="text-lg font-bold text-zinc-900 dark:text-white">GymFlow</span>
             </Link>
-            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-sm font-semibold text-primary">{userInitials}</span>
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+              <span className="text-sm font-bold text-white">{userInitials}</span>
             </div>
           </div>
         </header>

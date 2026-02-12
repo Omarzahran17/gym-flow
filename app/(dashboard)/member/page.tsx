@@ -4,7 +4,8 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Dumbbell, Calendar, TrendingUp, CreditCard, ArrowRight, Play, CalendarCheck } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Dumbbell, Calendar, TrendingUp, CreditCard, ArrowRight, Play, CalendarCheck, Target, Flame } from "lucide-react"
 
 interface MemberStats {
   workoutsThisWeek: number
@@ -54,166 +55,194 @@ export default function MemberDashboardPage() {
   }, [])
 
   const quickActions = [
-    { href: "/member/workout-plan", label: "View Workout", icon: Dumbbell, color: "blue" },
-    { href: "/member/classes", label: "Book Class", icon: Calendar, color: "purple" },
-    { href: "/member/progress", label: "Track Progress", icon: TrendingUp, color: "green" },
-    { href: "/member/subscription", label: "Manage Plan", icon: CreditCard, color: "orange" },
+    { href: "/member/workout-plan", label: "View Workout", icon: Dumbbell, color: "blue", gradient: "from-blue-500 to-blue-600" },
+    { href: "/member/classes", label: "Book Class", icon: Calendar, color: "purple", gradient: "from-purple-500 to-purple-600" },
+    { href: "/member/progress", label: "Track Progress", icon: TrendingUp, color: "green", gradient: "from-green-500 to-green-600" },
+    { href: "/member/subscription", label: "Manage Plan", icon: CreditCard, color: "orange", gradient: "from-orange-500 to-orange-600" },
   ]
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Welcome back!</h1>
-        <p className="text-muted-foreground mt-1">Here's your fitness overview for today</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">Welcome back!</h1>
+          <p className="mt-1 text-zinc-500 dark:text-zinc-400">Here's your fitness overview for today</p>
+        </div>
+        <Link href="/member/workout-plan">
+          <Button className="rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+            <Play className="h-4 w-4 mr-2" />
+            Start Workout
+          </Button>
+        </Link>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-border shadow-sm">
-          <CardContent className="p-6">
+        <Card className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 opacity-5" />
+          <CardContent className="p-6 relative">
             <div className="flex items-center justify-between">
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <Dumbbell className="h-5 w-5 text-blue-600" />
+              <div className="p-2.5 rounded-xl bg-blue-100 dark:bg-blue-900/30">
+                <Dumbbell className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div className="flex items-center gap-1 text-orange-500">
+                <Flame className="h-4 w-4 fill-current" />
+                <span className="text-xs font-medium">This week</span>
               </div>
             </div>
             <div className="mt-4">
-              <p className="text-2xl font-bold text-foreground">
-                {loading ? "..." : stats.workoutsThisWeek}
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">Workouts This Week</p>
+              {loading ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.workoutsThisWeek}</p>
+              )}
+              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Workouts Completed</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border shadow-sm">
-          <CardContent className="p-6">
+        <Card className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-purple-600 opacity-5" />
+          <CardContent className="p-6 relative">
             <div className="flex items-center justify-between">
-              <div className="p-2 bg-purple-50 rounded-lg">
-                <Calendar className="h-5 w-5 text-purple-600" />
+              <div className="p-2.5 rounded-xl bg-purple-100 dark:bg-purple-900/30">
+                <Calendar className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               </div>
             </div>
             <div className="mt-4">
-              <p className="text-2xl font-bold text-foreground">
-                {loading ? "..." : stats.classesBooked}
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">Classes Booked</p>
+              {loading ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.classesBooked}</p>
+              )}
+              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Classes Booked</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border shadow-sm">
-          <CardContent className="p-6">
+        <Card className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-green-600 opacity-5" />
+          <CardContent className="p-6 relative">
             <div className="flex items-center justify-between">
-              <div className="p-2 bg-green-50 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-green-600" />
+              <div className="p-2.5 rounded-xl bg-green-100 dark:bg-green-900/30">
+                <Target className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
-              <span className="text-xs text-green-600 font-medium">On track</span>
-            </div>
-            <div className="mt-4">
-              <p className="text-2xl font-bold text-foreground">
-                {loading ? "..." : `${stats.goalCompletion}%`}
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">Goal Completion</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="p-2 bg-orange-50 rounded-lg">
-                <CreditCard className="h-5 w-5 text-orange-600" />
-              </div>
-              <span className={`text-xs font-medium px-2 py-1 rounded-full ${stats.activeSubscription ? "bg-green-50 text-green-600" : "bg-muted text-muted-foreground"}`}>
-                {stats.activeSubscription ? "Active" : "Inactive"}
+              <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
+                {loading ? "..." : stats.goalCompletion >= 70 ? "On track" : stats.goalCompletion >= 40 ? "Halfway" : "Just started"}
               </span>
             </div>
             <div className="mt-4">
-              <p className="text-2xl font-bold text-foreground">
-                {loading ? "..." : (stats.activeSubscription ? "Premium" : "Free")}
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">{stats.activeSubscription ? "Subscription active" : "No subscription"}</p>
+              {loading ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.goalCompletion}%</p>
+              )}
+              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Goal Completion</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-600 opacity-5" />
+          <CardContent className="p-6 relative">
+            <div className="flex items-center justify-between">
+              <div className="p-2.5 rounded-xl bg-orange-100 dark:bg-orange-900/30">
+                <CreditCard className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+              </div>
+              <span className={`text-xs font-medium px-2 py-1 rounded-full ${stats.activeSubscription ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"}`}>
+                {loading ? "..." : stats.activeSubscription ? "Active" : "Inactive"}
+              </span>
+            </div>
+            <div className="mt-4">
+              {loading ? (
+                <Skeleton className="h-8 w-20" />
+              ) : (
+                <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.activeSubscription ? "Premium" : "Free"}</p>
+              )}
+              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{stats.activeSubscription ? "Subscription active" : "No subscription"}</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {quickActions.map((action, i) => (
           <Link key={i} href={action.href}>
-            <Card className="border-border shadow-sm hover:shadow-md transition-all cursor-pointer group">
+            <Card className="group relative overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer h-full">
+              <div className={`absolute inset-0 bg-gradient-to-br ${action.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
-                  <div className={`p-2 rounded-lg bg-${action.color}-50`}>
-                    <action.icon className={`h-5 w-5 text-${action.color}-600`} />
+                  <div className={`p-2.5 rounded-xl bg-${action.color}-100 dark:bg-${action.color}-900/20 group-hover:scale-110 transition-transform duration-300`}>
+                    <action.icon className={`h-5 w-5 text-${action.color}-600 dark:text-${action.color}-400`} />
                   </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 group-hover:translate-x-1 transition-all duration-300" />
                 </div>
-                <p className="mt-4 font-medium text-foreground">{action.label}</p>
+                <p className="mt-4 font-semibold text-zinc-900 dark:text-white">{action.label}</p>
               </CardContent>
             </Card>
           </Link>
         ))}
       </div>
 
-      {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Today's Schedule */}
-        <Card className="border-border shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-semibold text-foreground">Today's Schedule</CardTitle>
-            <Link href="/member/classes">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                View all
-              </Button>
-            </Link>
+        <Card>
+          <CardHeader className="pb-4 border-b border-zinc-100 dark:border-zinc-800">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg font-semibold">Today's Schedule</CardTitle>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">Your upcoming classes</p>
+              </div>
+              <Link href="/member/classes">
+                <Button variant="ghost" size="sm" className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white rounded-lg">
+                  View all
+                </Button>
+              </Link>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-4">
             {loading ? (
               <div className="space-y-4">
-                {[1, 2].map((i) => (
-                  <div key={i} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg animate-pulse">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-zinc-200 rounded-lg" />
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl animate-pulse">
+                    <div className="flex items-center gap-4">
+                      <Skeleton className="h-12 w-12 rounded-lg" />
                       <div className="space-y-2">
-                        <div className="h-4 w-24 bg-zinc-200 rounded" />
-                        <div className="h-3 w-32 bg-zinc-200 rounded" />
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-3 w-24" />
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : upcomingClasses.length === 0 ? (
-              <div className="text-center py-8">
-                <Calendar className="h-12 w-12 mx-auto text-zinc-300 mb-4" />
-                <p className="text-muted-foreground">No upcoming classes this week</p>
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
+                  <Calendar className="h-8 w-8 text-zinc-400" />
+                </div>
+                <p className="text-zinc-500 dark:text-zinc-400 font-medium">No upcoming classes</p>
+                <p className="text-sm text-zinc-400 dark:text-zinc-500 mt-1">Book a class to start your fitness journey</p>
                 <Link href="/member/classes">
-                  <Button variant="outline" className="mt-4">
+                  <Button variant="outline" size="sm" className="mt-4 rounded-lg">
                     <CalendarCheck className="h-4 w-4 mr-2" />
                     Book a Class
                   </Button>
                 </Link>
               </div>
             ) : (
-              <div className="space-y-4">
-                {upcomingClasses.map((cls) => (
-                  <div key={cls.id} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border border-border">
-                        <Calendar className="h-5 w-5 text-foreground/80" />
+              <div className="space-y-3">
+                {upcomingClasses.slice(0, 4).map((cls) => (
+                  <div key={cls.id} className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                        <Calendar className="h-5 w-5 text-white" />
                       </div>
                       <div>
-                        <p className="font-medium text-foreground">{cls.name}</p>
-                        <p className="text-sm text-muted-foreground">{cls.trainer} • {cls.room}</p>
+                        <p className="font-medium text-zinc-900 dark:text-white">{cls.name}</p>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400">{cls.trainer} • {cls.room}</p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="text-right">
-                        <span className="text-sm font-medium text-foreground">{cls.time}</span>
-                        <p className="text-xs text-muted-foreground">{cls.day}</p>
-                      </div>
+                    <div className="text-right">
+                      <span className="text-sm font-semibold text-zinc-900 dark:text-white bg-white dark:bg-zinc-700 px-3 py-1 rounded-lg">{cls.time}</span>
+                      <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">{cls.day}</p>
                     </div>
                   </div>
                 ))}
@@ -222,20 +251,23 @@ export default function MemberDashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Quick Workout */}
-        <Card className="border-border shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-foreground">Quick Workout</CardTitle>
+        <Card>
+          <CardHeader className="pb-4 border-b border-zinc-100 dark:border-zinc-800">
+            <CardTitle className="text-lg font-semibold">Quick Workout</CardTitle>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">Ready to train?</p>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8">
-              <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-6">
-                <Dumbbell className="h-10 w-10 text-white" />
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <div className="relative mb-6">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                  <Dumbbell className="h-12 w-12 text-white" />
+                </div>
+                <div className="absolute inset-0 rounded-full border-4 border-white dark:border-zinc-900 animate-pulse opacity-50" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">Ready to train?</h3>
-              <p className="text-muted-foreground mb-6">Start your daily workout routine</p>
+              <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">Ready to train?</h3>
+              <p className="text-zinc-500 dark:text-zinc-400 max-w-sm mb-6">Start your daily workout routine and crush your fitness goals</p>
               <Link href="/member/workout-plan">
-                <Button size="lg" className="bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg">
+                <Button size="lg" className="rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
                   <Play className="h-5 w-5 mr-2" />
                   Start Workout
                 </Button>

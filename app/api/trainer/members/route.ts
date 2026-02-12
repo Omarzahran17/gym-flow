@@ -1,7 +1,8 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { members, trainers, workoutPlans } from "@/lib/db/schema"
-import { eq, desc } from "drizzle-orm"
+import { members, trainers } from "@/lib/db/schema"
+import { desc } from "drizzle-orm"
+import { eq } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
@@ -14,6 +15,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    // Verify trainer exists
     const trainer = await db.query.trainers.findFirst({
       where: eq(trainers.userId, session.user.id),
     })
@@ -22,37 +24,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Trainer profile not found" }, { status: 404 })
     }
 
-    const trainerWorkoutPlans = await db.query.workoutPlans.findMany({
-      where: eq(workoutPlans.trainerId, trainer.id),
-      orderBy: [desc(workoutPlans.createdAt)],
+    // Get all active members
+    const allMembers = await db.query.members.findMany({
+      where: eq(members.status, "active"),
+      orderBy: [desc(members.createdAt)],
+      with: {
+        user: true,
+      },
     })
 
-    if (trainerWorkoutPlans.length === 0) {
-      return NextResponse.json({ members: [] })
-    }
-
-    const membersList = await db.query.members.findMany({
-      orderBy: [members.createdAt],
-    })
-
-    const membersWithPlans = membersList.map(member => {
-      const memberAssignments = trainerWorkoutPlans.filter(plan => 
-        plan.assignments?.some(a => a.memberId === member.id)
-      )
-      const activePlan = memberAssignments.find(plan => plan.isActive)
-
-      return {
-        ...member,
-        assignedPlans: memberAssignments.length,
-        activePlan: activePlan ? {
-          id: activePlan.id,
-          name: activePlan.name,
-          isActive: activePlan.isActive,
-        } : null,
-      }
-    })
-
-    return NextResponse.json({ members: membersWithPlans })
+    return NextResponse.json({ members: allMembers })
   } catch (error) {
     console.error("Get members error:", error)
     return NextResponse.json(

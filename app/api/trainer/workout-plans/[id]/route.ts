@@ -29,7 +29,11 @@ export async function GET(
       with: {
         assignments: {
           with: {
-            member: true,
+            member: {
+              with: {
+                user: true,
+              },
+            },
           },
         },
         exercises: {
@@ -89,14 +93,14 @@ export async function PUT(
       description,
       isActive: isActive !== undefined ? isActive : true,
     }
-    
+
     if (startDate !== undefined) {
       updateData.startDate = startDate ? new Date(startDate) : null
     }
     if (endDate !== undefined) {
       updateData.endDate = endDate ? new Date(endDate) : null
     }
-    
+
     const [plan] = await db.update(workoutPlans)
       .set(updateData)
       .where(eq(workoutPlans.id, planId))
@@ -109,7 +113,7 @@ export async function PUT(
     // Delete existing exercises and re-add
     if (planExercisesList) {
       await db.delete(planExercises).where(eq(planExercises.planId, planId))
-      
+
       if (planExercisesList.length > 0) {
         await db.insert(planExercises).values(
           planExercisesList.map((ex: any, index: number) => ({

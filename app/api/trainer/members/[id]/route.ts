@@ -38,22 +38,26 @@ export async function GET(
       return NextResponse.json({ error: "Member not found or not assigned to you" }, { status: 404 })
     }
 
-    const planIds = memberAssignments.map(a => a.planId)
-    
-    const memberPlans = await db.query.workoutPlans.findMany({
-      where: and(
-        inArray(workoutPlans.id, planIds),
-        eq(workoutPlans.trainerId, trainer.id)
-      ),
-      with: {
-        exercises: {
-          with: {
-            exercise: true,
+    const planIds = memberAssignments.map(a => a.planId).filter((id): id is number => typeof id === 'number')
+
+    let memberPlans: any[] = []
+
+    if (planIds.length > 0) {
+      memberPlans = await db.query.workoutPlans.findMany({
+        where: and(
+          inArray(workoutPlans.id, planIds),
+          eq(workoutPlans.trainerId, trainer.id)
+        ),
+        with: {
+          exercises: {
+            with: {
+              exercise: true,
+            },
           },
         },
-      },
-      orderBy: [desc(workoutPlans.createdAt)],
-    })
+        orderBy: [desc(workoutPlans.createdAt)],
+      })
+    }
 
     const member = await db.query.members.findFirst({
       where: eq(members.id, memberIdNum),
@@ -97,7 +101,7 @@ export async function GET(
         description: plan.description,
         isActive: plan.isActive,
         startDate: plan.startDate,
-        exercises: plan.exercises.map((pe) => ({
+        exercises: plan.exercises.map((pe: any) => ({
           id: pe.id,
           exerciseId: pe.exerciseId,
           exerciseName: pe.exercise?.name || "Unknown",

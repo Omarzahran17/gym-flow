@@ -28,9 +28,13 @@ export async function GET(request: NextRequest) {
         eq(workoutPlans.isActive, true)
       ),
       with: {
-        member: {
+        assignments: {
           with: {
-            user: true,
+            member: {
+              with: {
+                user: true,
+              },
+            },
           },
         },
       },
@@ -39,15 +43,20 @@ export async function GET(request: NextRequest) {
     })
 
     const recentMembers = activePlans
-      .filter(plan => plan.member)
-      .map(plan => {
-        const member = plan.member!
+      .flatMap((plan: any) =>
+        plan.assignments.map((assignment: any) => ({
+          member: assignment.member,
+          plan: plan
+        }))
+      )
+      .slice(0, 5)
+      .map(({ member, plan }) => {
         return {
           id: member.id,
           name: member.user?.name || member.userId,
           email: member.user?.email || null,
           planName: plan.name,
-          lastActive: plan.createdAt 
+          lastActive: plan.createdAt
             ? getTimeAgo(new Date(plan.createdAt))
             : "Never",
         }
@@ -92,7 +101,7 @@ function getTimeAgo(date: Date): string {
   const now = new Date()
   const diffMs = now.getTime() - date.getTime()
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-  
+
   if (diffDays === 0) return "Today"
   if (diffDays === 1) return "Yesterday"
   if (diffDays < 7) return `${diffDays} days ago`

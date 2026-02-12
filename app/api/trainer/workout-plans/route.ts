@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     const plansWithMembers = plans.map(plan => ({
       ...plan,
-      members: plan.assignments?.map(a => a.member) || [],
+      members: plan.assignments.map(a => a.member),
     }))
 
     return NextResponse.json({ plans: plansWithMembers })
@@ -84,21 +84,21 @@ export async function POST(request: NextRequest) {
       description: description || "",
       isActive: true,
     }
-    
+
     if (startDate) {
       planData.startDate = new Date(startDate)
     }
     if (endDate) {
       planData.endDate = new Date(endDate)
     }
-    
+
     const [plan] = await db.insert(workoutPlans).values(planData).returning()
 
     if (memberIds && Array.isArray(memberIds) && memberIds.length > 0) {
       await db.insert(workoutPlanAssignments).values(
         memberIds.map((memberId: number) => ({
           planId: plan.id,
-          memberId: parseInt(memberId),
+          memberId: parseInt(memberId.toString()),
         }))
       )
     }

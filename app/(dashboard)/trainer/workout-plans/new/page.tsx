@@ -22,6 +22,10 @@ interface Member {
   id: number
   userId: string
   phone?: string
+  user?: {
+    name: string | null
+    email: string | null
+  }
 }
 
 interface PlanExercise {
@@ -107,7 +111,7 @@ export default function NewWorkoutPlanPage() {
 
     const updated = [...selectedExercises]
     const newIndex = direction === "up" ? index - 1 : index + 1
-    ;[updated[index], updated[newIndex]] = [updated[newIndex], updated[index]]
+      ;[updated[index], updated[newIndex]] = [updated[newIndex], updated[index]]
     setSelectedExercises(updated)
   }
 
@@ -207,7 +211,7 @@ export default function NewWorkoutPlanPage() {
                           className="rounded border-gray-300"
                         />
                         <span className="text-sm">
-                          Member #{member.id} {member.phone ? `(${member.phone})` : ""}
+                          {member.user?.name || `Member #${member.id}`} {member.phone ? `(${member.phone})` : ""}
                         </span>
                       </label>
                     ))
@@ -434,13 +438,12 @@ export default function NewWorkoutPlanPage() {
                         )}
                       >
                         <Plus
-                          className={`h-4 w-4 ${
-                            selectedExercises.some(
-                              (e) => e.exerciseId === exercise.id
-                            )
-                              ? "text-gray-400"
-                              : "text-green-600"
-                          }`}
+                          className={`h-4 w-4 ${selectedExercises.some(
+                            (e) => e.exerciseId === exercise.id
+                          )
+                            ? "text-gray-400"
+                            : "text-green-600"
+                            }`}
                         />
                       </Button>
                     </div>

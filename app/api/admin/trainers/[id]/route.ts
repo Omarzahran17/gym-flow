@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { trainers, users } from "@/lib/db/schema"
+import { trainers, users, workoutPlans } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -91,6 +91,9 @@ export async function DELETE(
 
     const { id } = await params
     const trainerId = parseInt(id)
+
+    await db.delete(workoutPlans)
+      .where(eq(workoutPlans.trainerId, trainerId))
 
     const [deleted] = await db.delete(trainers)
       .where(eq(trainers.id, trainerId))

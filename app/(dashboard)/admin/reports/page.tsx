@@ -141,7 +141,7 @@ export default function AdminReportsPage() {
                     CSV
                   </Button>
                   <Button
-                    className="w-full justify-start bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-foreground dark:hover:bg-muted"
+                    className="w-full justify-start bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
                     onClick={() => downloadPDF("revenue", report.period)}
                     disabled={loading === `revenue-pdf-${report.period}`}
                   >
@@ -215,7 +215,7 @@ export default function AdminReportsPage() {
                     CSV
                   </Button>
                   <Button
-                    className="w-full justify-start bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-foreground dark:hover:bg-muted"
+                    className="w-full justify-start bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
                     onClick={() => downloadPDF("attendance", report.period)}
                     disabled={loading === `attendance-pdf-${report.period}`}
                   >
