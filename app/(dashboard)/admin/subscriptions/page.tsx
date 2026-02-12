@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, CreditCard, Check, X, Users, TrendingUp, DollarSign, ChevronRight, Edit2, Trash2 } from "lucide-react"
+import { Plus, CreditCard, Check, X, Users, TrendingUp, DollarSign, ChevronRight, Edit2 } from "lucide-react"
 
 interface SubscriptionPlan {
   id: number
@@ -137,36 +137,6 @@ export default function SubscriptionsPage() {
     setShowForm(true)
   }
 
-  const handleDelete = async (planId: number, force: boolean = false) => {
-    if (!confirm(force ? "This will cancel all active subscriptions. Are you sure?" : "Are you sure you want to delete this plan?")) return
-
-    try {
-      const url = force
-        ? `/api/admin/subscriptions/plans?id=${planId}&force=true`
-        : `/api/admin/subscriptions/plans?id=${planId}`
-      const response = await fetch(url, {
-        method: "DELETE",
-      })
-
-      if (response.ok) {
-        fetchPlans()
-      } else {
-        const data = await response.json()
-        const errorMsg = data.error || "Failed to delete plan"
-
-        // If failed due to active subscriptions, offer force delete
-        if (errorMsg.includes("active subscriptions") && !force) {
-          if (confirm(`${errorMsg}\n\nDo you want to cancel all subscriptions and delete anyway?`)) {
-            handleDelete(planId, true)
-          }
-        } else {
-          alert(errorMsg)
-        }
-      }
-    } catch (err) {
-      alert("Failed to delete plan")
-    }
-  }
 
   const cancelEdit = () => {
     setShowForm(false)
@@ -506,8 +476,8 @@ export default function SubscriptionsPage() {
                   </div>
                   <span
                     className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${plan.isActive
-                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                        : "bg-muted text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                      : "bg-muted text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300"
                       }`}
                   >
                     {plan.isActive ? "Active" : "Inactive"}
@@ -543,14 +513,6 @@ export default function SubscriptionsPage() {
                       className="h-8 w-8 text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-white"
                     >
                       <Edit2 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(plan.id)}
-                      className="h-8 w-8 text-muted-foreground hover:text-red-600 dark:text-muted-foreground dark:hover:text-red-500"
-                    >
-                      <Trash2 className="h-4 w-4" />
                     </Button>
                     <ChevronRight className="h-5 w-5 text-muted-foreground" />
                   </div>
