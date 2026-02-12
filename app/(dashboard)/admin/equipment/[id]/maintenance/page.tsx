@@ -77,7 +77,7 @@ export default function EquipmentMaintenancePage() {
     }
   }
 
-  const totalCost = maintenance.reduce((sum, record) => sum + (record.cost || 0), 0)
+  const totalCost = maintenance.reduce((sum, record) => sum + Number(record.cost || 0), 0)
 
   if (loading) {
     return (
@@ -174,10 +174,10 @@ export default function EquipmentMaintenancePage() {
                           <span>{record.performedBy}</span>
                         </div>
                       )}
-                      {record.cost && (
+                      {record.cost !== null && record.cost !== undefined && (
                         <div className="flex items-center gap-1">
                           <DollarSign className="h-4 w-4" />
-                          <span>${record.cost.toFixed(2)}</span>
+                          <span>${Number(record.cost).toFixed(2)}</span>
                         </div>
                       )}
                     </div>

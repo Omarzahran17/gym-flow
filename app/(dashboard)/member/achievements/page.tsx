@@ -50,7 +50,7 @@ export default function AchievementsPage() {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <div className="relative">
-          <div className="h-12 w-12 rounded-full border-4 border-zinc-200"></div>
+          <div className="h-12 w-12 rounded-full border-4 border-border"></div>
           <div className="absolute top-0 left-0 h-12 w-12 rounded-full border-4 border-zinc-900 border-t-transparent animate-spin"></div>
         </div>
       </div>
@@ -60,48 +60,48 @@ export default function AchievementsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900">Achievements</h1>
-        <p className="text-zinc-500 mt-1">Track your fitness milestones and earn badges</p>
+        <h1 className="text-2xl font-bold text-foreground">Achievements</h1>
+        <p className="text-muted-foreground mt-1">Track your fitness milestones and earn badges</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-zinc-200 shadow-sm bg-gradient-to-br from-amber-50 to-yellow-50">
+        <Card className="border-border shadow-sm bg-gradient-to-br from-amber-50 to-yellow-50">
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-amber-100 rounded-xl">
                 <Trophy className="h-6 w-6 text-amber-600" />
               </div>
               <div>
-                <p className="text-3xl font-bold text-zinc-900">{earnedAchievements.length}</p>
-                <p className="text-sm text-zinc-600">Earned</p>
+                <p className="text-3xl font-bold text-foreground">{earnedAchievements.length}</p>
+                <p className="text-sm text-foreground/80">Earned</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-zinc-100 rounded-xl">
-                <Lock className="h-6 w-6 text-zinc-600" />
+              <div className="p-3 bg-muted rounded-xl">
+                <Lock className="h-6 w-6 text-foreground/80" />
               </div>
               <div>
-                <p className="text-3xl font-bold text-zinc-900">{lockedAchievements.length}</p>
-                <p className="text-sm text-zinc-500">Locked</p>
+                <p className="text-3xl font-bold text-foreground">{lockedAchievements.length}</p>
+                <p className="text-sm text-muted-foreground">Locked</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-200 shadow-sm bg-gradient-to-br from-purple-50 to-indigo-50">
+        <Card className="border-border shadow-sm bg-gradient-to-br from-purple-50 to-indigo-50">
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-purple-100 rounded-xl">
                 <Star className="h-6 w-6 text-purple-600" />
               </div>
               <div>
-                <p className="text-3xl font-bold text-zinc-900">{totalPoints}</p>
-                <p className="text-sm text-zinc-600">Total Points</p>
+                <p className="text-3xl font-bold text-foreground">{totalPoints}</p>
+                <p className="text-sm text-foreground/80">Total Points</p>
               </div>
             </div>
           </CardContent>
@@ -110,7 +110,7 @@ export default function AchievementsPage() {
 
       {earnedAchievements.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold text-zinc-900 mb-4 flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
             <Trophy className="h-5 w-5 text-amber-500" />
             Earned Achievements
           </h2>
@@ -126,9 +126,9 @@ export default function AchievementsPage() {
                       {achievement.icon || "🏆"}
                     </span>
                   </div>
-                  <h3 className="font-semibold text-zinc-900">{achievement.name}</h3>
+                  <h3 className="font-semibold text-foreground">{achievement.name}</h3>
                   {achievement.description && (
-                    <p className="text-sm text-zinc-600 mt-1">{achievement.description}</p>
+                    <p className="text-sm text-foreground/80 mt-1">{achievement.description}</p>
                   )}
                   <div className="mt-4 flex items-center justify-center gap-2">
                     <Badge className="bg-amber-100 text-amber-700 border-amber-200">
@@ -136,7 +136,7 @@ export default function AchievementsPage() {
                     </Badge>
                   </div>
                   {achievement.earnedAt && (
-                    <p className="text-xs text-zinc-400 mt-3">
+                    <p className="text-xs text-muted-foreground mt-3">
                       Earned {new Date(achievement.earnedAt).toLocaleDateString()}
                     </p>
                   )}
@@ -149,26 +149,26 @@ export default function AchievementsPage() {
 
       {lockedAchievements.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold text-zinc-900 mb-4 flex items-center gap-2">
-            <Lock className="h-5 w-5 text-zinc-400" />
+          <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+            <Lock className="h-5 w-5 text-muted-foreground" />
             Locked Achievements
           </h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {lockedAchievements.map((achievement) => (
               <Card 
                 key={achievement.id} 
-                className="border-zinc-200 shadow-sm opacity-60 hover:opacity-80 transition-opacity"
+                className="border-border shadow-sm opacity-60 hover:opacity-80 transition-opacity"
               >
                 <CardContent className="pt-6 text-center">
-                  <div className="w-16 h-16 mx-auto bg-zinc-100 rounded-full flex items-center justify-center mb-4">
-                    <Lock className="h-6 w-6 text-zinc-400" />
+                  <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center mb-4">
+                    <Lock className="h-6 w-6 text-muted-foreground" />
                   </div>
-                  <h3 className="font-semibold text-zinc-700">{achievement.name}</h3>
+                  <h3 className="font-semibold text-foreground">{achievement.name}</h3>
                   {achievement.description && (
-                    <p className="text-sm text-zinc-500 mt-1">{achievement.description}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{achievement.description}</p>
                   )}
                   {achievement.criteriaValue && (
-                    <p className="text-xs text-zinc-400 mt-3">
+                    <p className="text-xs text-muted-foreground mt-3">
                       Requires: {achievement.criteriaValue} {achievement.criteriaType}
                     </p>
                   )}
@@ -180,11 +180,11 @@ export default function AchievementsPage() {
       )}
 
       {achievements.length === 0 && (
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="py-16 text-center">
             <Trophy className="h-12 w-12 mx-auto text-zinc-300 mb-4" />
-            <p className="text-zinc-500">No achievements available</p>
-            <p className="text-zinc-400 text-sm mt-1">Start working out to earn achievements!</p>
+            <p className="text-muted-foreground">No achievements available</p>
+            <p className="text-muted-foreground text-sm mt-1">Start working out to earn achievements!</p>
           </CardContent>
         </Card>
       )}

@@ -110,7 +110,6 @@ export const members = pgTable('members', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
-// Trainers table
 export const trainers = pgTable('trainers', {
   id: serial('id').primaryKey(),
   userId: varchar('user_id', { length: 255 }).notNull().unique(),
@@ -120,6 +119,7 @@ export const trainers = pgTable('trainers', {
   maxClients: integer('max_clients').default(20),
   hourlyRate: decimal('hourly_rate', { precision: 10, scale: 2 }),
   videoStorageQuota: integer('video_storage_quota').default(1073741824), // 1GB in bytes
+  isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });

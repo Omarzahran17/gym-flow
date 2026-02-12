@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Search, ChevronRight, Mail, Calendar, Phone } from "lucide-react"
+import { Search, ChevronRight, Mail, Calendar, Phone, ArrowUpCircle } from "lucide-react"
 
 interface Member {
   id: number
@@ -23,6 +23,7 @@ export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([])
   const [search, setSearch] = useState("")
   const [loading, setLoading] = useState(true)
+  const [promotingId, setPromotingId] = useState<number | null>(null)
 
   useEffect(() => {
     fetch("/api/admin/members")
@@ -44,62 +45,81 @@ export default function MembersPage() {
       member.userId.toLowerCase().includes(search.toLowerCase())
   )
 
+  const handlePromoteToTrainer = async (memberId: number, memberName: string) => {
+    setPromotingId(memberId)
+    try {
+      const response = await fetch(`/api/admin/members/${memberId}/convert`, {
+        method: "POST",
+      })
+
+      if (response.ok) {
+        fetch("/api/admin/members")
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.members) {
+              setMembers(data.members)
+            }
+          })
+      } else {
+        const data = await response.json()
+        alert(data.error || "Failed to promote member to trainer")
+      }
+    } catch (err) {
+      alert("Failed to promote member to trainer")
+    } finally {
+      setPromotingId(null)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-zinc-900">Members</h1>
-          <p className="text-zinc-500 mt-1">Manage gym members and their subscriptions</p>
+          <h1 className="text-3xl font-bold text-foreground dark:text-white">Members</h1>
+          <p className="text-muted-foreground dark:text-muted-foreground mt-1">Manage gym members and their subscriptions</p>
         </div>
-        <Link href="/admin/members/new">
-          <Button className="bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Member
-          </Button>
-        </Link>
       </div>
 
       {/* Search */}
-      <Card className="border-zinc-200 shadow-sm">
+      <Card className="border-border dark:border-zinc-800 shadow-sm bg-card">
         <CardContent className="p-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search members by name, email, or ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 bg-zinc-50 border-zinc-200 focus:border-zinc-900 focus:ring-zinc-900"
+              className="pl-10 bg-muted/50 dark:bg-zinc-800 border-border dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white focus:ring-zinc-900 dark:focus:ring-white"
             />
           </div>
         </CardContent>
       </Card>
 
       {/* Members List */}
-      <Card className="border-zinc-200 shadow-sm">
+      <Card className="border-border dark:border-zinc-800 shadow-sm bg-card">
         <CardContent className="p-0">
           {loading ? (
             <div className="p-8 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900 mx-auto"></div>
-              <p className="text-zinc-500 mt-4">Loading members...</p>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900 dark:border-white mx-auto"></div>
+              <p className="text-muted-foreground dark:text-muted-foreground mt-4">Loading members...</p>
             </div>
           ) : filteredMembers.length === 0 ? (
             <div className="p-12 text-center">
-              <div className="w-16 h-16 mx-auto bg-zinc-100 rounded-full flex items-center justify-center mb-4">
-                <Search className="h-8 w-8 text-zinc-400" />
+              <div className="w-16 h-16 mx-auto bg-muted dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4">
+                <Search className="h-8 w-8 text-muted-foreground dark:text-muted-foreground" />
               </div>
-              <p className="text-zinc-500 mb-4">No members found</p>
+              <p className="text-muted-foreground dark:text-muted-foreground mb-4">No members found</p>
               {search && (
-                <p className="text-sm text-zinc-400">Try adjusting your search</p>
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">Try adjusting your search</p>
               )}
             </div>
           ) : (
-            <div className="divide-y divide-zinc-100">
+            <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {filteredMembers.map((member) => (
-                <Link
+                <div
                   key={member.id}
-                  href={`/admin/members/${member.id}`}
-                  className="flex items-center justify-between p-4 hover:bg-zinc-50 transition-colors cursor-pointer"
+                  className="flex items-center justify-between p-4 hover:bg-muted/50 dark:hover:bg-zinc-800/50 transition-colors"
                 >
                   <div className="flex items-center space-x-4">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
@@ -109,12 +129,12 @@ export default function MembersPage() {
                       </span>
                     </div>
                     <div>
-                      <p className="font-medium text-zinc-900">
+                      <p className="font-medium text-foreground dark:text-white">
                         {member.firstName && member.lastName
                           ? `${member.firstName} ${member.lastName}`
                           : member.userId}
                       </p>
-                      <div className="flex items-center space-x-4 mt-1 text-sm text-zinc-500">
+                      <div className="flex items-center space-x-4 mt-1 text-sm text-muted-foreground dark:text-muted-foreground">
                         <span className="flex items-center">
                           <Mail className="h-3 w-3 mr-1" />
                           {member.email || "No email"}
@@ -132,22 +152,45 @@ export default function MembersPage() {
                   <div className="flex items-center space-x-4">
                     <div className="text-right">
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          member.status === "active"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-zinc-100 text-zinc-800"
-                        }`}
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${member.status === "active"
+                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                            : "bg-muted text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300"
+                          }`}
                       >
                         {member.status}
                       </span>
-                      <p className="text-xs text-zinc-400 mt-1 flex items-center justify-end">
+                      <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-1 flex items-center justify-end">
                         <Calendar className="h-3 w-3 mr-1" />
                         {new Date(member.joinDate).toLocaleDateString()}
                       </p>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-zinc-400" />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const memberName = member.firstName && member.lastName
+                          ? `${member.firstName} ${member.lastName}`
+                          : member.userId
+                        if (confirm(`Are you sure you want to promote ${memberName} to a trainer?`)) {
+                          handlePromoteToTrainer(member.id, memberName)
+                        }
+                      }}
+                      disabled={promotingId === member.id}
+                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20"
+                    >
+                      {promotingId === member.id ? (
+                        <svg className="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      ) : (
+                        <ArrowUpCircle className="h-4 w-4 mr-1" />
+                      )}
+                      {promotingId === member.id ? "Promoting..." : "Promote to Trainer"}
+                    </Button>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           )}
@@ -156,24 +199,24 @@ export default function MembersPage() {
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border dark:border-zinc-800 shadow-sm bg-card">
           <CardContent className="p-4">
-            <p className="text-sm text-zinc-500">Total Members</p>
-            <p className="text-2xl font-bold text-zinc-900">{members.length}</p>
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground">Total Members</p>
+            <p className="text-2xl font-bold text-foreground dark:text-white">{members.length}</p>
           </CardContent>
         </Card>
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border dark:border-zinc-800 shadow-sm bg-card">
           <CardContent className="p-4">
-            <p className="text-sm text-zinc-500">Active</p>
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground">Active</p>
             <p className="text-2xl font-bold text-green-600">
               {members.filter(m => m.status === "active").length}
             </p>
           </CardContent>
         </Card>
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border dark:border-zinc-800 shadow-sm bg-card">
           <CardContent className="p-4">
-            <p className="text-sm text-zinc-500">Inactive</p>
-            <p className="text-2xl font-bold text-zinc-400">
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground">Inactive</p>
+            <p className="text-2xl font-bold text-muted-foreground dark:text-muted-foreground">
               {members.filter(m => m.status !== "active").length}
             </p>
           </CardContent>

@@ -1,43 +1,143 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Dumbbell, ArrowRight, Check, Zap, Users, Calendar, CreditCard, TrendingUp, BarChart3 } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { authClient } from "@/lib/auth-client"
+import { Dumbbell, ArrowRight, Check, Zap, Users, Calendar, CreditCard, TrendingUp, BarChart3, Sun, Moon, Mail, Phone, MapPin, LayoutDashboard } from "lucide-react"
 
 export default function HomePage() {
+  const router = useRouter()
+  const [darkMode, setDarkMode] = useState(false)
+  const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" })
+  const [contactSubmitting, setContactSubmitting] = useState(false)
+  const [user, setUser] = useState<{ name?: string; email?: string; role?: string } | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme")
+    if (savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      setDarkMode(true)
+      document.documentElement.classList.add("dark")
+    }
+
+    const checkSession = async () => {
+      try {
+        const { data } = await authClient.getSession()
+        if (data?.user) {
+          setUser(data.user as { name?: string; email?: string; role?: string })
+        }
+      } catch (e) {
+        // Not logged in
+      } finally {
+        setLoading(false)
+      }
+    }
+    checkSession()
+  }, [])
+
+  const toggleTheme = () => {
+    setDarkMode(!darkMode)
+    if (darkMode) {
+      document.documentElement.classList.remove("dark")
+      localStorage.setItem("theme", "light")
+    } else {
+      document.documentElement.classList.add("dark")
+      localStorage.setItem("theme", "dark")
+    }
+  }
+
+  const getDashboardUrl = () => {
+    switch (user?.role) {
+      case "admin":
+        return "/admin"
+      case "trainer":
+        return "/trainer"
+      default:
+        return "/member"
+    }
+  }
+
+  const handleSignOut = async () => {
+    await authClient.signOut()
+    setUser(null)
+    router.push("/")
+  }
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setContactSubmitting(true)
+    // Simulate submission
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    setContactForm({ name: "", email: "", message: "" })
+    setContactSubmitting(false)
+    alert("Thank you for your message! We'll get back to you soon.")
+  }
+
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
       {/* Navigation */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-200">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
               <Dumbbell className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-zinc-900">GymFlow</span>
+            <span className="text-xl font-bold text-zinc-900 dark:text-white">GymFlow</span>
           </Link>
-          
+
           <nav className="hidden md:flex items-center space-x-8">
-            <Link href="#features" className="text-sm text-zinc-600 hover:text-zinc-900 transition-colors">
+            <Link href="#features" className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">
               Features
             </Link>
-            <Link href="#pricing" className="text-sm text-zinc-600 hover:text-zinc-900 transition-colors">
-              Pricing
-            </Link>
-            <Link href="#testimonials" className="text-sm text-zinc-600 hover:text-zinc-900 transition-colors">
-              Testimonials
+            <Link href="#contact" className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">
+              Contact
             </Link>
           </nav>
 
           <div className="flex items-center space-x-4">
-            <Link href="/login">
-              <Button variant="ghost" className="text-zinc-600 hover:text-zinc-900">
-                Sign In
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button className="bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg">
-                Get Started
-              </Button>
-            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+            >
+              {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
+
+            {!loading && user ? (
+              <>
+                <Link href={getDashboardUrl()}>
+                  <Button className="bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 rounded-lg">
+                    <LayoutDashboard className="h-4 w-4 mr-2" />
+                    Dashboard
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  onClick={handleSignOut}
+                  className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                >
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost" className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button className="bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 rounded-lg">
+                    Get Started
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -46,17 +146,17 @@ export default function HomePage() {
       <section className="pt-32 pb-20 px-6 relative overflow-hidden">
         {/* Background Gradient */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-blue-500/10 via-purple-500/5 to-transparent rounded-full blur-3xl" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-blue-500/10 via-purple-500/5 to-transparent rounded-full blur-3xl dark:opacity-5" />
         </div>
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center space-x-2 bg-white border border-zinc-200 rounded-full px-4 py-1.5 mb-8">
+            <div className="inline-flex items-center space-x-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-full px-4 py-1.5 mb-8">
               <span className="flex h-2 w-2 rounded-full bg-green-500" />
-              <span className="text-sm text-zinc-600">Now with AI-powered workout suggestions</span>
+              <span className="text-sm text-zinc-600 dark:text-zinc-400">Now with AI-powered workout suggestions</span>
             </div>
-            
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-zinc-900 mb-6">
+
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-zinc-900 dark:text-white mb-6">
               The complete
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
@@ -65,21 +165,21 @@ export default function HomePage() {
               <br />
               platform
             </h1>
-            
-            <p className="text-xl text-zinc-600 mb-10 max-w-2xl mx-auto">
-              Streamline your fitness business with powerful tools for member management, 
+
+            <p className="text-xl text-zinc-600 dark:text-zinc-400 mb-10 max-w-2xl mx-auto">
+              Streamline your fitness business with powerful tools for member management,
               class scheduling, payments, and progress tracking.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/register">
-                <Button size="lg" className="h-12 px-8 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg">
+                <Button size="lg" className="h-12 px-8 bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 rounded-lg">
                   Start free trial
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/login">
-                <Button size="lg" variant="outline" className="h-12 px-8 border-zinc-300 rounded-lg">
+                <Button size="lg" variant="outline" className="h-12 px-8 border-zinc-300 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800">
                   View demo
                 </Button>
               </Link>
@@ -117,13 +217,13 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-24 px-6 bg-white">
+      <section id="features" className="py-24 px-6 bg-white dark:bg-zinc-900">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-zinc-900 mb-4">
+            <h2 className="text-4xl font-bold text-zinc-900 dark:text-white mb-4">
               Everything you need to run your gym
             </h2>
-            <p className="text-xl text-zinc-600 max-w-2xl mx-auto">
+            <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
               Powerful features designed to help fitness businesses grow and succeed.
             </p>
           </div>
@@ -167,14 +267,119 @@ export default function HomePage() {
                 color: "bg-yellow-500/10 text-yellow-600",
               },
             ].map((feature, i) => (
-              <div key={i} className="group p-8 rounded-2xl border border-zinc-200 bg-zinc-50/50 hover:bg-white hover:shadow-xl transition-all duration-300">
+              <div key={i} className="group p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-white dark:hover:bg-zinc-900 hover:shadow-xl transition-all duration-300">
                 <div className={`w-12 h-12 rounded-xl ${feature.color} flex items-center justify-center mb-6`}>
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-semibold text-zinc-900 mb-3">{feature.title}</h3>
-                <p className="text-zinc-600">{feature.description}</p>
+                <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-3">{feature.title}</h3>
+                <p className="text-zinc-600 dark:text-zinc-400">{feature.description}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="contact" className="py-24 px-6 bg-white dark:bg-zinc-900">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-zinc-900 dark:text-white mb-4">
+              Get in touch
+            </h2>
+            <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
+              Have questions about GymFlow? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-12">
+            {/* Contact Form */}
+            <div className="bg-zinc-50 dark:bg-zinc-950 rounded-2xl p-8">
+              <form onSubmit={handleContactSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-zinc-700 dark:text-zinc-300">Name</Label>
+                  <Input
+                    id="name"
+                    placeholder="Your name"
+                    value={contactForm.name}
+                    onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                    className="bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-zinc-700 dark:text-zinc-300">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={contactForm.email}
+                    onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                    className="bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="message" className="text-zinc-700 dark:text-zinc-300">Message</Label>
+                  <textarea
+                    id="message"
+                    placeholder="How can we help you?"
+                    value={contactForm.message}
+                    onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                    className="w-full min-h-[120px] p-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
+                    required
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full h-11 bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 rounded-lg"
+                  disabled={contactSubmitting}
+                >
+                  {contactSubmitting ? "Sending..." : "Send Message"}
+                </Button>
+              </form>
+            </div>
+
+            {/* Contact Info */}
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-6">Contact Information</h3>
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-10 h-10 bg-blue-500/10 dark:bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-zinc-900 dark:text-white">Email</p>
+                      <p className="text-zinc-600 dark:text-zinc-400">hello@gymflow.com</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="w-10 h-10 bg-green-500/10 dark:bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Phone className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-zinc-900 dark:text-white">Phone</p>
+                      <p className="text-zinc-600 dark:text-zinc-400">+1 (555) 123-4567</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="w-10 h-10 bg-purple-500/10 dark:bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <MapPin className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-zinc-900 dark:text-white">Office</p>
+                      <p className="text-zinc-600 dark:text-zinc-400">123 Fitness Street<br />New York, NY 10001</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-zinc-50 dark:bg-zinc-950 rounded-2xl p-6">
+                <h4 className="font-semibold text-zinc-900 dark:text-white mb-2">Business Hours</h4>
+                <p className="text-zinc-600 dark:text-zinc-400">Monday - Friday: 9am - 6pm EST</p>
+                <p className="text-zinc-600 dark:text-zinc-400">Saturday - Sunday: Closed</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -182,23 +387,22 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-24 px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-zinc-950 rounded-3xl p-12 text-center relative overflow-hidden">
-            {/* Background Pattern */}
+          <div className="bg-zinc-950 dark:bg-white rounded-3xl p-12 text-center relative overflow-hidden">
             <div className="absolute inset-0 opacity-5">
               <div className="absolute inset-0" style={{
                 backgroundImage: `radial-gradient(circle at 50% 50%, #3b82f6 0%, transparent 50%)`,
               }} />
             </div>
-            
+
             <div className="relative z-10">
-              <h2 className="text-4xl font-bold text-white mb-4">
+              <h2 className="text-4xl font-bold text-white dark:text-zinc-900 mb-4">
                 Ready to transform your gym?
               </h2>
-              <p className="text-xl text-zinc-400 mb-8">
+              <p className="text-xl text-zinc-400 dark:text-zinc-600 mb-8">
                 Join thousands of fitness businesses using GymFlow.
               </p>
               <Link href="/register">
-                <Button size="lg" className="h-12 px-8 bg-white text-zinc-900 hover:bg-zinc-100 rounded-lg">
+                <Button size="lg" className="h-12 px-8 bg-white text-zinc-900 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800 rounded-lg">
                   Get started for free
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -209,28 +413,28 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-zinc-200 bg-white">
+      <footer className="py-12 px-6 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                 <Dumbbell className="h-5 w-5 text-white" />
               </div>
-              <span className="font-semibold text-zinc-900">GymFlow</span>
+              <span className="font-semibold text-zinc-900 dark:text-white">GymFlow</span>
             </div>
-            
-            <p className="text-sm text-zinc-500">
+
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
               &copy; 2026 GymFlow. All rights reserved.
             </p>
 
             <div className="flex items-center space-x-6">
-              <Link href="#" className="text-sm text-zinc-500 hover:text-zinc-900">
+              <Link href="#" className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white">
                 Privacy
               </Link>
-              <Link href="#" className="text-sm text-zinc-500 hover:text-zinc-900">
+              <Link href="#" className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white">
                 Terms
               </Link>
-              <Link href="#" className="text-sm text-zinc-500 hover:text-zinc-900">
+              <Link href="#contact" className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white">
                 Contact
               </Link>
             </div>

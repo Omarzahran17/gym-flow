@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { subscriptionPlans, memberSubscriptions } from "@/lib/db/schema"
-import { eq, desc } from "drizzle-orm"
+import { eq, desc, and } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
@@ -53,10 +53,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { 
+    const {
       name, description, price, interval, stripePriceId, stripeAnnualPriceId, features,
       tier, maxClassesPerWeek, maxCheckInsPerDay, hasTrainerAccess, hasPersonalTraining,
-      hasProgressTracking, hasAchievements 
+      hasProgressTracking, hasAchievements
     } = body
 
     const [plan] = await db.insert(subscriptionPlans).values({
@@ -82,6 +82,106 @@ export async function POST(request: NextRequest) {
     console.error("Create subscription plan error:", error)
     return NextResponse.json(
       { error: "Failed to create subscription plan" },
+      { status: 500 }
+    )
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    })
+
+    if (!session || (session.user as any).role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { id, name, description, price, interval, stripePriceId, stripeAnnualPriceId, features,
+      tier, maxClassesPerWeek, maxCheckInsPerDay, hasTrainerAccess, hasPersonalTraining,
+      hasProgressTracking, hasAchievements
+    } = body
+
+    if (!id) {
+      return NextResponse.json({ error: "Plan ID is required" }, { status: 400 })
+    }
+
+    const [plan] = await db.update(subscriptionPlans)
+      .set({
+        name,
+        description,
+        price,
+        interval: interval || "month",
+        stripePriceId,
+        stripeAnnualPriceId,
+        features: features || [],
+        tier: tier || "basic",
+        maxClassesPerWeek: maxClassesPerWeek ?? 3,
+        maxCheckInsPerDay: maxCheckInsPerDay ?? 1,
+        hasTrainerAccess: hasTrainerAccess ?? false,
+        hasPersonalTraining: hasPersonalTraining ?? false,
+        hasProgressTracking: hasProgressTracking ?? true,
+        hasAchievements: hasAchievements ?? true,
+      })
+      .where(eq(subscriptionPlans.id, id))
+      .returning()
+
+    return NextResponse.json({ plan })
+  } catch (error) {
+    console.error("Update subscription plan error:", error)
+    return NextResponse.json(
+      { error: "Failed to update subscription plan" },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    })
+
+    if (!session || (session.user as any).role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = parseInt(searchParams.get("id") || "0")
+    const force = searchParams.get("force") === "true"
+
+    if (!id) {
+      return NextResponse.json({ error: "Plan ID is required" }, { status: 400 })
+    }
+
+    if (!force) {
+      const activeSubscriptions = await db.query.memberSubscriptions.findMany({
+        where: and(
+          eq(memberSubscriptions.planId, id),
+          eq(memberSubscriptions.status, "active")
+        ),
+      })
+
+      if (activeSubscriptions.length > 0) {
+        return NextResponse.json(
+          { error: `Cannot delete plan with ${activeSubscriptions.length} active subscriptions. Add ?force=true to cancel all subscriptions and delete anyway.` },
+          { status: 400 }
+        )
+      }
+    } else {
+      await db.update(memberSubscriptions)
+        .set({ status: "cancelled" })
+        .where(eq(memberSubscriptions.planId, id))
+    }
+
+    await db.delete(subscriptionPlans).where(eq(subscriptionPlans.id, id))
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Delete subscription plan error:", error)
+    return NextResponse.json(
+      { error: "Failed to delete subscription plan" },
       { status: 500 }
     )
   }

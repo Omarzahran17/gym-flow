@@ -64,31 +64,31 @@ export default function NewClassPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900">Add New Class</h1>
-          <p className="text-zinc-500 mt-1">Create a new gym class</p>
+          <h1 className="text-2xl font-bold text-foreground">Add New Class</h1>
+          <p className="text-muted-foreground mt-1">Create a new gym class</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit}>
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg font-medium">Class Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-medium text-zinc-700">Class Name *</Label>
+              <Label htmlFor="name" className="text-sm font-medium text-foreground">Class Name *</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="e.g., Yoga Flow, HIIT Cardio"
-                className="border-zinc-200 focus:border-zinc-900 focus:ring-zinc-900"
+                className="border-border focus:border-zinc-900 focus:ring-zinc-900"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-sm font-medium text-zinc-700">Description</Label>
+              <Label htmlFor="description" className="text-sm font-medium text-foreground">Description</Label>
               <textarea
                 id="description"
                 value={formData.description}
@@ -96,13 +96,13 @@ export default function NewClassPage() {
                   setFormData({ ...formData, description: e.target.value })
                 }
                 placeholder="Describe the class..."
-                className="w-full border border-zinc-200 rounded-lg px-3 py-2 min-h-[100px] resize-none focus:border-zinc-900 focus:ring-zinc-900"
+                className="w-full border border-border rounded-lg px-3 py-2 min-h-[100px] resize-none focus:border-zinc-900 focus:ring-zinc-900"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="maxCapacity" className="text-sm font-medium text-zinc-700">Max Capacity</Label>
+                <Label htmlFor="maxCapacity" className="text-sm font-medium text-foreground">Max Capacity</Label>
                 <Input
                   id="maxCapacity"
                   type="number"
@@ -114,13 +114,13 @@ export default function NewClassPage() {
                     })
                   }
                   min={1}
-                  className="border-zinc-200 focus:border-zinc-900 focus:ring-zinc-900"
+                  className="border-border focus:border-zinc-900 focus:ring-zinc-900"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="duration" className="text-sm font-medium text-zinc-700">Duration (minutes)</Label>
+                <Label htmlFor="duration" className="text-sm font-medium text-foreground">Duration (minutes)</Label>
                 <Input
                   id="duration"
                   type="number"
@@ -133,25 +133,24 @@ export default function NewClassPage() {
                   }
                   min={15}
                   step={5}
-                  className="border-zinc-200 focus:border-zinc-900 focus:ring-zinc-900"
+                  className="border-border focus:border-zinc-900 focus:ring-zinc-900"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-zinc-700">Class Color</Label>
+              <Label className="text-sm font-medium text-foreground">Class Color</Label>
               <div className="flex flex-wrap gap-2">
                 {COLORS.map((color) => (
                   <button
                     key={color.value}
                     type="button"
                     onClick={() => setFormData({ ...formData, color: color.value })}
-                    className={`w-9 h-9 rounded-full border-2 transition-all ${
-                      formData.color === color.value
+                    className={`w-9 h-9 rounded-full border-2 transition-all ${formData.color === color.value
                         ? "border-zinc-900 scale-110 shadow-md"
                         : "border-transparent hover:scale-105"
-                    }`}
+                      }`}
                     style={{ backgroundColor: color.value }}
                     title={color.name}
                   />
@@ -161,7 +160,7 @@ export default function NewClassPage() {
 
             <div className="pt-4 flex items-center justify-end gap-4">
               <Link href="/admin/classes">
-                <Button variant="outline" type="button" className="border-zinc-200 hover:bg-zinc-50">
+                <Button variant="outline" type="button" className="border-border hover:bg-muted/50">
                   Cancel
                 </Button>
               </Link>

@@ -82,8 +82,8 @@ export default function WorkoutPlansPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900">Workout Plans</h1>
-          <p className="text-zinc-500 mt-1">Create and manage workout plans for your members</p>
+          <h1 className="text-2xl font-bold text-foreground">Workout Plans</h1>
+          <p className="text-muted-foreground mt-1">Create and manage workout plans for your members</p>
         </div>
         <Link href="/trainer/workout-plans/new">
           <Button className="bg-zinc-900 hover:bg-zinc-800 text-white">
@@ -96,18 +96,18 @@ export default function WorkoutPlansPage() {
       {loading ? (
         <div className="flex items-center justify-center py-24">
           <div className="relative">
-            <div className="h-12 w-12 rounded-full border-4 border-zinc-200"></div>
+            <div className="h-12 w-12 rounded-full border-4 border-border"></div>
             <div className="absolute top-0 left-0 h-12 w-12 rounded-full border-4 border-zinc-900 border-t-transparent animate-spin"></div>
           </div>
         </div>
       ) : plans.length === 0 ? (
-        <div className="text-center py-16 border-2 border-dashed border-zinc-200 rounded-xl">
-          <div className="w-16 h-16 mx-auto bg-zinc-100 rounded-full flex items-center justify-center mb-4">
-            <Dumbbell className="h-8 w-8 text-zinc-400" />
+        <div className="text-center py-16 border-2 border-dashed border-border rounded-xl">
+          <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center mb-4">
+            <Dumbbell className="h-8 w-8 text-muted-foreground" />
           </div>
-          <p className="text-zinc-500 mb-4">No workout plans created yet</p>
+          <p className="text-muted-foreground mb-4">No workout plans created yet</p>
           <Link href="/trainer/workout-plans/new">
-            <Button variant="outline" className="border-zinc-200 hover:bg-zinc-50">
+            <Button variant="outline" className="border-border hover:bg-muted/50">
               <Plus className="h-4 w-4 mr-2" />
               Create your first plan
             </Button>
@@ -116,27 +116,27 @@ export default function WorkoutPlansPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => (
-            <Card key={plan.id} className={`border-zinc-200 shadow-sm transition-all ${!plan.isActive ? "opacity-60" : ""}`}>
+            <Card key={plan.id} className={`border-border shadow-sm transition-all ${!plan.isActive ? "opacity-60" : ""}`}>
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <CardTitle className="text-lg font-semibold text-zinc-900">{plan.name}</CardTitle>
-                    <div className="flex items-center gap-2 text-sm text-zinc-500 mt-1">
+                    <CardTitle className="text-lg font-semibold text-foreground">{plan.name}</CardTitle>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                       <User className="h-4 w-4" />
                       <span>Member #{plan.memberId}</span>
                     </div>
                   </div>
-                  <Badge variant={plan.isActive ? "default" : "secondary"} className={plan.isActive ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-zinc-100 text-zinc-600"}>
+                  <Badge variant={plan.isActive ? "default" : "secondary"} className={plan.isActive ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-muted text-foreground/80"}>
                     {plan.isActive ? "Active" : "Inactive"}
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-zinc-600 mb-4 line-clamp-2">
+                <p className="text-sm text-foreground/80 mb-4 line-clamp-2">
                   {plan.description || "No description"}
                 </p>
 
-                <div className="flex items-center gap-4 text-sm text-zinc-500 mb-4">
+                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
                   <div className="flex items-center gap-1.5">
                     <Dumbbell className="h-4 w-4" />
                     <span>{plan.exercises?.length || 0} exercises</span>
@@ -151,25 +151,25 @@ export default function WorkoutPlansPage() {
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 pt-2 border-t border-zinc-100">
+                <div className="flex items-center gap-2 pt-2 border-t border-border">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1 border-zinc-200 hover:bg-zinc-50"
+                    className="flex-1 border-border hover:bg-muted/50"
                     onClick={() => toggleActive(plan.id, plan.isActive)}
                   >
                     <CheckCircle className="h-4 w-4 mr-1.5" />
                     {plan.isActive ? "Deactivate" : "Activate"}
                   </Button>
                   <Link href={`/trainer/workout-plans/${plan.id}`}>
-                    <Button variant="outline" size="icon" className="border-zinc-200 hover:bg-zinc-50">
+                    <Button variant="outline" size="icon" className="border-border hover:bg-muted/50">
                       <Edit className="h-4 w-4" />
                     </Button>
                   </Link>
                   <Button
                     variant="outline"
                     size="icon"
-                    className="border-zinc-200 hover:bg-red-50 hover:border-red-200"
+                    className="border-border hover:bg-red-50 hover:border-red-200"
                     onClick={() => handleDelete(plan.id)}
                   >
                     <Trash2 className="h-4 w-4 text-red-500" />

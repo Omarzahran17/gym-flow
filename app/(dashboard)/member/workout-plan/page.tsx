@@ -90,16 +90,16 @@ export default function MemberWorkoutPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-zinc-900">My Workout</h1>
-          <p className="text-zinc-500 mt-1">Your personalized workout plan</p>
+          <h1 className="text-3xl font-bold text-foreground">My Workout</h1>
+          <p className="text-muted-foreground mt-1">Your personalized workout plan</p>
         </div>
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="p-12 text-center">
-            <div className="w-20 h-20 mx-auto bg-zinc-100 rounded-full flex items-center justify-center mb-6">
-              <Trophy className="h-10 w-10 text-zinc-400" />
+            <div className="w-20 h-20 mx-auto bg-muted rounded-full flex items-center justify-center mb-6">
+              <Trophy className="h-10 w-10 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-semibold text-zinc-900 mb-2">No Active Workout Plan</h3>
-            <p className="text-zinc-500 mb-6">
+            <h3 className="text-xl font-semibold text-foreground mb-2">No Active Workout Plan</h3>
+            <p className="text-muted-foreground mb-6">
               Contact your trainer to get started with a personalized workout plan.
             </p>
           </CardContent>
@@ -111,7 +111,7 @@ export default function MemberWorkoutPage() {
   if (selectedVideo) {
     return (
       <div className="space-y-4">
-        <Button variant="ghost" onClick={() => setSelectedVideo(null)} className="text-zinc-600 hover:text-zinc-900">
+        <Button variant="ghost" onClick={() => setSelectedVideo(null)} className="text-foreground/80 hover:text-foreground">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Workout
         </Button>
@@ -125,8 +125,8 @@ export default function MemberWorkoutPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-zinc-900">{plan.name}</h1>
-          <p className="text-zinc-500 mt-1">{plan.description}</p>
+          <h1 className="text-3xl font-bold text-foreground">{plan.name}</h1>
+          <p className="text-muted-foreground mt-1">{plan.description}</p>
         </div>
         <Badge variant={plan.isActive ? "default" : "secondary"} className={plan.isActive ? "bg-green-500" : ""}>
           {plan.isActive ? "Active" : "Inactive"}
@@ -134,21 +134,21 @@ export default function MemberWorkoutPage() {
       </div>
 
       {/* Progress Card */}
-      <Card className="border-zinc-200 shadow-sm">
+      <Card className="border-border shadow-sm">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-3">
-            <span className="font-medium text-zinc-900">Workout Progress</span>
-            <span className="text-sm text-zinc-500">
+            <span className="font-medium text-foreground">Workout Progress</span>
+            <span className="text-sm text-muted-foreground">
               {completedExercises.size} of {plan.exercises.length} completed
             </span>
           </div>
-          <div className="h-3 bg-zinc-100 rounded-full overflow-hidden">
+          <div className="h-3 bg-muted rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-500"
               style={{ width: `${completionPercentage}%` }}
             />
           </div>
-          <p className="text-center mt-2 font-semibold text-zinc-900">{completionPercentage}% Complete</p>
+          <p className="text-center mt-2 font-semibold text-foreground">{completionPercentage}% Complete</p>
         </CardContent>
       </Card>
 
@@ -167,15 +167,15 @@ export default function MemberWorkoutPage() {
 
       {/* Exercises */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-zinc-900">Today's Exercises</h2>
+        <h2 className="text-xl font-semibold text-foreground">Today's Exercises</h2>
         <div className="space-y-4">
           {plan.exercises.map((exercise, index) => {
             const isCompleted = completedExercises.has(exercise.id)
             return (
               <Card
                 key={exercise.id}
-                className={`border-zinc-200 shadow-sm transition-all ${
-                  isCompleted ? "opacity-60 bg-zinc-50" : "hover:shadow-md"
+                className={`border-border shadow-sm transition-all ${
+                  isCompleted ? "opacity-60 bg-muted/50" : "hover:shadow-md"
                 }`}
               >
                 <CardContent className="p-6">
@@ -184,7 +184,7 @@ export default function MemberWorkoutPage() {
                       className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                         isCompleted
                           ? "bg-green-100 text-green-600"
-                          : "bg-zinc-100 text-zinc-600"
+                          : "bg-muted text-foreground/80"
                       }`}
                     >
                       {isCompleted ? (
@@ -197,8 +197,8 @@ export default function MemberWorkoutPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <h3 className="font-semibold text-zinc-900">{exercise.exercise.name}</h3>
-                          <p className="text-sm text-zinc-500 mt-1">
+                          <h3 className="font-semibold text-foreground">{exercise.exercise.name}</h3>
+                          <p className="text-sm text-muted-foreground mt-1">
                             {exercise.exercise.category} • {exercise.exercise.muscleGroup}
                           </p>
                         </div>
@@ -220,25 +220,25 @@ export default function MemberWorkoutPage() {
                       </div>
 
                       {exercise.exercise.description && (
-                        <p className="text-sm text-zinc-600 mt-3">{exercise.exercise.description}</p>
+                        <p className="text-sm text-foreground/80 mt-3">{exercise.exercise.description}</p>
                       )}
 
                       <div className="flex items-center gap-6 mt-4">
                         <div className="text-center">
-                          <p className="text-2xl font-bold text-zinc-900">{exercise.sets}</p>
-                          <p className="text-xs text-zinc-500">Sets</p>
+                          <p className="text-2xl font-bold text-foreground">{exercise.sets}</p>
+                          <p className="text-xs text-muted-foreground">Sets</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-2xl font-bold text-zinc-900">{exercise.reps}</p>
-                          <p className="text-xs text-zinc-500">Reps</p>
+                          <p className="text-2xl font-bold text-foreground">{exercise.reps}</p>
+                          <p className="text-xs text-muted-foreground">Reps</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-2xl font-bold text-zinc-900">{exercise.weight || "-"}</p>
-                          <p className="text-xs text-zinc-500">kg</p>
+                          <p className="text-2xl font-bold text-foreground">{exercise.weight || "-"}</p>
+                          <p className="text-xs text-muted-foreground">kg</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-2xl font-bold text-zinc-900">{exercise.restSeconds}s</p>
-                          <p className="text-xs text-zinc-500">Rest</p>
+                          <p className="text-2xl font-bold text-foreground">{exercise.restSeconds}s</p>
+                          <p className="text-xs text-muted-foreground">Rest</p>
                         </div>
                       </div>
 

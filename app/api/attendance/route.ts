@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { attendance, members } from "@/lib/db/schema";
-import { eq, and, gte } from "drizzle-orm";
+import { attendance, members, users } from "@/lib/db/schema";
+import { eq, and, gte, or, like } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { checkMemberSubscription } from "@/lib/subscription";
 
@@ -15,48 +15,54 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { memberId, qrCode, method = "qr_code" } = await request.json();
+    const { qrCode, method = "qr_code" } = await request.json();
+
+    if (!qrCode || !qrCode.trim()) {
+      return NextResponse.json(
+        { error: "QR code or member identifier is required" },
+        { status: 400 }
+      );
+    }
 
     let member;
 
-    if (qrCode) {
-      member = await db.query.members.findFirst({
-        where: eq(members.qrCode, qrCode),
-        with: {
-          user: true,
-        },
+    // Try to find member by QR code first
+    member = await db.query.members.findFirst({
+      where: eq(members.qrCode, qrCode),
+      with: {
+        user: true,
+      },
+    });
+
+    // If not found by QR code, try finding by userId or email
+    if (!member) {
+      const userResult = await db.query.users.findFirst({
+        where: or(
+          eq(users.id, qrCode),
+          like(users.email, `%${qrCode}%`)
+        ),
       });
 
-      if (!member) {
-        return NextResponse.json(
-          { error: "Invalid QR code" },
-          { status: 404 }
-        );
+      if (userResult) {
+        member = await db.query.members.findFirst({
+          where: eq(members.userId, userResult.id),
+          with: {
+            user: true,
+          },
+        });
       }
-    } else if (memberId) {
-      member = await db.query.members.findFirst({
-        where: eq(members.id, memberId),
-        with: {
-          user: true,
-        },
-      });
+    }
 
-      if (!member) {
-        return NextResponse.json(
-          { error: "Member not found" },
-          { status: 404 }
-        );
-      }
-    } else {
+    if (!member) {
       return NextResponse.json(
-        { error: "Member ID or QR code is required" },
-        { status: 400 }
+        { error: "Member not found. Please check the QR code or member ID." },
+        { status: 404 }
       );
     }
 
     if (member.status !== "active") {
       return NextResponse.json(
-        { error: "Member is not active" },
+        { error: "Member account is not active. Please contact support." },
         { status: 400 }
       );
     }
@@ -65,7 +71,7 @@ export async function POST(request: NextRequest) {
     
     if (!subscriptionCheck.hasSubscription || !subscriptionCheck.isActive) {
       return NextResponse.json(
-        { error: "Active subscription required for gym access", code: "SUBSCRIPTION_REQUIRED" },
+        { error: "Active subscription required for gym access. Please renew your subscription.", code: "SUBSCRIPTION_REQUIRED" },
         { status: 403 }
       );
     }
@@ -73,7 +79,7 @@ export async function POST(request: NextRequest) {
     if (subscriptionCheck.limits && !subscriptionCheck.limits.canCheckIn) {
       return NextResponse.json(
         { 
-          error: `Daily check-in limit reached (${subscriptionCheck.plan?.maxCheckInsPerDay} per day)`,
+          error: `Daily check-in limit reached (${subscriptionCheck.plan?.maxCheckInsPerDay || 1} per day)`,
           code: "CHECKIN_LIMIT_REACHED"
         },
         { status: 403 }
@@ -82,12 +88,11 @@ export async function POST(request: NextRequest) {
 
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    const todayStr = today.toISOString().split('T')[0]
 
     const existingToday = await db.query.attendance.findFirst({
       where: and(
         eq(attendance.memberId, member.id),
-        gte(attendance.date, todayStr)
+        gte(attendance.checkInTime, today)
       ),
     })
 

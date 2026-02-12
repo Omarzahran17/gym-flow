@@ -33,7 +33,7 @@ export default function TrainerDetailPage({ params }: { params: Promise<{ id: st
     const loadParams = async () => {
       const { id } = await params
       setTrainerId(id)
-      
+
       try {
         const res = await fetch(`/api/admin/trainers/${id}`)
         const data = await res.json()
@@ -46,7 +46,7 @@ export default function TrainerDetailPage({ params }: { params: Promise<{ id: st
         setLoading(false)
       }
     }
-    
+
     loadParams()
   }, [params])
 
@@ -126,8 +126,8 @@ export default function TrainerDetailPage({ params }: { params: Promise<{ id: st
         </Link>
         <div>
           <h1 className="text-3xl font-bold">
-            {trainer.firstName && trainer.lastName 
-              ? `${trainer.firstName} ${trainer.lastName}` 
+            {trainer.firstName && trainer.lastName
+              ? `${trainer.firstName} ${trainer.lastName}`
               : "Edit Trainer"}
           </h1>
           <p className="text-gray-600">Update trainer information</p>
@@ -235,21 +235,47 @@ export default function TrainerDetailPage({ params }: { params: Promise<{ id: st
             <CardTitle>Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
-              <Users className="h-5 w-5 text-blue-600" />
+            <div className="flex items-center space-x-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               <div>
                 <p className="font-medium">Current Clients</p>
-                <p className="text-sm text-gray-600">0 / {trainer.maxClients}</p>
+                <p className="text-sm text-muted-foreground">0 / {trainer.maxClients}</p>
               </div>
             </div>
 
-            <Button
-              variant="destructive"
-              className="w-full"
-              onClick={handleDelete}
-            >
-              Delete Trainer
-            </Button>
+            <div className="space-y-3 pt-2">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={async () => {
+                  if (!trainerId || !confirm("Are you sure you want to convert this trainer to a member? All trainer-specific data will be removed.")) return
+
+                  try {
+                    const response = await fetch(`/api/admin/trainers/${trainerId}/convert`, {
+                      method: "POST",
+                    })
+
+                    if (!response.ok) {
+                      throw new Error("Failed to convert trainer")
+                    }
+
+                    router.push("/admin/members")
+                  } catch (err) {
+                    setError(err instanceof Error ? err.message : "Failed to convert")
+                  }
+                }}
+              >
+                Convert to Member
+              </Button>
+
+              <Button
+                variant="destructive"
+                className="w-full"
+                onClick={handleDelete}
+              >
+                Delete Trainer
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

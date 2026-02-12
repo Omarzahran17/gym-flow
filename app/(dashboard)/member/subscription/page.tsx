@@ -78,8 +78,8 @@ export default async function MemberSubscriptionPage({
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900">My Subscription</h1>
-        <p className="text-zinc-500 mt-1">Manage your gym membership and billing</p>
+        <h1 className="text-2xl font-bold text-foreground">My Subscription</h1>
+        <p className="text-muted-foreground mt-1">Manage your gym membership and billing</p>
       </div>
 
       {showSuccess && <SubscriptionSync showSuccess={showSuccess} />}
@@ -92,12 +92,12 @@ export default async function MemberSubscriptionPage({
       )}
 
       {currentSubscription ? (
-        <Card className="border-zinc-200 shadow-sm">
-          <CardHeader className="border-b border-zinc-100">
+        <Card className="border-border shadow-sm">
+          <CardHeader className="border-b border-border">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-lg font-semibold text-zinc-900">Current Subscription</CardTitle>
-                <CardDescription className="text-zinc-500">Your active gym membership</CardDescription>
+                <CardTitle className="text-lg font-semibold text-foreground">Current Subscription</CardTitle>
+                <CardDescription className="text-muted-foreground">Your active gym membership</CardDescription>
               </div>
               <SubscriptionStatusBadge status={currentSubscription.status || "unknown"} />
             </div>
@@ -109,8 +109,8 @@ export default async function MemberSubscriptionPage({
                   <Sparkles className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-zinc-500">Plan</p>
-                  <p className="text-lg font-semibold text-zinc-900">{currentSubscription.plan?.name || "Unknown"}</p>
+                  <p className="text-sm text-muted-foreground">Plan</p>
+                  <p className="text-lg font-semibold text-foreground">{currentSubscription.plan?.name || "Unknown"}</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
@@ -118,8 +118,8 @@ export default async function MemberSubscriptionPage({
                   <CreditCard className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-zinc-500">Price</p>
-                  <p className="text-lg font-semibold text-zinc-900">
+                  <p className="text-sm text-muted-foreground">Price</p>
+                  <p className="text-lg font-semibold text-foreground">
                     ${currentSubscription.plan?.price}/{currentSubscription.plan?.interval}
                   </p>
                 </div>
@@ -129,8 +129,8 @@ export default async function MemberSubscriptionPage({
                   <Calendar className="h-5 w-5 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-zinc-500">Current Period</p>
-                  <p className="text-zinc-900">
+                  <p className="text-sm text-muted-foreground">Current Period</p>
+                  <p className="text-foreground">
                     {currentSubscription.currentPeriodStart 
                       ? format(new Date(currentSubscription.currentPeriodStart), "MMM d, yyyy")
                       : "N/A"} - {" "}
@@ -145,8 +145,8 @@ export default async function MemberSubscriptionPage({
                   <CreditCard className="h-5 w-5 text-orange-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-zinc-500">Billing</p>
-                  <p className="text-zinc-900">
+                  <p className="text-sm text-muted-foreground">Billing</p>
+                  <p className="text-foreground">
                     Auto-renewal {currentSubscription.cancelAtPeriodEnd ? "disabled" : "enabled"}
                   </p>
                 </div>
@@ -157,11 +157,11 @@ export default async function MemberSubscriptionPage({
               const features = currentSubscription.plan?.features;
               if (features && Array.isArray(features) && features.length > 0) {
                 return (
-                  <div className="pt-6 border-t border-zinc-100">
-                    <p className="text-sm font-medium text-zinc-700 mb-3">Plan Features</p>
+                  <div className="pt-6 border-t border-border">
+                    <p className="text-sm font-medium text-foreground mb-3">Plan Features</p>
                     <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       {(features as string[]).map((feature, index) => (
-                        <li key={index} className="flex items-center gap-2 text-sm text-zinc-600">
+                        <li key={index} className="flex items-center gap-2 text-sm text-foreground/80">
                           <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
                             <Check className="h-3 w-3 text-emerald-600" />
                           </div>
@@ -175,28 +175,28 @@ export default async function MemberSubscriptionPage({
               return null;
             })()}
           </CardContent>
-          <CardFooter className="border-t border-zinc-100 pt-6">
+          <CardFooter className="border-t border-border pt-6">
             <ManageBillingButton />
           </CardFooter>
         </Card>
       ) : (
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="py-12 text-center">
-            <div className="w-16 h-16 mx-auto bg-zinc-100 rounded-full flex items-center justify-center mb-4">
-              <CreditCard className="h-8 w-8 text-zinc-400" />
+            <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center mb-4">
+              <CreditCard className="h-8 w-8 text-muted-foreground" />
             </div>
-            <CardTitle className="text-lg font-semibold text-zinc-900 mb-2">No Active Subscription</CardTitle>
-            <CardDescription className="text-zinc-500">Choose a plan below to get started</CardDescription>
+            <CardTitle className="text-lg font-semibold text-foreground mb-2">No Active Subscription</CardTitle>
+            <CardDescription className="text-muted-foreground">Choose a plan below to get started</CardDescription>
           </CardContent>
         </Card>
       )}
 
       <div>
-        <h2 className="text-lg font-semibold text-zinc-900 mb-4">Available Plans</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-4">Available Plans</h2>
         {plans.length === 0 ? (
-          <Card className="border-zinc-200 shadow-sm">
+          <Card className="border-border shadow-sm">
             <CardContent className="py-12 text-center">
-              <p className="text-zinc-500">No plans available at the moment</p>
+              <p className="text-muted-foreground">No plans available at the moment</p>
             </CardContent>
           </Card>
         ) : (
@@ -204,16 +204,16 @@ export default async function MemberSubscriptionPage({
             {plans.map((plan) => (
               <Card 
                 key={plan.id} 
-                className={`border-zinc-200 shadow-sm hover:shadow-md transition-all ${
+                className={`border-border shadow-sm hover:shadow-md transition-all ${
                   currentSubscription?.planId === plan.id ? "ring-2 ring-zinc-900" : ""
                 }`}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="text-base font-semibold text-zinc-900">{plan.name}</CardTitle>
+                      <CardTitle className="text-base font-semibold text-foreground">{plan.name}</CardTitle>
                       {plan.description && (
-                        <CardDescription className="text-zinc-500 mt-1">{plan.description}</CardDescription>
+                        <CardDescription className="text-muted-foreground mt-1">{plan.description}</CardDescription>
                       )}
                     </div>
                     {currentSubscription?.planId === plan.id && (
@@ -223,8 +223,8 @@ export default async function MemberSubscriptionPage({
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <span className="text-3xl font-bold text-zinc-900">${plan.price}</span>
-                    <span className="text-zinc-500 ml-1">/{plan.interval}</span>
+                    <span className="text-3xl font-bold text-foreground">${plan.price}</span>
+                    <span className="text-muted-foreground ml-1">/{plan.interval}</span>
                   </div>
                   
                   {(() => {
@@ -233,7 +233,7 @@ export default async function MemberSubscriptionPage({
                       return (
                         <ul className="space-y-2">
                           {(features as string[]).map((feature, index) => (
-                            <li key={index} className="flex items-center gap-2 text-sm text-zinc-600">
+                            <li key={index} className="flex items-center gap-2 text-sm text-foreground/80">
                               <div className="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
                                 <Check className="h-2.5 w-2.5 text-emerald-600" />
                               </div>
@@ -246,9 +246,9 @@ export default async function MemberSubscriptionPage({
                     return null;
                   })()}
                 </CardContent>
-                <CardFooter className="pt-4 border-t border-zinc-100">
+                <CardFooter className="pt-4 border-t border-border">
                   {currentSubscription?.planId === plan.id ? (
-                    <Button disabled className="w-full bg-zinc-100 text-zinc-500 hover:bg-zinc-100">
+                    <Button disabled className="w-full bg-muted text-muted-foreground hover:bg-muted">
                       Current Plan
                     </Button>
                   ) : (
@@ -267,13 +267,13 @@ export default async function MemberSubscriptionPage({
 function SubscriptionStatusBadge({ status }: { status: string }) {
   const config: Record<string, { className: string; label: string }> = {
     active: { className: "bg-emerald-50 text-emerald-700 border-emerald-200", label: "Active" },
-    canceled: { className: "bg-zinc-100 text-zinc-700 border-zinc-200", label: "Canceled" },
+    canceled: { className: "bg-muted text-foreground border-border", label: "Canceled" },
     past_due: { className: "bg-red-50 text-red-700 border-red-200", label: "Past Due" },
     unpaid: { className: "bg-red-50 text-red-700 border-red-200", label: "Unpaid" },
     trialing: { className: "bg-blue-50 text-blue-700 border-blue-200", label: "Trialing" },
   }
 
-  const { className, label } = config[status] || { className: "bg-zinc-100 text-zinc-700 border-zinc-200", label: status }
+  const { className, label } = config[status] || { className: "bg-muted text-foreground border-border", label: status }
 
   return (
     <Badge variant="outline" className={className}>

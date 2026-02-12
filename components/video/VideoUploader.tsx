@@ -49,7 +49,7 @@ export function VideoUploader({
 
       try {
         const progressInterval = setInterval(() => {
-          setProgress((prev) => Math.min(prev + 10, 90))
+          setProgress((prev) => Math.min(prev + 5, 90))
         }, 500)
 
         const formData = new FormData()
@@ -63,7 +63,8 @@ export function VideoUploader({
         })
 
         if (!response.ok) {
-          throw new Error("Failed to upload video")
+          const errorData = await response.json()
+          throw new Error(errorData.error || "Failed to upload video")
         }
 
         const data = await response.json()
@@ -79,7 +80,8 @@ export function VideoUploader({
           setProgress(0)
         }, 500)
       } catch (err) {
-        onError("Failed to upload video. Please try again.")
+        console.error("Upload failed:", err)
+        onError(err instanceof Error ? err.message : "Failed to upload video. Please try again.")
         setUploading(false)
         setProgress(0)
         setSelectedFile(null)

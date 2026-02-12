@@ -86,8 +86,8 @@ export default function TrainerDashboardPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900">Trainer Dashboard</h1>
-          <p className="text-zinc-500 mt-1">Manage your clients and workout plans</p>
+          <h1 className="text-2xl font-bold text-foreground">Trainer Dashboard</h1>
+          <p className="text-muted-foreground mt-1">Manage your clients and workout plans</p>
         </div>
         <Link href="/trainer/workout-plans/new">
           <Button className="bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg">
@@ -98,7 +98,7 @@ export default function TrainerDashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="p-2.5 bg-blue-50 rounded-lg">
@@ -106,17 +106,17 @@ export default function TrainerDashboardPage() {
               </div>
             </div>
             <div className="mt-4">
-              <p className="text-3xl font-bold text-zinc-900">
+              <p className="text-3xl font-bold text-foreground">
                 {loading ? (
-                  <div className="h-8 w-12 bg-zinc-100 animate-pulse rounded"></div>
+                  <div className="h-8 w-12 bg-muted animate-pulse rounded"></div>
                 ) : stats.memberCount}
               </p>
-              <p className="text-sm text-zinc-500 mt-1">My Members</p>
+              <p className="text-sm text-muted-foreground mt-1">My Members</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="p-2.5 bg-purple-50 rounded-lg">
@@ -124,17 +124,17 @@ export default function TrainerDashboardPage() {
               </div>
             </div>
             <div className="mt-4">
-              <p className="text-3xl font-bold text-zinc-900">
+              <p className="text-3xl font-bold text-foreground">
                 {loading ? (
-                  <div className="h-8 w-12 bg-zinc-100 animate-pulse rounded"></div>
+                  <div className="h-8 w-12 bg-muted animate-pulse rounded"></div>
                 ) : stats.workoutPlanCount}
               </p>
-              <p className="text-sm text-zinc-500 mt-1">Workout Plans</p>
+              <p className="text-sm text-muted-foreground mt-1">Workout Plans</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="p-2.5 bg-emerald-50 rounded-lg">
@@ -143,12 +143,12 @@ export default function TrainerDashboardPage() {
               <span className="text-xs text-emerald-600 font-medium px-2 py-1 bg-emerald-50 rounded-full">Active</span>
             </div>
             <div className="mt-4">
-              <p className="text-3xl font-bold text-zinc-900">
+              <p className="text-3xl font-bold text-foreground">
                 {loading ? (
-                  <div className="h-8 w-12 bg-zinc-100 animate-pulse rounded"></div>
+                  <div className="h-8 w-12 bg-muted animate-pulse rounded"></div>
                 ) : stats.activePlanCount}
               </p>
-              <p className="text-sm text-zinc-500 mt-1">Active Plans</p>
+              <p className="text-sm text-muted-foreground mt-1">Active Plans</p>
             </div>
           </CardContent>
         </Card>
@@ -156,51 +156,51 @@ export default function TrainerDashboardPage() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <Link href="/trainer/members">
-          <Card className="border-zinc-200 shadow-sm hover:shadow-md transition-all cursor-pointer group h-full">
+          <Card className="border-border shadow-sm hover:shadow-md transition-all cursor-pointer group h-full">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="p-2.5 bg-blue-50 rounded-lg">
                   <Users className="h-5 w-5 text-blue-600" />
                 </div>
-                <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900 transition-colors" />
+                <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
               </div>
-              <p className="mt-4 font-medium text-zinc-900">View Members</p>
+              <p className="mt-4 font-medium text-foreground">View Members</p>
             </CardContent>
           </Card>
         </Link>
         <Link href="/trainer/workout-plans/new">
-          <Card className="border-zinc-200 shadow-sm hover:shadow-md transition-all cursor-pointer group h-full">
+          <Card className="border-border shadow-sm hover:shadow-md transition-all cursor-pointer group h-full">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="p-2.5 bg-purple-50 rounded-lg">
                   <Dumbbell className="h-5 w-5 text-purple-600" />
                 </div>
-                <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900 transition-colors" />
+                <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
               </div>
-              <p className="mt-4 font-medium text-zinc-900">Create Plan</p>
+              <p className="mt-4 font-medium text-foreground">Create Plan</p>
             </CardContent>
           </Card>
         </Link>
         <Link href="/trainer/exercises/new">
-          <Card className="border-zinc-200 shadow-sm hover:shadow-md transition-all cursor-pointer group h-full">
+          <Card className="border-border shadow-sm hover:shadow-md transition-all cursor-pointer group h-full">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="p-2.5 bg-emerald-50 rounded-lg">
                   <Plus className="h-5 w-5 text-emerald-600" />
                 </div>
-                <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900 transition-colors" />
+                <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
               </div>
-              <p className="mt-4 font-medium text-zinc-900">Add Exercise</p>
+              <p className="mt-4 font-medium text-foreground">Add Exercise</p>
             </CardContent>
           </Card>
         </Link>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="border-zinc-200 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 border-b border-zinc-100">
-            <CardTitle className="text-base font-semibold text-zinc-900">Today&apos;s Schedule</CardTitle>
-            <Button variant="ghost" size="sm" className="text-zinc-500 hover:text-zinc-900 h-8">
+        <Card className="border-border shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 border-b border-border">
+            <CardTitle className="text-base font-semibold text-foreground">Today&apos;s Schedule</CardTitle>
+            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground h-8">
               View all
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
@@ -209,7 +209,7 @@ export default function TrainerDashboardPage() {
             {loading ? (
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center justify-between p-4 bg-zinc-50 rounded-lg animate-pulse">
+                  <div key={i} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg animate-pulse">
                     <div className="flex items-center gap-4">
                       <div className="w-11 h-11 bg-zinc-200 rounded-lg" />
                       <div className="space-y-2">
@@ -221,23 +221,23 @@ export default function TrainerDashboardPage() {
                 ))}
               </div>
             ) : todaysSchedule.length === 0 ? (
-              <div className="text-center py-8 text-zinc-500">
+              <div className="text-center py-8 text-muted-foreground">
                 <p>No classes scheduled for today</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {todaysSchedule.map((session) => (
-                  <div key={session.id} className="flex items-center justify-between p-4 bg-zinc-50 rounded-lg">
+                  <div key={session.id} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                     <div className="flex items-center gap-4">
-                      <div className="w-11 h-11 bg-white rounded-lg flex items-center justify-center border border-zinc-200">
-                        <Clock className="h-5 w-5 text-zinc-600" />
+                      <div className="w-11 h-11 bg-white rounded-lg flex items-center justify-center border border-border">
+                        <Clock className="h-5 w-5 text-foreground/80" />
                       </div>
                       <div>
-                        <p className="font-medium text-zinc-900">{session.member}</p>
-                        <p className="text-sm text-zinc-500">{session.type} • {session.duration}</p>
+                        <p className="font-medium text-foreground">{session.member}</p>
+                        <p className="text-sm text-muted-foreground">{session.type} • {session.duration}</p>
                       </div>
                     </div>
-                    <span className="text-sm font-medium text-zinc-900">{session.time}</span>
+                    <span className="text-sm font-medium text-foreground">{session.time}</span>
                   </div>
                 ))}
               </div>
@@ -245,11 +245,11 @@ export default function TrainerDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-200 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 border-b border-zinc-100">
-            <CardTitle className="text-base font-semibold text-zinc-900">Recent Members</CardTitle>
+        <Card className="border-border shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 border-b border-border">
+            <CardTitle className="text-base font-semibold text-foreground">Recent Members</CardTitle>
             <Link href="/trainer/members">
-              <Button variant="ghost" size="sm" className="text-zinc-500 hover:text-zinc-900 h-8">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground h-8">
                 View all
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
@@ -259,7 +259,7 @@ export default function TrainerDashboardPage() {
             {loading ? (
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center justify-between p-4 bg-zinc-50 rounded-lg animate-pulse">
+                  <div key={i} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg animate-pulse">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 bg-zinc-200 rounded-full" />
                       <div className="space-y-2">
@@ -271,14 +271,14 @@ export default function TrainerDashboardPage() {
                 ))}
               </div>
             ) : recentMembers.length === 0 ? (
-              <div className="text-center py-8 text-zinc-500">
+              <div className="text-center py-8 text-muted-foreground">
                 <p>No members with active plans yet</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {recentMembers.map((member) => (
                   <Link key={member.id} href={`/trainer/members/${member.id}`}>
-                    <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-lg hover:bg-zinc-100 transition-colors cursor-pointer">
+                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors cursor-pointer">
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                           <span className="text-sm font-medium text-white">
@@ -286,13 +286,13 @@ export default function TrainerDashboardPage() {
                           </span>
                         </div>
                         <div>
-                          <p className="font-medium text-zinc-900">{member.name}</p>
-                          <p className="text-sm text-zinc-500">{member.planName}</p>
+                          <p className="font-medium text-foreground">{member.name}</p>
+                          <p className="text-sm text-muted-foreground">{member.planName}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-zinc-400">{member.lastActive}</span>
-                        <ChevronRight className="h-4 w-4 text-zinc-400" />
+                        <span className="text-xs text-muted-foreground">{member.lastActive}</span>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
                       </div>
                     </div>
                   </Link>

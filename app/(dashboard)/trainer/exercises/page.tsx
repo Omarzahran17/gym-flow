@@ -90,8 +90,8 @@ export default function ExercisesPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900">Exercise Library</h1>
-          <p className="text-zinc-500 mt-1">Manage your exercise database</p>
+          <h1 className="text-2xl font-bold text-foreground">Exercise Library</h1>
+          <p className="text-muted-foreground mt-1">Manage your exercise database</p>
         </div>
         <Link href="/trainer/exercises/new">
           <Button className="bg-zinc-900 hover:bg-zinc-800 text-white">
@@ -103,18 +103,18 @@ export default function ExercisesPage() {
 
       <div className="flex gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search exercises..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 border-zinc-200 focus:border-zinc-900 focus:ring-zinc-900"
+            className="pl-10 border-border focus:border-zinc-900 focus:ring-zinc-900"
           />
         </div>
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="border border-zinc-200 rounded-lg px-3 py-2 min-w-[150px] focus:border-zinc-900 focus:ring-zinc-900"
+          className="border border-border rounded-lg px-3 py-2 min-w-[150px] focus:border-zinc-900 focus:ring-zinc-900"
         >
           <option value="">All Categories</option>
           {CATEGORIES.map((cat) => (
@@ -126,7 +126,7 @@ export default function ExercisesPage() {
         <select
           value={muscleFilter}
           onChange={(e) => setMuscleFilter(e.target.value)}
-          className="border border-zinc-200 rounded-lg px-3 py-2 min-w-[150px] focus:border-zinc-900 focus:ring-zinc-900"
+          className="border border-border rounded-lg px-3 py-2 min-w-[150px] focus:border-zinc-900 focus:ring-zinc-900"
         >
           <option value="">All Muscle Groups</option>
           {MUSCLE_GROUPS.map((muscle) => (
@@ -140,18 +140,18 @@ export default function ExercisesPage() {
       {loading ? (
         <div className="flex items-center justify-center py-24">
           <div className="relative">
-            <div className="h-12 w-12 rounded-full border-4 border-zinc-200"></div>
+            <div className="h-12 w-12 rounded-full border-4 border-border"></div>
             <div className="absolute top-0 left-0 h-12 w-12 rounded-full border-4 border-zinc-900 border-t-transparent animate-spin"></div>
           </div>
         </div>
       ) : filteredExercises.length === 0 ? (
-        <div className="text-center py-16 border-2 border-dashed border-zinc-200 rounded-xl">
-          <div className="w-16 h-16 mx-auto bg-zinc-100 rounded-full flex items-center justify-center mb-4">
-            <Dumbbell className="h-8 w-8 text-zinc-400" />
+        <div className="text-center py-16 border-2 border-dashed border-border rounded-xl">
+          <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center mb-4">
+            <Dumbbell className="h-8 w-8 text-muted-foreground" />
           </div>
-          <p className="text-zinc-500 mb-4">No exercises found</p>
+          <p className="text-muted-foreground mb-4">No exercises found</p>
           <Link href="/trainer/exercises/new">
-            <Button variant="outline" className="border-zinc-200 hover:bg-zinc-50">
+            <Button variant="outline" className="border-border hover:bg-muted/50">
               <Plus className="h-4 w-4 mr-2" />
               Add your first exercise
             </Button>
@@ -160,10 +160,10 @@ export default function ExercisesPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredExercises.map((exercise) => (
-            <Card key={exercise.id} className="border-zinc-200 shadow-sm overflow-hidden">
+            <Card key={exercise.id} className="border-border shadow-sm overflow-hidden">
               {exercise.defaultVideoUrl && (
                 <div
-                  className="aspect-video bg-zinc-100 relative cursor-pointer group"
+                  className="aspect-video bg-muted relative cursor-pointer group"
                   onClick={() => setSelectedVideo(exercise.defaultVideoUrl!)}
                 >
                   <video
@@ -179,8 +179,8 @@ export default function ExercisesPage() {
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle className="text-lg font-semibold text-zinc-900">{exercise.name}</CardTitle>
-                    <p className="text-sm text-zinc-500 mt-0.5">{exercise.category}</p>
+                    <CardTitle className="text-lg font-semibold text-foreground">{exercise.name}</CardTitle>
+                    <p className="text-sm text-muted-foreground mt-0.5">{exercise.category}</p>
                   </div>
                   <Link href={`/trainer/exercises/${exercise.id}`}>
                     <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -190,13 +190,13 @@ export default function ExercisesPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-zinc-600 mb-2">
-                  <span className="font-medium text-zinc-900">{exercise.muscleGroup}</span>
+                <p className="text-sm text-foreground/80 mb-2">
+                  <span className="font-medium text-foreground">{exercise.muscleGroup}</span>
                 </p>
-                <p className="text-sm text-zinc-500 line-clamp-2 mb-3">
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
                   {exercise.description}
                 </p>
-                <div className="flex items-center justify-end mt-3 pt-3 border-t border-zinc-100">
+                <div className="flex items-center justify-end mt-3 pt-3 border-t border-border">
                   <Button
                     variant="ghost"
                     size="icon"

@@ -68,7 +68,7 @@ export default function TrainerMemberDetailPage() {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <div className="relative">
-          <div className="h-12 w-12 rounded-full border-4 border-zinc-200"></div>
+          <div className="h-12 w-12 rounded-full border-4 border-border"></div>
           <div className="absolute top-0 left-0 h-12 w-12 rounded-full border-4 border-zinc-900 border-t-transparent animate-spin"></div>
         </div>
       </div>
@@ -94,13 +94,13 @@ export default function TrainerMemberDetailPage() {
             </span>
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-zinc-900">{member.name}</h1>
+            <h1 className="text-2xl font-bold text-foreground">{member.name}</h1>
             <div className="flex items-center gap-3 mt-1">
-              <span className="text-zinc-500 flex items-center gap-1">
+              <span className="text-muted-foreground flex items-center gap-1">
                 <Mail className="h-4 w-4" />
                 {member.email}
               </span>
-              <Badge className={member.status === "active" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-zinc-100 text-zinc-600"}>
+              <Badge className={member.status === "active" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-muted text-foreground/80"}>
                 {member.status}
               </Badge>
             </div>
@@ -109,7 +109,7 @@ export default function TrainerMemberDetailPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="p-2.5 bg-blue-50 rounded-lg">
@@ -117,13 +117,13 @@ export default function TrainerMemberDetailPage() {
               </div>
             </div>
             <div className="mt-4">
-              <p className="text-3xl font-bold text-zinc-900">{member.stats.totalWorkouts}</p>
-              <p className="text-sm text-zinc-500 mt-1">Total Workouts</p>
+              <p className="text-3xl font-bold text-foreground">{member.stats.totalWorkouts}</p>
+              <p className="text-sm text-muted-foreground mt-1">Total Workouts</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="p-2.5 bg-purple-50 rounded-lg">
@@ -131,13 +131,13 @@ export default function TrainerMemberDetailPage() {
               </div>
             </div>
             <div className="mt-4">
-              <p className="text-3xl font-bold text-zinc-900">{member.stats.attendanceRate}%</p>
-              <p className="text-sm text-zinc-500 mt-1">Attendance Rate</p>
+              <p className="text-3xl font-bold text-foreground">{member.stats.attendanceRate}%</p>
+              <p className="text-sm text-muted-foreground mt-1">Attendance Rate</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="p-2.5 bg-emerald-50 rounded-lg">
@@ -145,20 +145,20 @@ export default function TrainerMemberDetailPage() {
               </div>
             </div>
             <div className="mt-4">
-              <p className="text-3xl font-bold text-zinc-900">{member.workoutPlans.length}</p>
-              <p className="text-sm text-zinc-500 mt-1">Workout Plans</p>
+              <p className="text-3xl font-bold text-foreground">{member.workoutPlans.length}</p>
+              <p className="text-sm text-muted-foreground mt-1">Workout Plans</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="border-zinc-200 shadow-sm">
-          <CardHeader className="border-b border-zinc-100">
+        <Card className="border-border shadow-sm">
+          <CardHeader className="border-b border-border">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-semibold text-zinc-900">Workout Plans</CardTitle>
+              <CardTitle className="text-base font-semibold text-foreground">Workout Plans</CardTitle>
               <Link href={`/trainer/workout-plans/new?memberId=${member.id}`}>
-                <Button variant="outline" size="sm" className="border-zinc-200">
+                <Button variant="outline" size="sm" className="border-border">
                   Create Plan
                 </Button>
               </Link>
@@ -168,23 +168,23 @@ export default function TrainerMemberDetailPage() {
             {member.workoutPlans.length === 0 ? (
               <div className="text-center py-8">
                 <Dumbbell className="h-10 w-10 mx-auto text-zinc-300 mb-3" />
-                <p className="text-zinc-500">No workout plans yet</p>
+                <p className="text-muted-foreground">No workout plans yet</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {member.workoutPlans.map((plan) => (
                   <Link key={plan.id} href={`/trainer/workout-plans/${plan.id}`}>
-                    <div className="p-4 bg-zinc-50 rounded-lg hover:bg-zinc-100 transition-colors cursor-pointer border border-zinc-100">
+                    <div className="p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors cursor-pointer border border-border">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium text-zinc-900">{plan.name}</p>
-                          <p className="text-sm text-zinc-500">{plan.exercises.length} exercises</p>
+                          <p className="font-medium text-foreground">{plan.name}</p>
+                          <p className="text-sm text-muted-foreground">{plan.exercises.length} exercises</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge className={plan.isActive ? "bg-emerald-50 text-emerald-700" : "bg-zinc-100 text-zinc-600"}>
+                          <Badge className={plan.isActive ? "bg-emerald-50 text-emerald-700" : "bg-muted text-foreground/80"}>
                             {plan.isActive ? "Active" : "Inactive"}
                           </Badge>
-                          <ChevronRight className="h-4 w-4 text-zinc-400" />
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
                         </div>
                       </div>
                     </div>
@@ -195,9 +195,9 @@ export default function TrainerMemberDetailPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-200 shadow-sm">
-          <CardHeader className="border-b border-zinc-100">
-            <CardTitle className="text-base font-semibold text-zinc-900 flex items-center gap-2">
+        <Card className="border-border shadow-sm">
+          <CardHeader className="border-b border-border">
+            <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
               <Trophy className="h-5 w-5" />
               Achievements
             </CardTitle>
@@ -206,15 +206,15 @@ export default function TrainerMemberDetailPage() {
             {member.achievements.length === 0 ? (
               <div className="text-center py-8">
                 <Trophy className="h-10 w-10 mx-auto text-zinc-300 mb-3" />
-                <p className="text-zinc-500">No achievements yet</p>
+                <p className="text-muted-foreground">No achievements yet</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 {member.achievements.map((achievement) => (
-                  <div key={achievement.id} className="p-3 bg-zinc-50 rounded-lg border border-zinc-100 text-center">
+                  <div key={achievement.id} className="p-3 bg-muted/50 rounded-lg border border-border text-center">
                     <div className="text-2xl mb-1">{achievement.icon || "🏆"}</div>
-                    <p className="text-sm font-medium text-zinc-900">{achievement.name}</p>
-                    <p className="text-xs text-zinc-400 mt-1">
+                    <p className="text-sm font-medium text-foreground">{achievement.name}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
                       {new Date(achievement.earnedAt).toLocaleDateString()}
                     </p>
                   </div>

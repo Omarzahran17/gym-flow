@@ -70,36 +70,36 @@ export default function NewEquipmentPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900">Add New Equipment</h1>
-          <p className="text-zinc-500 mt-1">Add a new piece of gym equipment</p>
+          <h1 className="text-2xl font-bold text-foreground">Add New Equipment</h1>
+          <p className="text-muted-foreground mt-1">Add a new piece of gym equipment</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit}>
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg font-medium">Equipment Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-medium text-zinc-700">Equipment Name *</Label>
+              <Label htmlFor="name" className="text-sm font-medium text-foreground">Equipment Name *</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="e.g., Treadmill T-1000"
-                className="border-zinc-200 focus:border-zinc-900 focus:ring-zinc-900"
+                className="border-border focus:border-zinc-900 focus:ring-zinc-900"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category" className="text-sm font-medium text-zinc-700">Category *</Label>
+              <Label htmlFor="category" className="text-sm font-medium text-foreground">Category *</Label>
               <select
                 id="category"
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full border border-zinc-200 rounded-lg px-3 py-2 focus:border-zinc-900 focus:ring-zinc-900"
+                className="w-full border border-border rounded-lg px-3 py-2 focus:border-zinc-900 focus:ring-zinc-900"
                 required
               >
                 <option value="">Select category</option>
@@ -113,45 +113,45 @@ export default function NewEquipmentPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="purchaseDate" className="text-sm font-medium text-zinc-700">Purchase Date</Label>
+                <Label htmlFor="purchaseDate" className="text-sm font-medium text-foreground">Purchase Date</Label>
                 <Input
                   id="purchaseDate"
                   type="date"
                   value={formData.purchaseDate}
                   onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
-                  className="border-zinc-200 focus:border-zinc-900 focus:ring-zinc-900"
+                  className="border-border focus:border-zinc-900 focus:ring-zinc-900"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="warrantyExpiry" className="text-sm font-medium text-zinc-700">Warranty Expiry</Label>
+                <Label htmlFor="warrantyExpiry" className="text-sm font-medium text-foreground">Warranty Expiry</Label>
                 <Input
                   id="warrantyExpiry"
                   type="date"
                   value={formData.warrantyExpiry}
                   onChange={(e) => setFormData({ ...formData, warrantyExpiry: e.target.value })}
-                  className="border-zinc-200 focus:border-zinc-900 focus:ring-zinc-900"
+                  className="border-border focus:border-zinc-900 focus:ring-zinc-900"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="nextMaintenance" className="text-sm font-medium text-zinc-700">Next Scheduled Maintenance</Label>
+              <Label htmlFor="nextMaintenance" className="text-sm font-medium text-foreground">Next Scheduled Maintenance</Label>
               <Input
                 id="nextMaintenance"
                 type="date"
                 value={formData.nextMaintenance}
                 onChange={(e) => setFormData({ ...formData, nextMaintenance: e.target.value })}
-                className="border-zinc-200 focus:border-zinc-900 focus:ring-zinc-900"
+                className="border-border focus:border-zinc-900 focus:ring-zinc-900"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="status" className="text-sm font-medium text-zinc-700">Status</Label>
+              <Label htmlFor="status" className="text-sm font-medium text-foreground">Status</Label>
               <select
                 id="status"
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full border border-zinc-200 rounded-lg px-3 py-2 focus:border-zinc-900 focus:ring-zinc-900"
+                className="w-full border border-border rounded-lg px-3 py-2 focus:border-zinc-900 focus:ring-zinc-900"
               >
                 {STATUSES.map((status) => (
                   <option key={status.value} value={status.value}>
@@ -163,7 +163,7 @@ export default function NewEquipmentPage() {
 
             <div className="pt-4 flex items-center justify-end gap-4">
               <Link href="/admin/equipment">
-                <Button variant="outline" type="button" className="border-zinc-200 hover:bg-zinc-50">
+                <Button variant="outline" type="button" className="border-border hover:bg-muted/50">
                   Cancel
                 </Button>
               </Link>

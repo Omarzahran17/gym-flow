@@ -52,7 +52,7 @@ export default function MemberDetailPage() {
     return (
       <div className="flex items-center justify-center py-24">
         <div className="relative">
-          <div className="h-12 w-12 rounded-full border-4 border-zinc-200"></div>
+          <div className="h-12 w-12 rounded-full border-4 border-border"></div>
           <div className="absolute top-0 left-0 h-12 w-12 rounded-full border-4 border-zinc-900 border-t-transparent animate-spin"></div>
         </div>
       </div>
@@ -86,70 +86,94 @@ export default function MemberDetailPage() {
               </span>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-zinc-900">
+              <h1 className="text-2xl font-bold text-foreground">
                 {member.firstName} {member.lastName}
               </h1>
-              <p className="text-zinc-500">{member.email}</p>
+              <p className="text-muted-foreground">{member.email}</p>
             </div>
           </div>
         </div>
-        <Button className="bg-zinc-900 hover:bg-zinc-800 text-white">
-          <Edit className="h-4 w-4 mr-2" />
-          Edit Member
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={async () => {
+              if (!confirm("Are you sure you want to convert this member to a trainer?")) return
+
+              try {
+                const response = await fetch(`/api/admin/members/${memberId}/convert`, {
+                  method: "POST",
+                })
+
+                if (!response.ok) {
+                  const data = await response.json()
+                  throw new Error(data.error || "Failed to convert member")
+                }
+
+                window.location.href = "/admin/trainers"
+              } catch (err) {
+                alert(err instanceof Error ? err.message : "Failed to convert")
+              }
+            }}
+          >
+            Convert to Trainer
+          </Button>
+          <Button>
+            <Edit className="h-4 w-4 mr-2" />
+            Edit Member
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center text-center">
               <QRCodeSVG value={member.qrCode || member.userId} size={140} />
-              <p className="mt-4 text-sm font-medium text-zinc-900">Member QR Code</p>
-              <p className="text-xs text-zinc-500 mt-1">Scan at reception for quick check-in</p>
+              <p className="mt-4 text-sm font-medium text-foreground">Member QR Code</p>
+              <p className="text-xs text-muted-foreground mt-1">Scan at reception for quick check-in</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-medium">Contact Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-col">
-              <span className="text-xs text-zinc-500 uppercase tracking-wide">Phone</span>
-              <span className="font-medium text-zinc-900">{member.phone || "-"}</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wide">Phone</span>
+              <span className="font-medium text-foreground">{member.phone || "-"}</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-xs text-zinc-500 uppercase tracking-wide">Emergency Contact</span>
-              <span className="font-medium text-zinc-900">{member.emergencyContact || "-"}</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wide">Emergency Contact</span>
+              <span className="font-medium text-foreground">{member.emergencyContact || "-"}</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-xs text-zinc-500 uppercase tracking-wide">Health Notes</span>
-              <span className="font-medium text-zinc-900">{member.healthNotes || "-"}</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wide">Health Notes</span>
+              <span className="font-medium text-foreground">{member.healthNotes || "-"}</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-medium">Membership Status</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-col">
-              <span className="text-xs text-zinc-500 uppercase tracking-wide">Current Status</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wide">Current Status</span>
               <span
-                className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-medium w-fit mt-1 ${
-                  member.status === "active"
+                className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-medium w-fit mt-1 ${member.status === "active"
                     ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                    : "bg-zinc-100 text-zinc-700 border border-zinc-200"
-                }`}
+                    : "bg-muted text-foreground border border-border"
+                  }`}
               >
                 {member.status}
               </span>
             </div>
             <div className="flex flex-col">
-              <span className="text-xs text-zinc-500 uppercase tracking-wide">Member Since</span>
-              <span className="font-medium text-zinc-900">
+              <span className="text-xs text-muted-foreground uppercase tracking-wide">Member Since</span>
+              <span className="font-medium text-foreground">
                 {new Date(member.joinDate).toLocaleDateString()}
               </span>
             </div>
@@ -159,7 +183,7 @@ export default function MemberDetailPage() {
 
       {stats && (
         <div className="grid gap-4 md:grid-cols-3">
-          <Card className="border-zinc-200 shadow-sm">
+          <Card className="border-border shadow-sm">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div className="p-2 bg-blue-50 rounded-lg">
@@ -167,13 +191,13 @@ export default function MemberDetailPage() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-3xl font-bold text-zinc-900">{stats.totalWorkouts}</p>
-                <p className="text-sm text-zinc-500 mt-1">Total Workouts</p>
+                <p className="text-3xl font-bold text-foreground">{stats.totalWorkouts}</p>
+                <p className="text-sm text-muted-foreground mt-1">Total Workouts</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-zinc-200 shadow-sm">
+          <Card className="border-border shadow-sm">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div className="p-2 bg-purple-50 rounded-lg">
@@ -181,13 +205,13 @@ export default function MemberDetailPage() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-3xl font-bold text-zinc-900">{stats.attendanceRate}%</p>
-                <p className="text-sm text-zinc-500 mt-1">Attendance Rate</p>
+                <p className="text-3xl font-bold text-foreground">{stats.attendanceRate}%</p>
+                <p className="text-sm text-muted-foreground mt-1">Attendance Rate</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-zinc-200 shadow-sm">
+          <Card className="border-border shadow-sm">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div className="p-2 bg-emerald-50 rounded-lg">
@@ -195,8 +219,8 @@ export default function MemberDetailPage() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-3xl font-bold text-zinc-900">{stats.memberSince}</p>
-                <p className="text-sm text-zinc-500 mt-1">Member Duration</p>
+                <p className="text-3xl font-bold text-foreground">{stats.memberSince}</p>
+                <p className="text-sm text-muted-foreground mt-1">Member Duration</p>
               </div>
             </CardContent>
           </Card>

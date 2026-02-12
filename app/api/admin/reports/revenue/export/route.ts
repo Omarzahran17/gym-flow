@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { memberSubscriptions, subscriptionPlans, members, attendance } from "@/lib/db/schema"
-import { eq, and, gte, lte } from "drizzle-orm"
+import { and, gte, lte, desc } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns"
 
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
-    const format_type = searchParams.get("format") || "csv"
+    const formatType = searchParams.get("format") || "csv"
     const period = searchParams.get("period") || "month"
 
     // Calculate date range
@@ -42,21 +42,54 @@ export async function GET(request: NextRequest) {
       ),
       with: {
         plan: true,
-        member: true,
       },
+      orderBy: [desc(memberSubscriptions.createdAt)],
+      limit: 1000,
     })
 
-    if (format_type === "csv") {
-      // Generate CSV
-      const headers = ["Date", "Member", "Plan", "Amount", "Status"]
+    // Get member count
+    const newMembers = await db.query.members.findMany({
+      where: and(
+        gte(members.createdAt, startDate),
+        lte(members.createdAt, endDate)
+      ),
+    })
+
+    // Get attendance
+    const attendanceRecords = await db.query.attendance.findMany({
+      where: and(
+        gte(attendance.checkInTime, startDate),
+        lte(attendance.checkInTime, endDate)
+      ),
+      limit: 1000,
+    })
+
+    // Calculate metrics
+    const totalRevenue = subscriptions.reduce((sum, sub) => {
+      return sum + (parseFloat(sub.plan?.price || "0") || 0)
+    }, 0)
+
+    // Group revenue by plan
+    const revenueByPlan: Record<string, { count: number; revenue: number }> = {}
+    subscriptions.forEach((sub) => {
+      const planName = sub.plan?.name || "Unknown"
+      if (!revenueByPlan[planName]) {
+        revenueByPlan[planName] = { count: 0, revenue: 0 }
+      }
+      revenueByPlan[planName].count++
+      revenueByPlan[planName].revenue += parseFloat(sub.plan?.price || "0") || 0
+    })
+
+    if (formatType === "csv") {
+      const headers = ["Date", "Member ID", "Plan", "Amount", "Status"]
       const rows = subscriptions.map((sub) => {
         const createdAt = sub.createdAt ? new Date(sub.createdAt) : new Date()
         return [
           format(createdAt, "yyyy-MM-dd"),
-          `Member #${sub.memberId}`,
+          sub.memberId?.toString() || "",
           sub.plan?.name || "Unknown",
-          sub.plan?.price || "0",
-          sub.status,
+          `$${sub.plan?.price || "0"}`,
+          sub.status || "unknown",
         ]
       })
 
@@ -65,15 +98,21 @@ export async function GET(request: NextRequest) {
       return new NextResponse(csvContent, {
         headers: {
           "Content-Type": "text/csv",
-          "Content-Disposition": `attachment; filename="revenue-report-${format(new Date(), "yyyy-MM-dd")}.csv"`,
+          "Content-Disposition": `attachment; filename="revenue-report-${period}-${format(new Date(), "yyyy-MM-dd")}.csv"`,
         },
       })
     } else {
-      // For PDF, return JSON data that will be used by client-side PDF generation
-      // Since @react-pdf/renderer works best on the client side
       return NextResponse.json({
         data: {
-          period: { start: startDate, end: endDate },
+          period: { start: startDate, end: endDate, period },
+          summary: {
+            totalRevenue,
+            totalSubscriptions: subscriptions.length,
+            newMembers: newMembers.length,
+            totalAttendance: attendanceRecords.length,
+            avgDailyAttendance: Math.round(attendanceRecords.length / 30),
+          },
+          revenueByPlan,
           subscriptions: subscriptions.map((sub) => ({
             date: sub.createdAt,
             memberId: sub.memberId,
@@ -81,10 +120,6 @@ export async function GET(request: NextRequest) {
             amount: sub.plan?.price || "0",
             status: sub.status,
           })),
-          summary: {
-            totalRevenue: subscriptions.reduce((sum, sub) => sum + parseFloat(sub.plan?.price || "0"), 0),
-            totalSubscriptions: subscriptions.length,
-          },
         },
       })
     }

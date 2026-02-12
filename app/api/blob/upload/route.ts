@@ -24,6 +24,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate file type
+    const allowedTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo'];
+    if (!allowedTypes.includes(file.type)) {
+      return NextResponse.json(
+        { error: `Invalid file type: ${file.type}. Allowed: MP4, WebM, QuickTime` },
+        { status: 400 }
+      );
+    }
+
+    // Check file size (100MB limit)
+    const maxSizeMB = 100;
+    const sizeMB = file.size / (1024 * 1024);
+    if (sizeMB > maxSizeMB) {
+      return NextResponse.json(
+        { error: `File too large: ${sizeMB.toFixed(2)}MB. Maximum size is ${maxSizeMB}MB` },
+        { status: 400 }
+      );
+    }
+
+    console.log("Uploading video:", file.name, "size:", sizeMB.toFixed(2), "MB");
+
     let blob;
     if (type === "video") {
       blob = await uploadVideo(file, path);
@@ -31,11 +52,13 @@ export async function POST(request: NextRequest) {
       blob = await uploadImage(file, path);
     }
 
+    console.log("Upload successful:", blob.url);
+
     return NextResponse.json({ url: blob.url });
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json(
-      { error: "Failed to upload file" },
+      { error: error instanceof Error ? error.message : "Failed to upload file. Please try again." },
       { status: 500 }
     );
   }

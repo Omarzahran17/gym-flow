@@ -50,6 +50,8 @@ export async function checkMemberSubscription(memberId: number): Promise<Subscri
   startOfWeek.setHours(0, 0, 0, 0)
 
   const todayStr = now.toISOString().split('T')[0]
+  const todayStart = new Date(todayStr)
+  todayStart.setHours(0, 0, 0, 0)
 
   const weeklyBookings = await db.query.classBookings.findMany({
     where: and(
@@ -61,7 +63,7 @@ export async function checkMemberSubscription(memberId: number): Promise<Subscri
   const todayAttendance = await db.query.attendance.findMany({
     where: and(
       eq(attendance.memberId, memberId),
-      gte(attendance.date, todayStr)
+      gte(attendance.checkInTime, todayStart)
     ),
   })
 

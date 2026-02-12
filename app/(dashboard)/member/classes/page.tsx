@@ -173,10 +173,10 @@ export default function MemberClassesPage() {
       <div className="flex items-center justify-center h-[60vh]">
         <div className="text-center">
           <div className="relative inline-block">
-            <div className="h-12 w-12 rounded-full border-4 border-zinc-200"></div>
+            <div className="h-12 w-12 rounded-full border-4 border-border"></div>
             <div className="absolute top-0 left-0 h-12 w-12 rounded-full border-4 border-zinc-900 border-t-transparent animate-spin"></div>
           </div>
-          <p className="text-zinc-500 mt-4">Loading classes...</p>
+          <p className="text-muted-foreground mt-4">Loading classes...</p>
         </div>
       </div>
     )
@@ -185,8 +185,8 @@ export default function MemberClassesPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900">Class Schedule</h1>
-        <p className="text-zinc-500 mt-1">Book classes and manage your gym schedule</p>
+        <h1 className="text-2xl font-bold text-foreground">Class Schedule</h1>
+        <p className="text-muted-foreground mt-1">Book classes and manage your gym schedule</p>
       </div>
 
       {!subscriptionStatus?.hasSubscription && (
@@ -212,7 +212,7 @@ export default function MemberClassesPage() {
       )}
 
       {subscriptionStatus?.hasSubscription && subscriptionStatus?.plan && (
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -221,10 +221,10 @@ export default function MemberClassesPage() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="font-medium text-zinc-900">{subscriptionStatus.plan.name} Plan</p>
+                    <p className="font-medium text-foreground">{subscriptionStatus.plan.name} Plan</p>
                     <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">Active</Badge>
                   </div>
-                  <p className="text-sm text-zinc-500">
+                  <p className="text-sm text-muted-foreground">
                     {subscriptionStatus.usage?.classesThisWeek || 0} of {subscriptionStatus.plan.maxClassesPerWeek === 999 ? "∞" : subscriptionStatus.plan.maxClassesPerWeek} classes used this week
                   </p>
                 </div>
@@ -232,8 +232,8 @@ export default function MemberClassesPage() {
               <div className="flex items-center gap-3">
                 {subscriptionStatus.limits && subscriptionStatus.plan.maxClassesPerWeek !== 999 && (
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-zinc-900">{subscriptionStatus.limits.classesRemaining}</p>
-                    <p className="text-xs text-zinc-500">classes remaining</p>
+                    <p className="text-2xl font-bold text-foreground">{subscriptionStatus.limits.classesRemaining}</p>
+                    <p className="text-xs text-muted-foreground">classes remaining</p>
                   </div>
                 )}
                 {subscriptionStatus.limits && subscriptionStatus.plan.maxClassesPerWeek === 999 && (
@@ -243,7 +243,7 @@ export default function MemberClassesPage() {
             </div>
             {subscriptionStatus.plan.maxClassesPerWeek !== 999 && (
               <div className="mt-4">
-                <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
                   <div 
                     className={`h-full rounded-full transition-all ${
                       (subscriptionStatus.usage?.classesThisWeek || 0) >= subscriptionStatus.plan.maxClassesPerWeek ? "bg-red-500" :
@@ -267,42 +267,47 @@ export default function MemberClassesPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6">
-          <Card className="border-zinc-200 shadow-sm">
-            <CardHeader className="pb-3 border-b border-zinc-100">
-              <CardTitle className="text-base font-semibold text-zinc-900 flex items-center gap-2">
-                <CalendarDays className="h-5 w-5 text-zinc-600" />
+          <Card className="border-border shadow-sm overflow-hidden">
+            <CardHeader className="pb-3 border-b border-border bg-muted/30">
+              <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
+                <CalendarDays className="h-5 w-5 text-foreground/80" />
                 Select Date
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-4">
+            <CardContent className="pt-4 flex justify-center">
               <Calendar
                 mode="single"
                 selected={selectedDate}
                 onSelect={(date) => date && setSelectedDate(date)}
-                className="rounded-md border-zinc-200"
+                className="rounded-md p-2"
+                modifiersClassNames={{
+                  selected: "bg-zinc-900 text-white hover:bg-zinc-800",
+                  today: "font-semibold text-zinc-900 dark:text-white",
+                  day: "h-9 w-9 p-0 font-normal hover:bg-muted rounded-md transition-colors",
+                }}
               />
             </CardContent>
           </Card>
 
-          <Card className="border-zinc-200 shadow-sm">
-            <CardHeader className="pb-3 border-b border-zinc-100">
-              <CardTitle className="text-base font-semibold text-zinc-900">My Upcoming Classes</CardTitle>
+          <Card className="border-border shadow-sm">
+            <CardHeader className="pb-3 border-b border-border">
+              <CardTitle className="text-base font-semibold text-foreground">My Upcoming Classes</CardTitle>
             </CardHeader>
             <CardContent className="pt-4">
               {upcomingBookings.length === 0 ? (
                 <div className="text-center py-8">
-                  <div className="w-14 h-14 mx-auto bg-zinc-100 rounded-full flex items-center justify-center mb-3">
-                    <CalendarDays className="h-7 w-7 text-zinc-400" />
+                  <div className="w-14 h-14 mx-auto bg-muted rounded-full flex items-center justify-center mb-3">
+                    <CalendarDays className="h-7 w-7 text-muted-foreground" />
                   </div>
-                  <p className="text-zinc-500 text-sm">No upcoming classes</p>
-                  <p className="text-zinc-400 text-xs mt-1">Book a class to get started</p>
+                  <p className="text-muted-foreground text-sm">No upcoming classes</p>
+                  <p className="text-muted-foreground text-xs mt-1">Book a class to get started</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {upcomingBookings.slice(0, 5).map((booking) => (
                     <div
                       key={booking.id}
-                      className="flex items-center justify-between p-3 bg-zinc-50 rounded-lg border border-zinc-100 hover:border-zinc-200 transition-colors"
+                      className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border hover:border-border transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         <div 
@@ -310,8 +315,8 @@ export default function MemberClassesPage() {
                           style={{ backgroundColor: booking.schedule.class.color }}
                         />
                         <div>
-                          <p className="font-medium text-zinc-900 text-sm">{booking.schedule.class.name}</p>
-                          <p className="text-xs text-zinc-500">
+                          <p className="font-medium text-foreground text-sm">{booking.schedule.class.name}</p>
+                          <p className="text-xs text-muted-foreground">
                             {format(new Date(booking.bookingDate), "MMM d")} at {booking.schedule.startTime.slice(0, 5)}
                           </p>
                         </div>
@@ -320,14 +325,14 @@ export default function MemberClassesPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleCancelBooking(booking.id, booking.scheduleId)}
-                        className="h-8 w-8 text-zinc-400 hover:text-red-500 hover:bg-red-50"
+                        className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-50"
                       >
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
                   ))}
                   {upcomingBookings.length > 5 && (
-                    <p className="text-xs text-zinc-400 text-center pt-2">
+                    <p className="text-xs text-muted-foreground text-center pt-2">
                       +{upcomingBookings.length - 5} more bookings
                     </p>
                   )}
@@ -338,14 +343,14 @@ export default function MemberClassesPage() {
         </div>
 
         <div className="lg:col-span-2">
-          <Card className="border-zinc-200 shadow-sm">
-            <CardHeader className="border-b border-zinc-100">
+          <Card className="border-border shadow-sm">
+            <CardHeader className="border-b border-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-base font-semibold text-zinc-900">
+                  <CardTitle className="text-base font-semibold text-foreground">
                     {getDateLabel(selectedDate)}
                   </CardTitle>
-                  <p className="text-sm text-zinc-500 mt-0.5">
+                  <p className="text-sm text-muted-foreground mt-0.5">
                     {format(selectedDate, "MMMM d, yyyy")}
                   </p>
                 </div>
@@ -370,11 +375,11 @@ export default function MemberClassesPage() {
             <CardContent className="pt-6">
               {classesForDay.length === 0 ? (
                 <div className="text-center py-16">
-                  <div className="w-16 h-16 mx-auto bg-zinc-100 rounded-full flex items-center justify-center mb-4">
-                    <CalendarDays className="h-8 w-8 text-zinc-400" />
+                  <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center mb-4">
+                    <CalendarDays className="h-8 w-8 text-muted-foreground" />
                   </div>
-                  <p className="text-zinc-500 font-medium">No classes scheduled</p>
-                  <p className="text-zinc-400 text-sm mt-1">Try selecting a different date</p>
+                  <p className="text-muted-foreground font-medium">No classes scheduled</p>
+                  <p className="text-muted-foreground text-sm mt-1">Try selecting a different date</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -388,7 +393,7 @@ export default function MemberClassesPage() {
                     return (
                       <div
                         key={classSchedule.id}
-                        className={`group border border-zinc-200 rounded-xl overflow-hidden hover:shadow-md transition-all ${
+                        className={`group border border-border rounded-xl overflow-hidden hover:shadow-md transition-all ${
                           classSchedule.isBooked ? "ring-2 ring-emerald-500 ring-offset-2" : ""
                         }`}
                       >
@@ -401,7 +406,7 @@ export default function MemberClassesPage() {
                             <div className="flex items-start justify-between mb-3">
                               <div>
                                 <div className="flex items-center gap-2">
-                                  <h3 className="font-semibold text-zinc-900">{classSchedule.class.name}</h3>
+                                  <h3 className="font-semibold text-foreground">{classSchedule.class.name}</h3>
                                   {classSchedule.isBooked && (
                                     <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">
                                       <Check className="h-3 w-3 mr-1" />
@@ -410,18 +415,18 @@ export default function MemberClassesPage() {
                                   )}
                                 </div>
                                 {classSchedule.class.description && (
-                                  <p className="text-sm text-zinc-500 mt-1">{classSchedule.class.description}</p>
+                                  <p className="text-sm text-muted-foreground mt-1">{classSchedule.class.description}</p>
                                 )}
                               </div>
                             </div>
 
-                            <div className="flex flex-wrap gap-4 text-sm text-zinc-500 mb-4">
+                            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
                               <span className="flex items-center gap-1.5">
-                                <Clock className="h-4 w-4 text-zinc-400" />
+                                <Clock className="h-4 w-4 text-muted-foreground" />
                                 <span>{classSchedule.startTime.slice(0, 5)} - {endTime}</span>
                               </span>
                               <span className="flex items-center gap-1.5">
-                                <MapPin className="h-4 w-4 text-zinc-400" />
+                                <MapPin className="h-4 w-4 text-muted-foreground" />
                                 <span>{classSchedule.room}</span>
                               </span>
                             </div>
@@ -429,12 +434,12 @@ export default function MemberClassesPage() {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
                                 <div className="flex items-center gap-2">
-                                  <Users className="h-4 w-4 text-zinc-400" />
-                                  <span className="text-sm text-zinc-600">
+                                  <Users className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-sm text-foreground/80">
                                     {classSchedule.bookingsCount}/{classSchedule.class.maxCapacity}
                                   </span>
                                 </div>
-                                <div className="w-24 h-2 bg-zinc-100 rounded-full overflow-hidden">
+                                <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
                                   <div 
                                     className={`h-full rounded-full transition-all ${
                                       capacityPercent >= 100 ? "bg-red-500" : 
@@ -509,7 +514,7 @@ export default function MemberClassesPage() {
             </CardContent>
           </Card>
 
-          <div className="mt-4 flex items-center gap-4 text-xs text-zinc-400">
+          <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
               <span>Available</span>

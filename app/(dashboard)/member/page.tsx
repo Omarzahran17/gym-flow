@@ -64,13 +64,13 @@ export default function MemberDashboardPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-zinc-900">Welcome back!</h1>
-        <p className="text-zinc-500 mt-1">Here's your fitness overview for today</p>
+        <h1 className="text-3xl font-bold text-foreground">Welcome back!</h1>
+        <p className="text-muted-foreground mt-1">Here's your fitness overview for today</p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="p-2 bg-blue-50 rounded-lg">
@@ -78,15 +78,15 @@ export default function MemberDashboardPage() {
               </div>
             </div>
             <div className="mt-4">
-              <p className="text-2xl font-bold text-zinc-900">
+              <p className="text-2xl font-bold text-foreground">
                 {loading ? "..." : stats.workoutsThisWeek}
               </p>
-              <p className="text-sm text-zinc-500 mt-1">Workouts This Week</p>
+              <p className="text-sm text-muted-foreground mt-1">Workouts This Week</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="p-2 bg-purple-50 rounded-lg">
@@ -94,15 +94,15 @@ export default function MemberDashboardPage() {
               </div>
             </div>
             <div className="mt-4">
-              <p className="text-2xl font-bold text-zinc-900">
+              <p className="text-2xl font-bold text-foreground">
                 {loading ? "..." : stats.classesBooked}
               </p>
-              <p className="text-sm text-zinc-500 mt-1">Classes Booked</p>
+              <p className="text-sm text-muted-foreground mt-1">Classes Booked</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="p-2 bg-green-50 rounded-lg">
@@ -111,29 +111,29 @@ export default function MemberDashboardPage() {
               <span className="text-xs text-green-600 font-medium">On track</span>
             </div>
             <div className="mt-4">
-              <p className="text-2xl font-bold text-zinc-900">
+              <p className="text-2xl font-bold text-foreground">
                 {loading ? "..." : `${stats.goalCompletion}%`}
               </p>
-              <p className="text-sm text-zinc-500 mt-1">Goal Completion</p>
+              <p className="text-sm text-muted-foreground mt-1">Goal Completion</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="p-2 bg-orange-50 rounded-lg">
                 <CreditCard className="h-5 w-5 text-orange-600" />
               </div>
-              <span className={`text-xs font-medium px-2 py-1 rounded-full ${stats.activeSubscription ? "bg-green-50 text-green-600" : "bg-zinc-100 text-zinc-500"}`}>
+              <span className={`text-xs font-medium px-2 py-1 rounded-full ${stats.activeSubscription ? "bg-green-50 text-green-600" : "bg-muted text-muted-foreground"}`}>
                 {stats.activeSubscription ? "Active" : "Inactive"}
               </span>
             </div>
             <div className="mt-4">
-              <p className="text-2xl font-bold text-zinc-900">
+              <p className="text-2xl font-bold text-foreground">
                 {loading ? "..." : (stats.activeSubscription ? "Premium" : "Free")}
               </p>
-              <p className="text-sm text-zinc-500 mt-1">{stats.activeSubscription ? "Subscription active" : "No subscription"}</p>
+              <p className="text-sm text-muted-foreground mt-1">{stats.activeSubscription ? "Subscription active" : "No subscription"}</p>
             </div>
           </CardContent>
         </Card>
@@ -143,15 +143,15 @@ export default function MemberDashboardPage() {
       <div className="grid gap-4 md:grid-cols-4">
         {quickActions.map((action, i) => (
           <Link key={i} href={action.href}>
-            <Card className="border-zinc-200 shadow-sm hover:shadow-md transition-all cursor-pointer group">
+            <Card className="border-border shadow-sm hover:shadow-md transition-all cursor-pointer group">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div className={`p-2 rounded-lg bg-${action.color}-50`}>
                     <action.icon className={`h-5 w-5 text-${action.color}-600`} />
                   </div>
-                  <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900 transition-colors" />
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </div>
-                <p className="mt-4 font-medium text-zinc-900">{action.label}</p>
+                <p className="mt-4 font-medium text-foreground">{action.label}</p>
               </CardContent>
             </Card>
           </Link>
@@ -161,11 +161,11 @@ export default function MemberDashboardPage() {
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Today's Schedule */}
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-semibold text-zinc-900">Today's Schedule</CardTitle>
+            <CardTitle className="text-lg font-semibold text-foreground">Today's Schedule</CardTitle>
             <Link href="/member/classes">
-              <Button variant="ghost" size="sm" className="text-zinc-500 hover:text-zinc-900">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                 View all
               </Button>
             </Link>
@@ -174,7 +174,7 @@ export default function MemberDashboardPage() {
             {loading ? (
               <div className="space-y-4">
                 {[1, 2].map((i) => (
-                  <div key={i} className="flex items-center justify-between p-4 bg-zinc-50 rounded-lg animate-pulse">
+                  <div key={i} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg animate-pulse">
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-zinc-200 rounded-lg" />
                       <div className="space-y-2">
@@ -188,7 +188,7 @@ export default function MemberDashboardPage() {
             ) : upcomingClasses.length === 0 ? (
               <div className="text-center py-8">
                 <Calendar className="h-12 w-12 mx-auto text-zinc-300 mb-4" />
-                <p className="text-zinc-500">No upcoming classes this week</p>
+                <p className="text-muted-foreground">No upcoming classes this week</p>
                 <Link href="/member/classes">
                   <Button variant="outline" className="mt-4">
                     <CalendarCheck className="h-4 w-4 mr-2" />
@@ -199,20 +199,20 @@ export default function MemberDashboardPage() {
             ) : (
               <div className="space-y-4">
                 {upcomingClasses.map((cls) => (
-                  <div key={cls.id} className="flex items-center justify-between p-4 bg-zinc-50 rounded-lg">
+                  <div key={cls.id} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                     <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border border-zinc-200">
-                        <Calendar className="h-5 w-5 text-zinc-600" />
+                      <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border border-border">
+                        <Calendar className="h-5 w-5 text-foreground/80" />
                       </div>
                       <div>
-                        <p className="font-medium text-zinc-900">{cls.name}</p>
-                        <p className="text-sm text-zinc-500">{cls.trainer} • {cls.room}</p>
+                        <p className="font-medium text-foreground">{cls.name}</p>
+                        <p className="text-sm text-muted-foreground">{cls.trainer} • {cls.room}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
                       <div className="text-right">
-                        <span className="text-sm font-medium text-zinc-900">{cls.time}</span>
-                        <p className="text-xs text-zinc-500">{cls.day}</p>
+                        <span className="text-sm font-medium text-foreground">{cls.time}</span>
+                        <p className="text-xs text-muted-foreground">{cls.day}</p>
                       </div>
                     </div>
                   </div>
@@ -223,17 +223,17 @@ export default function MemberDashboardPage() {
         </Card>
 
         {/* Quick Workout */}
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg font-semibold text-zinc-900">Quick Workout</CardTitle>
+            <CardTitle className="text-lg font-semibold text-foreground">Quick Workout</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-center py-8">
               <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-6">
                 <Dumbbell className="h-10 w-10 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-zinc-900 mb-2">Ready to train?</h3>
-              <p className="text-zinc-500 mb-6">Start your daily workout routine</p>
+              <h3 className="text-xl font-semibold text-foreground mb-2">Ready to train?</h3>
+              <p className="text-muted-foreground mb-6">Start your daily workout routine</p>
               <Link href="/member/workout-plan">
                 <Button size="lg" className="bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg">
                   <Play className="h-5 w-5 mr-2" />

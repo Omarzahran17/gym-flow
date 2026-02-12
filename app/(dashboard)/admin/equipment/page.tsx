@@ -59,7 +59,7 @@ export default function EquipmentPage() {
     const nextDate = new Date(item.nextMaintenance)
     const today = new Date()
     const diffDays = Math.ceil((nextDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-    
+
     if (diffDays < 0) return { status: "overdue", text: `${Math.abs(diffDays)} days overdue`, color: "text-red-600 bg-red-50" }
     if (diffDays <= 7) return { status: "due-soon", text: `Due in ${diffDays} days`, color: "text-yellow-600 bg-yellow-50" }
     return null
@@ -75,8 +75,8 @@ export default function EquipmentPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-zinc-900">Equipment</h1>
-          <p className="text-zinc-500 mt-1">Manage gym equipment and maintenance</p>
+          <h1 className="text-3xl font-bold text-foreground">Equipment</h1>
+          <p className="text-muted-foreground mt-1">Manage gym equipment and maintenance</p>
         </div>
         <Link href="/admin/equipment/new">
           <Button className="bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg">
@@ -88,29 +88,29 @@ export default function EquipmentPage() {
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-zinc-900">{equipment.length}</p>
-            <p className="text-sm text-zinc-500">Total Equipment</p>
+            <p className="text-2xl font-bold text-foreground">{equipment.length}</p>
+            <p className="text-sm text-muted-foreground">Total Equipment</p>
           </CardContent>
         </Card>
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-green-600">
               {equipment.filter(e => e.status === "active").length}
             </p>
-            <p className="text-sm text-zinc-500">Active</p>
+            <p className="text-sm text-muted-foreground">Active</p>
           </CardContent>
         </Card>
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-yellow-600">
               {equipment.filter(e => e.status === "maintenance").length}
             </p>
-            <p className="text-sm text-zinc-500">In Maintenance</p>
+            <p className="text-sm text-muted-foreground">In Maintenance</p>
           </CardContent>
         </Card>
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-red-600">
               {equipment.filter(e => {
@@ -118,28 +118,28 @@ export default function EquipmentPage() {
                 return new Date(e.nextMaintenance) < new Date()
               }).length}
             </p>
-            <p className="text-sm text-zinc-500">Overdue</p>
+            <p className="text-sm text-muted-foreground">Overdue</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters */}
-      <Card className="border-zinc-200 shadow-sm">
+      <Card className="border-border shadow-sm">
         <CardContent className="p-4">
           <div className="flex gap-4 flex-wrap">
             <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search equipment..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-zinc-50 border-zinc-200 focus:border-zinc-900 focus:ring-zinc-900"
+                className="pl-10 bg-muted/50 border-border focus:border-zinc-900 focus:ring-zinc-900"
               />
             </div>
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 min-w-[150px] focus:outline-none focus:ring-2 focus:ring-zinc-900"
+              className="bg-muted/50 border border-border rounded-lg px-3 py-2 min-w-[150px] focus:outline-none focus:ring-2 focus:ring-zinc-900"
             >
               <option value="">All Categories</option>
               {CATEGORIES.map((cat) => (
@@ -149,7 +149,7 @@ export default function EquipmentPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 min-w-[150px] focus:outline-none focus:ring-2 focus:ring-zinc-900"
+              className="bg-muted/50 border border-border rounded-lg px-3 py-2 min-w-[150px] focus:outline-none focus:ring-2 focus:ring-zinc-900"
             >
               <option value="">All Status</option>
               <option value="active">Active</option>
@@ -165,7 +165,7 @@ export default function EquipmentPage() {
       {loading && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="border-zinc-200 shadow-sm">
+            <Card key={i} className="border-border shadow-sm">
               <CardContent className="p-6">
                 <div className="animate-pulse space-y-4">
                   <div className="flex items-center justify-between">
@@ -183,12 +183,12 @@ export default function EquipmentPage() {
 
       {/* Empty State */}
       {!loading && filteredEquipment.length === 0 && (
-        <Card className="border-zinc-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="p-12 text-center">
-            <div className="w-16 h-16 mx-auto bg-zinc-100 rounded-full flex items-center justify-center mb-4">
-              <Wrench className="h-8 w-8 text-zinc-400" />
+            <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center mb-4">
+              <Wrench className="h-8 w-8 text-muted-foreground" />
             </div>
-            <p className="text-zinc-500 mb-4">No equipment found</p>
+            <p className="text-muted-foreground mb-4">No equipment found</p>
             <Link href="/admin/equipment/new">
               <Button variant="outline" className="rounded-lg">
                 <Plus className="h-4 w-4 mr-2" />
@@ -204,27 +204,26 @@ export default function EquipmentPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredEquipment.map((item) => {
             const maintenanceStatus = getMaintenanceStatus(item)
-            
+
             return (
               <Link key={item.id} href={`/admin/equipment/${item.id}`}>
-                <Card className="border-zinc-200 shadow-sm hover:shadow-md transition-all cursor-pointer group h-full">
+                <Card className="border-border shadow-sm hover:shadow-md transition-all cursor-pointer group h-full">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <h3 className="font-semibold text-zinc-900">{item.name}</h3>
-                        <p className="text-sm text-zinc-500">{item.category}</p>
+                        <h3 className="font-semibold text-foreground">{item.name}</h3>
+                        <p className="text-sm text-muted-foreground">{item.category}</p>
                       </div>
                       <div className="flex items-center space-x-2">
                         <span
-                          className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            item.status === "active"
+                          className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${item.status === "active"
                               ? "bg-green-100 text-green-800"
                               : item.status === "maintenance"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : item.status === "broken"
-                              ? "bg-red-100 text-red-800"
-                              : "bg-zinc-100 text-zinc-800"
-                          }`}
+                                ? "bg-yellow-100 text-yellow-800"
+                                : item.status === "broken"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-muted text-zinc-800"
+                            }`}
                         >
                           {item.status}
                         </span>
@@ -238,7 +237,7 @@ export default function EquipmentPage() {
                       </div>
                     )}
 
-                    <div className="space-y-2 text-sm text-zinc-500">
+                    <div className="space-y-2 text-sm text-muted-foreground">
                       {item.purchaseDate && (
                         <div className="flex items-center space-x-2">
                           <Calendar className="h-4 w-4" />
@@ -259,11 +258,11 @@ export default function EquipmentPage() {
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-100">
-                      <span className="text-sm text-zinc-400 group-hover:text-zinc-900 transition-colors">
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
+                      <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
                         View details
                       </span>
-                      <ChevronRight className="h-5 w-5 text-zinc-400 group-hover:text-zinc-900 transition-colors" />
+                      <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                     </div>
                   </CardContent>
                 </Card>
