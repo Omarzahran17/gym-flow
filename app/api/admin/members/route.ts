@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
         const trainerData = trainersMap.get(user.id)
 
         return {
-          id: user.id,
+          id: memberData?.id || user.id,
           userId: user.id,
           email: user.email || null,
           name: user.name || null,
@@ -41,8 +41,8 @@ export async function GET(request: NextRequest) {
           createdAt: user.createdAt,
           // Member info
           phone: (user as any).phone || memberData?.phone || null,
-          emergencyContact: memberData?.emergencyContact || null,
-          healthNotes: memberData?.healthNotes || null,
+          emergencyContact: (user as any).emergencyContact || memberData?.emergencyContact || null,
+          healthNotes: (user as any).healthNotes || memberData?.healthNotes || null,
           status: memberData?.status || "active",
           joinDate: memberData?.joinDate || null,
           // Trainer info

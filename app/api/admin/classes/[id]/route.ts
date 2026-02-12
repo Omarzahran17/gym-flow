@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { classes, trainers } from "@/lib/db/schema"
-import { eq } from "drizzle-orm"
+import { classes, trainers, classSchedules, classBookings } from "@/lib/db/schema"
+import { eq, inArray } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(
@@ -108,6 +108,21 @@ export async function DELETE(
 
     const { id } = await params
     const classId = parseInt(id)
+
+    // Get all schedules for this class
+    const schedules = await db.query.classSchedules.findMany({
+      where: eq(classSchedules.classId, classId),
+    })
+
+    const scheduleIds = schedules.map(s => s.id)
+
+    // Delete all bookings for these schedules
+    if (scheduleIds.length > 0) {
+      await db.delete(classBookings).where(inArray(classBookings.scheduleId, scheduleIds))
+    }
+
+    // Delete all schedules for this class
+    await db.delete(classSchedules).where(eq(classSchedules.classId, classId))
 
     const [deleted] = await db.delete(classes)
       .where(eq(classes.id, classId))

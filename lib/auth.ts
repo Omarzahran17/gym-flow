@@ -109,6 +109,29 @@ export const auth = betterAuth({
                 required: false,
                 input: true,
             },
+            emergencyContact: {
+                type: "string",
+                required: false,
+                input: true,
+            },
+            healthNotes: {
+                type: "string",
+                required: false,
+                input: true,
+            },
+        },
+    },
+    databaseHooks: {
+        user: {
+            create: {
+                after: async (user) => {
+                    await db.insert(members).values({
+                        userId: user.id,
+                        status: 'active',
+                        qrCode: `GYM-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
+                    });
+                },
+            },
         },
     },
     session: {

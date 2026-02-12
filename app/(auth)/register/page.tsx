@@ -16,6 +16,8 @@ export default function RegisterPage() {
     lastName: "",
     email: "",
     phone: "",
+    emergencyContact: "",
+    medicalNotes: "",
     password: "",
     confirmPassword: "",
   })
@@ -157,6 +159,8 @@ export default function RegisterPage() {
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         image: profilePic || undefined,
         phone: formData.phone || undefined,
+        emergencyContact: formData.emergencyContact || undefined,
+        healthNotes: formData.medicalNotes || undefined,
       }, {
         onRequest: () => {
           setLoading(true)
@@ -386,6 +390,32 @@ export default function RegisterPage() {
                 <p className="text-xs text-red-500">{phoneError}</p>
               )}
               <p className="text-xs text-zinc-500 dark:text-zinc-400">Format: +1 (555) 123-4567 or 0555-123-4567</p>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="emergencyContact" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Emergency Contact
+              </label>
+              <Input
+                id="emergencyContact"
+                placeholder="Name and phone number"
+                value={formData.emergencyContact}
+                onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
+                className="h-11 bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-blue-500/20 dark:focus:ring-blue-500/30 transition-all"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="medicalNotes" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Medical Notes / Allergies
+              </label>
+              <textarea
+                id="medicalNotes"
+                placeholder="Any health conditions we should be aware of?"
+                value={formData.medicalNotes}
+                onChange={(e) => setFormData({ ...formData, medicalNotes: e.target.value })}
+                className="w-full min-h-[80px] p-3 text-sm bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/30"
+              />
             </div>
 
             <div className="space-y-2">

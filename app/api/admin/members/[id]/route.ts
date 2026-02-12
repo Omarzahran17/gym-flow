@@ -1,6 +1,16 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { members, attendance, workoutPlanAssignments } from "@/lib/db/schema"
+import { 
+  members, 
+  attendance, 
+  workoutPlanAssignments,
+  memberSubscriptions,
+  measurements,
+  progressPhotos,
+  personalRecords,
+  memberAchievements,
+  classBookings
+} from "@/lib/db/schema"
 import { eq, desc, and, sql } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -129,6 +139,16 @@ export async function DELETE(
 
     const { id } = await params
     const memberId = parseInt(id)
+
+    // Delete all related records first (to handle foreign key constraints)
+    await db.delete(memberSubscriptions).where(eq(memberSubscriptions.memberId, memberId))
+    await db.delete(attendance).where(eq(attendance.memberId, memberId))
+    await db.delete(workoutPlanAssignments).where(eq(workoutPlanAssignments.memberId, memberId))
+    await db.delete(measurements).where(eq(measurements.memberId, memberId))
+    await db.delete(progressPhotos).where(eq(progressPhotos.memberId, memberId))
+    await db.delete(personalRecords).where(eq(personalRecords.memberId, memberId))
+    await db.delete(memberAchievements).where(eq(memberAchievements.memberId, memberId))
+    await db.delete(classBookings).where(eq(classBookings.memberId, memberId))
 
     const [deleted] = await db.delete(members)
       .where(eq(members.id, memberId))

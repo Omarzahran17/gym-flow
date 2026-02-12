@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { classSchedules } from "@/lib/db/schema"
+import { classSchedules, classBookings } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -26,6 +26,9 @@ export async function DELETE(
         { status: 400 }
       )
     }
+
+    // Delete all bookings for this schedule first
+    await db.delete(classBookings).where(eq(classBookings.scheduleId, scheduleId))
 
     await db.delete(classSchedules).where(eq(classSchedules.id, scheduleId))
 

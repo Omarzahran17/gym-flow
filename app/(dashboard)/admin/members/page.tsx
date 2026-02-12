@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Search, Mail, User, Shield, Crown, ArrowUpCircle, Phone, HeartPulse, ShieldAlert, Calendar, FileText, Award } from "lucide-react"
+import { Search, Mail, User, Shield, Crown, ArrowUpCircle, Phone, HeartPulse, ShieldAlert, Calendar, FileText, Award, Trash2 } from "lucide-react"
 
 interface Member {
   id: string
@@ -33,6 +33,8 @@ export default function MembersPage() {
   const [promotingId, setPromotingId] = useState<string | null>(null)
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     fetch("/api/admin/members")
@@ -98,6 +100,31 @@ export default function MembersPage() {
       alert("Failed to promote to trainer")
     } finally {
       setPromotingId(null)
+    }
+  }
+
+  const handleDelete = async (memberId: string, memberName: string) => {
+    setDeletingId(memberId)
+    try {
+      const response = await fetch(`/api/admin/members/${memberId}`, {
+        method: "DELETE",
+      })
+
+      if (response.ok) {
+        // Remove from list
+        setMembers(members.filter(m => m.id !== memberId))
+        setDeleteConfirmOpen(false)
+        setIsDialogOpen(false)
+        setSelectedMember(null)
+        alert(`${memberName} has been deleted successfully!`)
+      } else {
+        const data = await response.json()
+        alert(data.error || "Failed to delete account")
+      }
+    } catch (err) {
+      alert("Failed to delete account")
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -326,6 +353,64 @@ export default function MembersPage() {
                   </div>
                 </div>
               </section>
+
+              <section className="pt-4 border-t border-border">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setDeleteConfirmOpen(true)}
+                  className="w-full"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Account
+                </Button>
+              </section>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent className="max-w-md bg-white dark:bg-zinc-900 border-border dark:border-zinc-800">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl font-bold text-destructive">
+              <Trash2 className="h-5 w-5" />
+              Delete Account
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 space-y-4">
+            <p className="text-muted-foreground">
+              Are you sure you want to delete <span className="font-semibold text-foreground">{selectedMember?.name || selectedMember?.userId}</span>'s account?
+            </p>
+            <p className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
+              This action cannot be undone. All data associated with this account will be permanently removed.
+            </p>
+            <div className="flex gap-3 justify-end pt-2">
+              <Button
+                variant="outline"
+                onClick={() => setDeleteConfirmOpen(false)}
+                disabled={deletingId !== null}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => selectedMember && handleDelete(selectedMember.id, selectedMember.name || selectedMember.userId)}
+                disabled={deletingId !== null}
+              >
+                {deletingId === selectedMember?.id ? (
+                  <>
+                    <span className="animate-spin h-4 w-4 mr-2">⟳</span>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         </DialogContent>

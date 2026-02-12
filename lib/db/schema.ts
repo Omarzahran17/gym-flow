@@ -16,6 +16,8 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
   role: varchar("role", { length: 50 }).default("member").notNull(),
+  emergencyContact: varchar("emergency_contact", { length: 255 }),
+  healthNotes: text("health_notes"),
 });
 
 export const session = pgTable("session", {
