@@ -24,16 +24,32 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Trainer profile not found" }, { status: 404 })
     }
 
-    // Get all active members
+    // Get all members with their user details and workout plan assignments
     const allMembers = await db.query.members.findMany({
-      where: eq(members.status, "active"),
       orderBy: [desc(members.createdAt)],
       with: {
         user: true,
+        assignedWorkoutPlans: {
+          with: {
+            plan: true,
+          },
+        },
       },
     })
 
-    return NextResponse.json({ members: allMembers })
+    // Map to include counts and active plan status
+    const formattedMembers = allMembers.map((m) => {
+      const plans = m.assignedWorkoutPlans.map((a) => a.plan)
+      const activePlan = plans.find((p) => p?.isActive) || null
+
+      return {
+        ...m,
+        assignedPlans: plans.length,
+        activePlan: activePlan,
+      }
+    })
+
+    return NextResponse.json({ members: formattedMembers })
   } catch (error) {
     console.error("Get members error:", error)
     return NextResponse.json(

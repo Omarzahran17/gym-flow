@@ -85,7 +85,7 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const { name, description, startDate, endDate, isActive, exercises: planExercisesList } = body
+    const { name, description, startDate, endDate, isActive, exercises: planExercisesList, memberIds } = body
 
     // Update plan
     const updateData: any = {
@@ -108,6 +108,22 @@ export async function PUT(
 
     if (!plan) {
       return NextResponse.json({ error: "Plan not found" }, { status: 404 })
+    }
+
+    // Update member assignments if provided
+    if (memberIds && Array.isArray(memberIds)) {
+      // Delete existing assignments
+      await db.delete(workoutPlanAssignments).where(eq(workoutPlanAssignments.planId, planId))
+
+      // Add new assignments
+      if (memberIds.length > 0) {
+        await db.insert(workoutPlanAssignments).values(
+          memberIds.map((memberId: number) => ({
+            planId: planId,
+            memberId: parseInt(memberId.toString()),
+          }))
+        )
+      }
     }
 
     // Delete existing exercises and re-add

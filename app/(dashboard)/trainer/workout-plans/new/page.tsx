@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -54,6 +54,9 @@ export default function NewWorkoutPlanPage() {
     endDate: "",
   })
 
+  const searchParams = useSearchParams()
+  const preSelectedMemberId = searchParams.get("memberId")
+
   useEffect(() => {
     // Load exercises and members
     Promise.all([
@@ -66,11 +69,22 @@ export default function NewWorkoutPlanPage() {
         }
         if (membersData.members) {
           setMembers(membersData.members)
+
+          // Auto-select member if memberId is in URL
+          if (preSelectedMemberId) {
+            const id = parseInt(preSelectedMemberId)
+            if (!isNaN(id)) {
+              setFormData(prev => ({
+                ...prev,
+                memberIds: [id]
+              }))
+            }
+          }
         }
       })
       .catch((err) => console.error("Failed to load data:", err))
       .finally(() => setLoading(false))
-  }, [])
+  }, [preSelectedMemberId])
 
   const filteredExercises = exercises.filter(
     (ex) =>

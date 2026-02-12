@@ -83,6 +83,7 @@ export default function EditWorkoutPlanPage({ params }: { params: Promise<{ id: 
     startDate: "",
     endDate: "",
     isActive: true,
+    memberIds: [] as number[],
   })
 
   useEffect(() => {
@@ -117,6 +118,7 @@ export default function EditWorkoutPlanPage({ params }: { params: Promise<{ id: 
           startDate: planData.plan.startDate ? planData.plan.startDate.split("T")[0] : "",
           endDate: planData.plan.endDate ? planData.plan.endDate.split("T")[0] : "",
           isActive: planData.plan.isActive,
+          memberIds: planData.plan.members ? planData.plan.members.map(m => m.id) : [],
         })
         if (planData.plan.members) {
           setAssignedMembers(planData.plan.members)
@@ -205,6 +207,7 @@ export default function EditWorkoutPlanPage({ params }: { params: Promise<{ id: 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
+          memberIds: formData.memberIds,
           exercises: selectedExercises.map(({ exercise, ...rest }) => rest),
         }),
       })
@@ -302,20 +305,34 @@ export default function EditWorkoutPlanPage({ params }: { params: Promise<{ id: 
 
               <div className="space-y-2">
                 <Label>Assigned Members</Label>
-                <div className="p-3 bg-gray-100 rounded-lg text-sm">
-                  {assignedMembers.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {assignedMembers.map((m) => (
-                        <span key={m.id} className="bg-white px-2 py-1 rounded border">
-                          {m.user?.name || `Member #${m.id}`}
-                        </span>
-                      ))}
-                    </div>
+                <div className="border rounded-lg px-3 py-2 max-h-48 overflow-y-auto space-y-2">
+                  {members.length === 0 ? (
+                    <p className="text-gray-500 text-sm">No members available</p>
                   ) : (
-                    <p className="text-gray-500">No members assigned</p>
+                    members.map((member) => (
+                      <label key={member.id} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input
+                          type="checkbox"
+                          checked={formData.memberIds.includes(member.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setFormData({ ...formData, memberIds: [...formData.memberIds, member.id] })
+                            } else {
+                              setFormData({ ...formData, memberIds: formData.memberIds.filter(id => id !== member.id) })
+                            }
+                          }}
+                          className="rounded border-gray-300"
+                        />
+                        <span className="text-sm">
+                          {member.user?.name || `Member #${member.id}`} {member.phone ? `(${member.phone})` : ""}
+                        </span>
+                      </label>
+                    ))
                   )}
                 </div>
-                <p className="text-xs text-gray-500">Manage assignments from workout plans list</p>
+                {formData.memberIds.length > 0 && (
+                  <p className="text-sm text-gray-500">{formData.memberIds.length} member(s) selected</p>
+                )}
               </div>
 
               <div className="space-y-2">

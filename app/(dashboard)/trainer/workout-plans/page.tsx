@@ -18,6 +18,10 @@ interface WorkoutPlan {
   members?: {
     id: number
     userId: string
+    user?: {
+      name: string | null
+      email: string | null
+    }
   }[]
   exercises?: {
     id: number
@@ -125,7 +129,7 @@ export default function WorkoutPlansPage() {
                       <span>
                         {plan.members && plan.members.length > 0
                           ? plan.members.length === 1
-                            ? `Member #${plan.members[0].id}`
+                            ? plan.members[0].user?.name || `Member #${plan.members[0].id}`
                             : `${plan.members.length} members`
                           : "Unassigned"}
                       </span>

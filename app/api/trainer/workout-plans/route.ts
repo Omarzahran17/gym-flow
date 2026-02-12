@@ -23,7 +23,11 @@ export async function GET(request: NextRequest) {
       with: {
         assignments: {
           with: {
-            member: true,
+            member: {
+              with: {
+                user: true,
+              },
+            },
           },
         },
         exercises: {

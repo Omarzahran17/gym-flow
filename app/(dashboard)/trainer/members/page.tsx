@@ -14,6 +14,10 @@ interface Member {
   status: string
   joinDate: Date
   assignedPlans: number
+  user?: {
+    name: string | null
+    email: string | null
+  }
   activePlan: {
     id: number
     name: string
@@ -40,8 +44,10 @@ export default function TrainerMembersPage() {
 
   const filteredMembers = members.filter(
     (member) =>
-      member.userId.toLowerCase().includes(search.toLowerCase()) ||
-      member.phone?.toLowerCase().includes(search.toLowerCase())
+      member.user?.name?.toLowerCase().includes(search.toLowerCase()) ||
+      member.user?.email?.toLowerCase().includes(search.toLowerCase()) ||
+      member.phone?.toLowerCase().includes(search.toLowerCase()) ||
+      member.userId.toLowerCase().includes(search.toLowerCase())
   )
 
   return (
@@ -93,7 +99,7 @@ export default function TrainerMembersPage() {
                       </div>
                       <div>
                         <CardTitle className="text-lg">
-                          {member.userId.split("_")[0]} {member.userId.split("_")[1]}
+                          {member.user?.name || member.userId.slice(0, 8)}
                         </CardTitle>
                         <p className="text-sm text-gray-500">
                           {member.phone || "No phone"}
@@ -106,11 +112,10 @@ export default function TrainerMembersPage() {
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Status</span>
                         <span
-                          className={`font-medium ${
-                            member.status === "active"
-                              ? "text-green-600"
-                              : "text-gray-500"
-                          }`}
+                          className={`font-medium ${member.status === "active"
+                            ? "text-green-600"
+                            : "text-gray-500"
+                            }`}
                         >
                           {member.status}
                         </span>
