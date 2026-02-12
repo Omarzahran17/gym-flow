@@ -156,6 +156,7 @@ export default function RegisterPage() {
         password: formData.password,
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         image: profilePic || undefined,
+        phone: formData.phone || undefined,
       }, {
         onRequest: () => {
           setLoading(true)

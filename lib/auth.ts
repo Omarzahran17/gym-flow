@@ -53,15 +53,15 @@ export const auth = betterAuth({
                 },
                 onSubscriptionComplete: async ({ subscription, plan }) => {
                     if (!subscription.referenceId) return;
-                    
+
                     await db.update(members)
                         .set({ status: 'active' })
                         .where(eq(members.userId, subscription.referenceId));
-                    
+
                     const planDetails = await db.query.subscriptionPlans.findFirst({
                         where: eq(subscriptionPlans.name, plan.name)
                     });
-                    
+
                     if (planDetails && subscription.referenceId) {
                         await db.insert(memberSubscriptions).values({
                             memberId: parseInt(subscription.referenceId),
@@ -75,14 +75,14 @@ export const auth = betterAuth({
                 },
                 onSubscriptionCancel: async ({ subscription }) => {
                     if (!subscription.stripeSubscriptionId) return;
-                    
+
                     await db.update(memberSubscriptions)
                         .set({ status: 'canceled' })
                         .where(eq(memberSubscriptions.stripeSubscriptionId, subscription.stripeSubscriptionId));
                 },
                 onSubscriptionUpdate: async ({ subscription }) => {
                     if (!subscription.stripeSubscriptionId) return;
-                    
+
                     await db.update(memberSubscriptions)
                         .set({
                             status: subscription.status,
@@ -103,6 +103,11 @@ export const auth = betterAuth({
                 type: "string",
                 default: "member",
                 input: false,
+            },
+            phone: {
+                type: "string",
+                required: false,
+                input: true,
             },
         },
     },

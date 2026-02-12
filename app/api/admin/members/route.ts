@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
           isTrainer: !!trainerData,
           createdAt: user.createdAt,
           // Member info
-          phone: memberData?.phone || null,
+          phone: (user as any).phone || memberData?.phone || null,
           emergencyContact: memberData?.emergencyContact || null,
           healthNotes: memberData?.healthNotes || null,
           status: memberData?.status || "active",
