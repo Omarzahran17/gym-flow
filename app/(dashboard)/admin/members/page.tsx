@@ -4,7 +4,8 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { Search, Mail, User, Shield, Crown, ArrowUpCircle } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Search, Mail, User, Shield, Crown, ArrowUpCircle, Phone, HeartPulse, ShieldAlert, Calendar, FileText, Award } from "lucide-react"
 
 interface Member {
   id: string
@@ -13,6 +14,16 @@ interface Member {
   email?: string | null
   status?: string
   role?: string
+  phone?: string | null
+  emergencyContact?: string | null
+  healthNotes?: string | null
+  joinDate?: string | null
+  createdAt?: string | null
+  bio?: string | null
+  specialization?: string | null
+  certifications?: string | null
+  isMember: boolean
+  isTrainer: boolean
 }
 
 export default function MembersPage() {
@@ -20,6 +31,8 @@ export default function MembersPage() {
   const [search, setSearch] = useState("")
   const [loading, setLoading] = useState(true)
   const [promotingId, setPromotingId] = useState<string | null>(null)
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   useEffect(() => {
     fetch("/api/admin/members")
@@ -141,10 +154,17 @@ export default function MembersPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredMembers.map((member) => (
-            <Card key={member.id} className="border-border dark:border-zinc-800 shadow-sm bg-card hover:shadow-md transition-shadow">
+            <Card
+              key={member.id}
+              className="border-border dark:border-zinc-800 shadow-sm bg-card hover:shadow-md transition-all cursor-pointer hover:border-blue-500/50 group"
+              onClick={() => {
+                setSelectedMember(member)
+                setIsDialogOpen(true)
+              }}
+            >
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                     <span className="text-white font-semibold text-sm">
                       {member.name?.[0] || member.userId[0]?.toUpperCase()}
                     </span>
@@ -162,7 +182,7 @@ export default function MembersPage() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-border dark:border-zinc-800">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getRoleBadgeColor(member.role)}`}>
                       {getRoleIcon(member.role)}
                       {member.role || "member"}
@@ -171,7 +191,8 @@ export default function MembersPage() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation()
                           const name = member.name || member.userId
                           if (confirm(`Promote ${name} to trainer?`)) {
                             handlePromoteToTrainer(member.id, name)
@@ -189,11 +210,10 @@ export default function MembersPage() {
                       </Button>
                     )}
                   </div>
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                    member.status === "active"
-                      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                      : "bg-muted text-muted-foreground"
-                  }`}>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${member.status === "active"
+                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                    : "bg-muted text-muted-foreground"
+                    }`}>
                     {member.status || "active"}
                   </span>
                 </div>
@@ -202,6 +222,114 @@ export default function MembersPage() {
           ))}
         </div>
       )}
+
+      {/* User Details Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-2xl bg-white dark:bg-zinc-900 border-border dark:border-zinc-800">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-2xl font-bold">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white">
+                {selectedMember?.name?.[0] || selectedMember?.userId[0]?.toUpperCase()}
+              </div>
+              <div>
+                <p>{selectedMember?.name || "User Details"}</p>
+                <div className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium mt-1 ${getRoleBadgeColor(selectedMember?.role)}`}>
+                  {getRoleIcon(selectedMember?.role)}
+                  {selectedMember?.role || "member"}
+                </div>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-6">
+              <section>
+                <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-3">Contact Information</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-4 w-4 text-blue-500" />
+                    <span className="text-zinc-600 dark:text-zinc-300">{selectedMember?.email || "No email"}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Phone className="h-4 w-4 text-emerald-500" />
+                    <span className="text-zinc-600 dark:text-zinc-300">{selectedMember?.phone || "No phone number"}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <ShieldAlert className="h-4 w-4 text-red-500" />
+                    <div className="text-sm">
+                      <p className="text-zinc-400 text-xs">Emergency Contact</p>
+                      <p className="text-zinc-600 dark:text-zinc-300">{selectedMember?.emergencyContact || "Not provided"}</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section>
+                <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-3">Health & Access</h3>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <HeartPulse className="h-4 w-4 text-pink-500 mt-1" />
+                    <div className="text-sm">
+                      <p className="text-zinc-400 text-xs">Medical Notes</p>
+                      <p className="text-zinc-600 dark:text-zinc-300 italic">
+                        {selectedMember?.healthNotes || "No medical notes on file."}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Calendar className="h-4 w-4 text-purple-500" />
+                    <div className="text-sm">
+                      <p className="text-zinc-400 text-xs">Member Since</p>
+                      <p className="text-zinc-600 dark:text-zinc-300">
+                        {selectedMember?.createdAt ? new Date(selectedMember.createdAt).toLocaleDateString() : "Unknown"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <div className="space-y-6">
+              {selectedMember?.role === "trainer" && (
+                <section className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20">
+                  <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <Award className="h-4 w-4" />
+                    Trainer Profile
+                  </h3>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-zinc-400 text-xs mb-1 font-medium">Specialization</p>
+                      <p className="text-zinc-700 dark:text-zinc-200">{selectedMember?.specialization || "General Fitness"}</p>
+                    </div>
+                    <div>
+                      <p className="text-zinc-400 text-xs mb-1 font-medium">Certifications</p>
+                      <p className="text-zinc-700 dark:text-zinc-200 text-sm">{selectedMember?.certifications || "N/A"}</p>
+                    </div>
+                    <div>
+                      <p className="text-zinc-400 text-xs mb-1 font-medium">Bio</p>
+                      <p className="text-zinc-600 dark:text-zinc-400 text-xs italic line-clamp-3">{selectedMember?.bio || "No bio provided."}</p>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              <section>
+                <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-3 font-medium">System Data</h3>
+                <div className="p-4 rounded-xl bg-muted/30 border border-border space-y-2">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-zinc-400">User ID</span>
+                    <span className="text-zinc-500 font-mono">{selectedMember?.userId}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-zinc-400">System ID</span>
+                    <span className="text-zinc-500 font-mono">{selectedMember?.id}</span>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4">

@@ -21,14 +21,14 @@ export async function GET(request: NextRequest) {
     const allMembers = await db.query.members.findMany()
     const allTrainers = await db.query.trainers.findMany()
 
-    const memberIds = new Set(allMembers.map(m => m.userId))
-    const trainerIds = new Set(allTrainers.map(t => t.userId))
+    const membersMap = new Map(allMembers.map(m => [m.userId, m]))
+    const trainersMap = new Map(allTrainers.map(t => [t.userId, t]))
 
     const formattedUsers = allUsers
-      .filter(user => user.role === "member" || user.role === "trainer")
+      .filter(user => user.role === "member" || user.role === "trainer" || user.role === "admin")
       .map((user) => {
-        const isMember = memberIds.has(user.id)
-        const isTrainer = trainerIds.has(user.id)
+        const memberData = membersMap.get(user.id)
+        const trainerData = trainersMap.get(user.id)
 
         return {
           id: user.id,
@@ -36,9 +36,19 @@ export async function GET(request: NextRequest) {
           email: user.email || null,
           name: user.name || null,
           role: user.role || "member",
-          isMember,
-          isTrainer,
+          isMember: !!memberData,
+          isTrainer: !!trainerData,
           createdAt: user.createdAt,
+          // Member info
+          phone: memberData?.phone || null,
+          emergencyContact: memberData?.emergencyContact || null,
+          healthNotes: memberData?.healthNotes || null,
+          status: memberData?.status || "active",
+          joinDate: memberData?.joinDate || null,
+          // Trainer info
+          bio: trainerData?.bio || null,
+          specialization: trainerData?.specialization || null,
+          certifications: trainerData?.certifications || null,
         }
       })
 

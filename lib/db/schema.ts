@@ -346,6 +346,16 @@ export const messages = pgTable('messages', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+// Contact Form Submissions
+export const contactMessages = pgTable('contact_messages', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  email: varchar('email', { length: 255 }).notNull(),
+  message: text('message').notNull(),
+  status: varchar('status', { length: 50 }).default('new').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 // Application Relations
 export const membersRelations = relations(members, ({ many, one }) => ({
   user: one(users, {
@@ -523,3 +533,5 @@ export type EquipmentMaintenance = typeof equipmentMaintenance.$inferSelect;
 export type NewEquipmentMaintenance = typeof equipmentMaintenance.$inferInsert;
 export type Message = typeof messages.$inferSelect;
 export type NewMessage = typeof messages.$inferInsert;
+export type ContactMessage = typeof contactMessages.$inferSelect;
+export type NewContactMessage = typeof contactMessages.$inferInsert;

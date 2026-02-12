@@ -70,11 +70,24 @@ export default function HomePage() {
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setContactSubmitting(true)
-    // Simulate submission
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setContactForm({ name: "", email: "", message: "" })
-    setContactSubmitting(false)
-    alert("Thank you for your message! We'll get back to you soon.")
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(contactForm),
+      })
+
+      if (response.ok) {
+        setContactForm({ name: "", email: "", message: "" })
+        alert("Thank you for your message! We'll get back to you soon.")
+      } else {
+        alert("Failed to send message. Please try again.")
+      }
+    } catch (err) {
+      alert("Failed to send message. Please try again.")
+    } finally {
+      setContactSubmitting(false)
+    }
   }
 
   return (

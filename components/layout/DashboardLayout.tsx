@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import {
   Dumbbell, Users, Calendar, Settings, LogOut, LayoutDashboard, CreditCard,
   ChevronLeft, ChevronRight, Menu, X, BarChart3, Trophy, Target, Zap,
-  ClipboardList, UserCheck, FileText, Wrench, Sun, Moon
+  ClipboardList, UserCheck, FileText, Wrench, Sun, Moon, MessageSquare
 } from "lucide-react"
 import { authClient } from "@/lib/auth-client"
 
@@ -39,6 +39,7 @@ const iconMap: Record<string, React.ReactNode> = {
   FileText: <FileText className="h-5 w-5" />,
   Wrench: <Wrench className="h-5 w-5" />,
   Zap: <Zap className="h-5 w-5" />,
+  MessageSquare: <MessageSquare className="h-5 w-5" />,
 }
 
 export default function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
@@ -109,6 +110,7 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
           { href: "/admin/equipment", label: "Equipment", icon: "Wrench" },
           { href: "/admin/check-in", label: "Check-In", icon: "ClipboardList" },
           { href: "/admin/reports", label: "Reports", icon: "BarChart3" },
+          { href: "/admin/contact", label: "Contact Messages", icon: "MessageSquare" },
         ]
       case "trainer":
         return [
