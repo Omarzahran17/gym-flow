@@ -157,7 +157,7 @@ export default function TrainerMemberDetailPage() {
           <CardHeader className="border-b border-border">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold text-foreground">Workout Plans</CardTitle>
-              <Link href={`/trainer/workout-plans/new?memberId=${member.id}`}>
+              <Link href={`/trainer/workout-plans/new`}>
                 <Button variant="outline" size="sm" className="border-border">
                   Create Plan
                 </Button>

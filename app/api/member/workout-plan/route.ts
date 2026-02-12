@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { workoutPlans, planExercises, members } from "@/lib/db/schema"
-import { eq, and } from "drizzle-orm"
+import { workoutPlans, planExercises, workoutPlanAssignments, members } from "@/lib/db/schema"
+import { eq } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
@@ -14,7 +14,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Get member from user
     const member = await db.query.members.findFirst({
       where: eq(members.userId, session.user.id),
     })
@@ -23,28 +22,32 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Member not found" }, { status: 404 })
     }
 
-    // Get active workout plan for member
-    const plan = await db.query.workoutPlans.findFirst({
-      where: and(
-        eq(workoutPlans.memberId, member.id),
-        eq(workoutPlans.isActive, true)
-      ),
+    const assignment = await db.query.workoutPlanAssignments.findFirst({
+      where: eq(workoutPlanAssignments.memberId, member.id),
       with: {
-        exercises: {
+        plan: {
           with: {
-            exercise: true,
+            exercises: {
+              with: {
+                exercise: true,
+              },
+              orderBy: [planExercises.orderIndex],
+            },
+            trainer: {
+              with: {
+                user: true,
+              },
+            },
           },
-          orderBy: [planExercises.orderIndex],
         },
-        trainer: true,
       },
     })
 
-    if (!plan) {
+    if (!assignment || !assignment.plan || !assignment.plan.isActive) {
       return NextResponse.json({ plan: null })
     }
 
-    return NextResponse.json({ plan })
+    return NextResponse.json({ plan: assignment.plan })
   } catch (error) {
     console.error("Get member workout plan error:", error)
     return NextResponse.json(

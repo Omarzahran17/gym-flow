@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { members, trainers, workoutPlans } from "@/lib/db/schema"
-import { eq, desc, inArray } from "drizzle-orm"
+import { eq, desc } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
@@ -31,20 +31,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ members: [] })
     }
 
-    const memberIds = [...new Set(trainerWorkoutPlans.map(plan => plan.memberId).filter(Boolean))]
-
     const membersList = await db.query.members.findMany({
-      where: inArray(members.id, memberIds as number[]),
       orderBy: [members.createdAt],
     })
 
     const membersWithPlans = membersList.map(member => {
-      const memberPlans = trainerWorkoutPlans.filter(plan => plan.memberId === member.id)
-      const activePlan = memberPlans.find(plan => plan.isActive)
+      const memberAssignments = trainerWorkoutPlans.filter(plan => 
+        plan.assignments?.some(a => a.memberId === member.id)
+      )
+      const activePlan = memberAssignments.find(plan => plan.isActive)
 
       return {
         ...member,
-        assignedPlans: memberPlans.length,
+        assignedPlans: memberAssignments.length,
         activePlan: activePlan ? {
           id: activePlan.id,
           name: activePlan.name,

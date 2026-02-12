@@ -45,7 +45,7 @@ export default function NewWorkoutPlanPage() {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    memberId: "",
+    memberIds: [] as number[],
     startDate: "",
     endDate: "",
   })
@@ -125,7 +125,7 @@ export default function NewWorkoutPlanPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          memberId: parseInt(formData.memberId),
+          memberIds: formData.memberIds,
           exercises: selectedExercises.map(({ exercise, ...rest }) => rest),
         }),
       })
@@ -187,23 +187,35 @@ export default function NewWorkoutPlanPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="member">Assign to Member *</Label>
-                <select
-                  id="member"
-                  value={formData.memberId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, memberId: e.target.value })
-                  }
-                  className="w-full border rounded-lg px-3 py-2"
-                  required
-                >
-                  <option value="">Select a member</option>
-                  {members.map((member) => (
-                    <option key={member.id} value={member.id}>
-                      Member #{member.id} {member.phone ? `(${member.phone})` : ""}
-                    </option>
-                  ))}
-                </select>
+                <Label>Assign to Members</Label>
+                <div className="border rounded-lg px-3 py-2 max-h-48 overflow-y-auto space-y-2">
+                  {members.length === 0 ? (
+                    <p className="text-gray-500 text-sm">No members available</p>
+                  ) : (
+                    members.map((member) => (
+                      <label key={member.id} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                        <input
+                          type="checkbox"
+                          checked={formData.memberIds.includes(member.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setFormData({ ...formData, memberIds: [...formData.memberIds, member.id] })
+                            } else {
+                              setFormData({ ...formData, memberIds: formData.memberIds.filter(id => id !== member.id) })
+                            }
+                          }}
+                          className="rounded border-gray-300"
+                        />
+                        <span className="text-sm">
+                          Member #{member.id} {member.phone ? `(${member.phone})` : ""}
+                        </span>
+                      </label>
+                    ))
+                  )}
+                </div>
+                {formData.memberIds.length > 0 && (
+                  <p className="text-sm text-gray-500">{formData.memberIds.length} member(s) selected</p>
+                )}
               </div>
 
               <div className="space-y-2">

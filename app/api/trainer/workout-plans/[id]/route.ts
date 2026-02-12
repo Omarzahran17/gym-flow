@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { workoutPlans, planExercises } from "@/lib/db/schema"
+import { workoutPlans, planExercises, workoutPlanAssignments } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -27,7 +27,11 @@ export async function GET(
     const plan = await db.query.workoutPlans.findFirst({
       where: eq(workoutPlans.id, planId),
       with: {
-        member: true,
+        assignments: {
+          with: {
+            member: true,
+          },
+        },
         exercises: {
           with: {
             exercise: true,
@@ -41,7 +45,12 @@ export async function GET(
       return NextResponse.json({ error: "Plan not found" }, { status: 404 })
     }
 
-    return NextResponse.json({ plan })
+    const planWithMembers = {
+      ...plan,
+      members: plan.assignments?.map(a => a.member) || [],
+    }
+
+    return NextResponse.json({ plan: planWithMembers })
   } catch (error) {
     console.error("Get workout plan error:", error)
     return NextResponse.json(

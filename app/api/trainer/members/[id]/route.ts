@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { trainers, members, workoutPlans, attendance, memberAchievements, achievements } from "@/lib/db/schema"
-import { eq, and, desc } from "drizzle-orm"
+import { trainers, members, workoutPlans, workoutPlanAssignments, planExercises, exercises, attendance, memberAchievements, achievements } from "@/lib/db/schema"
+import { eq, and, desc, inArray } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(
@@ -18,7 +18,7 @@ export async function GET(
     }
 
     const { id } = await params
-    const memberId = parseInt(id)
+    const memberIdNum = parseInt(id)
 
     const trainer = await db.query.trainers.findFirst({
       where: eq(trainers.userId, session.user.id),
@@ -28,9 +28,21 @@ export async function GET(
       return NextResponse.json({ error: "Trainer not found" }, { status: 404 })
     }
 
+    const memberAssignments = await db.query.workoutPlanAssignments.findMany({
+      where: and(
+        eq(workoutPlanAssignments.memberId, memberIdNum),
+      ),
+    })
+
+    if (memberAssignments.length === 0) {
+      return NextResponse.json({ error: "Member not found or not assigned to you" }, { status: 404 })
+    }
+
+    const planIds = memberAssignments.map(a => a.planId)
+    
     const memberPlans = await db.query.workoutPlans.findMany({
       where: and(
-        eq(workoutPlans.memberId, memberId),
+        inArray(workoutPlans.id, planIds),
         eq(workoutPlans.trainerId, trainer.id)
       ),
       with: {
@@ -43,12 +55,8 @@ export async function GET(
       orderBy: [desc(workoutPlans.createdAt)],
     })
 
-    if (memberPlans.length === 0) {
-      return NextResponse.json({ error: "Member not found or not assigned to you" }, { status: 404 })
-    }
-
     const member = await db.query.members.findFirst({
-      where: eq(members.id, memberId),
+      where: eq(members.id, memberIdNum),
       with: {
         user: true,
         achievements: {
@@ -66,7 +74,7 @@ export async function GET(
     }
 
     const allAttendance = await db.query.attendance.findMany({
-      where: eq(attendance.memberId, memberId),
+      where: eq(attendance.memberId, memberIdNum),
     })
 
     const thirtyDaysAgo = new Date()

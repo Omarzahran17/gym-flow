@@ -188,13 +188,20 @@ export const exercises = pgTable('exercises', {
 export const workoutPlans = pgTable('workout_plans', {
   id: serial('id').primaryKey(),
   trainerId: integer('trainer_id').references(() => trainers.id),
-  memberId: integer('member_id').references(() => members.id),
   name: varchar('name', { length: 255 }).notNull(),
   description: text('description'),
   startDate: date('start_date'),
   endDate: date('end_date'),
   isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at').defaultNow(),
+});
+
+// Workout Plan Assignments (many-to-many)
+export const workoutPlanAssignments = pgTable('workout_plan_assignments', {
+  id: serial('id').primaryKey(),
+  planId: integer('plan_id').references(() => workoutPlans.id),
+  memberId: integer('member_id').references(() => members.id),
+  assignedAt: timestamp('assigned_at').defaultNow(),
 });
 
 // Plan Exercises
@@ -348,6 +355,7 @@ export const membersRelations = relations(members, ({ many, one }) => ({
   subscriptions: many(memberSubscriptions),
   attendance: many(attendance),
   workoutPlans: many(workoutPlans),
+  assignedWorkoutPlans: many(workoutPlanAssignments),
   measurements: many(measurements),
   progressPhotos: many(progressPhotos),
   personalRecords: many(personalRecords),
@@ -384,11 +392,19 @@ export const workoutPlansRelations = relations(workoutPlans, ({ one, many }) => 
     fields: [workoutPlans.trainerId],
     references: [trainers.id],
   }),
+  exercises: many(planExercises),
+  assignments: many(workoutPlanAssignments),
+}));
+
+export const workoutPlanAssignmentsRelations = relations(workoutPlanAssignments, ({ one }) => ({
+  plan: one(workoutPlans, {
+    fields: [workoutPlanAssignments.planId],
+    references: [workoutPlans.id],
+  }),
   member: one(members, {
-    fields: [workoutPlans.memberId],
+    fields: [workoutPlanAssignments.memberId],
     references: [members.id],
   }),
-  exercises: many(planExercises),
 }));
 
 export const exercisesRelations = relations(exercises, ({ many }) => ({
@@ -474,6 +490,8 @@ export type Exercise = typeof exercises.$inferSelect;
 export type NewExercise = typeof exercises.$inferInsert;
 export type WorkoutPlan = typeof workoutPlans.$inferSelect;
 export type NewWorkoutPlan = typeof workoutPlans.$inferInsert;
+export type WorkoutPlanAssignment = typeof workoutPlanAssignments.$inferSelect;
+export type NewWorkoutPlanAssignment = typeof workoutPlanAssignments.$inferInsert;
 export type PlanExercise = typeof planExercises.$inferSelect;
 export type NewPlanExercise = typeof planExercises.$inferInsert;
 export type Measurement = typeof measurements.$inferSelect;

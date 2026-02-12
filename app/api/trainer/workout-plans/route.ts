@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { workoutPlans, planExercises, trainers } from "@/lib/db/schema"
+import { workoutPlans, planExercises, workoutPlanAssignments, trainers } from "@/lib/db/schema"
 import { desc, eq } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -14,7 +14,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Get trainer ID from user
     const trainer = await db.query.trainers.findFirst({
       where: eq(trainers.userId, session.user.id),
     })
@@ -22,7 +21,11 @@ export async function GET(request: NextRequest) {
     const plans = await db.query.workoutPlans.findMany({
       where: eq(workoutPlans.trainerId, trainer?.id || 0),
       with: {
-        member: true,
+        assignments: {
+          with: {
+            member: true,
+          },
+        },
         exercises: {
           with: {
             exercise: true,
@@ -32,7 +35,12 @@ export async function GET(request: NextRequest) {
       orderBy: [desc(workoutPlans.createdAt)],
     })
 
-    return NextResponse.json({ plans })
+    const plansWithMembers = plans.map(plan => ({
+      ...plan,
+      members: plan.assignments?.map(a => a.member) || [],
+    }))
+
+    return NextResponse.json({ plans: plansWithMembers })
   } catch (error) {
     console.error("Get workout plans error:", error)
     return NextResponse.json(
@@ -52,7 +60,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Get trainer ID from user
     const trainer = await db.query.trainers.findFirst({
       where: eq(trainers.userId, session.user.id),
     })
@@ -62,19 +69,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, description, memberId, startDate, endDate, exercises: planExercisesList } = body
+    const { name, description, memberIds, startDate, endDate, exercises: planExercisesList } = body
 
-    if (!name || !memberId) {
+    if (!name) {
       return NextResponse.json(
-        { error: "Name and member are required" },
+        { error: "Name is required" },
         { status: 400 }
       )
     }
 
-    // Create workout plan
     const planData: any = {
       trainerId: trainer.id,
-      memberId,
       name,
       description: description || "",
       isActive: true,
@@ -89,7 +94,15 @@ export async function POST(request: NextRequest) {
     
     const [plan] = await db.insert(workoutPlans).values(planData).returning()
 
-    // Add exercises to plan
+    if (memberIds && Array.isArray(memberIds) && memberIds.length > 0) {
+      await db.insert(workoutPlanAssignments).values(
+        memberIds.map((memberId: number) => ({
+          planId: plan.id,
+          memberId: parseInt(memberId),
+        }))
+      )
+    }
+
     if (planExercisesList && planExercisesList.length > 0) {
       await db.insert(planExercises).values(
         planExercisesList.map((ex: any, index: number) => ({

@@ -39,10 +39,13 @@ interface WorkoutPlan {
   id: number
   name: string
   description: string
-  memberId: number
   isActive: boolean
   startDate: string | null
   endDate: string | null
+  members?: {
+    id: number
+    userId: string
+  }[]
   exercises: {
     id: number
     exerciseId: number
@@ -68,7 +71,6 @@ export default function EditWorkoutPlanPage({ params }: { params: Promise<{ id: 
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    memberId: "",
     startDate: "",
     endDate: "",
     isActive: true,
@@ -103,7 +105,6 @@ export default function EditWorkoutPlanPage({ params }: { params: Promise<{ id: 
         setFormData({
           name: planData.plan.name,
           description: planData.plan.description || "",
-          memberId: planData.plan.memberId.toString(),
           startDate: planData.plan.startDate ? planData.plan.startDate.split("T")[0] : "",
           endDate: planData.plan.endDate ? planData.plan.endDate.split("T")[0] : "",
           isActive: planData.plan.isActive,
@@ -288,15 +289,21 @@ export default function EditWorkoutPlanPage({ params }: { params: Promise<{ id: 
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="member">Assigned Member</Label>
-                <Input
-                  value={members.find((m) => m.id.toString() === formData.memberId)
-                    ? `Member #${formData.memberId}`
-                    : "Unknown Member"}
-                  disabled
-                  className="bg-gray-100"
-                />
-                <p className="text-xs text-gray-500">Member cannot be changed after creation</p>
+                <Label>Assigned Members</Label>
+                <div className="p-3 bg-gray-100 rounded-lg text-sm">
+                  {planData.plan?.members && planData.plan.members.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {planData.plan.members.map((m: any) => (
+                        <span key={m.id} className="bg-white px-2 py-1 rounded border">
+                          Member #{m.id}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500">No members assigned</p>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500">Manage assignments from workout plans list</p>
               </div>
 
               <div className="space-y-2">

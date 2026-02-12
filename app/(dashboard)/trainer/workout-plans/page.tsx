@@ -11,15 +11,14 @@ interface WorkoutPlan {
   id: number
   name: string
   description: string
-  memberId: number
   isActive: boolean
   startDate: string | null
   endDate: string | null
   createdAt: string
-  member?: {
+  members?: {
     id: number
     userId: string
-  }
+  }[]
   exercises?: {
     id: number
     orderIndex: number
@@ -123,7 +122,13 @@ export default function WorkoutPlansPage() {
                     <CardTitle className="text-lg font-semibold text-foreground">{plan.name}</CardTitle>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                       <User className="h-4 w-4" />
-                      <span>Member #{plan.memberId}</span>
+                      <span>
+                        {plan.members && plan.members.length > 0
+                          ? plan.members.length === 1
+                            ? `Member #${plan.members[0].id}`
+                            : `${plan.members.length} members`
+                          : "Unassigned"}
+                      </span>
                     </div>
                   </div>
                   <Badge variant={plan.isActive ? "default" : "secondary"} className={plan.isActive ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-muted text-foreground/80"}>
