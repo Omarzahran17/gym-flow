@@ -25,10 +25,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file type
-    const allowedTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo'];
-    if (!allowedTypes.includes(file.type)) {
+    const allowedVideoTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo'];
+    const allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const isVideo = allowedVideoTypes.includes(file.type);
+    const isImage = allowedImageTypes.includes(file.type);
+
+    if (!isVideo && !isImage) {
       return NextResponse.json(
-        { error: `Invalid file type: ${file.type}. Allowed: MP4, WebM, QuickTime` },
+        { error: `Invalid file type: ${file.type}. Allowed: MP4, WebM, QuickTime, JPEG, PNG, WEBP` },
         { status: 400 }
       );
     }

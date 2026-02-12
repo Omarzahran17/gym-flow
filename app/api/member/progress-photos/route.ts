@@ -48,17 +48,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Get member from user
-    const member = await db.query.members.findFirst({
-      where: eq(members.userId, session.user.id),
-    })
-
-    if (!member) {
-      return NextResponse.json({ error: "Member not found" }, { status: 404 })
-    }
-
     const body = await request.json()
-    const { date, url, blobUrl, type, notes } = body
+    const { date, url, blobUrl, type, notes, memberId } = body
+
+    let targetMemberId: number
+
+    if ((session.user as any).role === "trainer") {
+      if (!memberId) {
+        return NextResponse.json({ error: "Member ID is required for trainers" }, { status: 400 })
+      }
+      targetMemberId = parseInt(memberId)
+    } else {
+      // Get member from user
+      const member = await db.query.members.findFirst({
+        where: eq(members.userId, session.user.id),
+      })
+
+      if (!member) {
+        return NextResponse.json({ error: "Member not found" }, { status: 404 })
+      }
+      targetMemberId = member.id
+    }
 
     if (!date || !url) {
       return NextResponse.json(
@@ -67,16 +77,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log("Creating progress photo for member:", targetMemberId, "date:", date)
+
     const photoData: any = {
-      memberId: member.id,
+      memberId: targetMemberId,
       date: new Date(date),
       url,
       type: type || "progress",
     }
-    
+
     if (blobUrl) photoData.blobUrl = blobUrl
     if (notes) photoData.notes = notes
-    
+
     const [photo] = await db.insert(progressPhotos).values(photoData).returning()
 
     return NextResponse.json({ photo }, { status: 201 })

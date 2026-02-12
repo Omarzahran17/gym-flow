@@ -8,11 +8,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
-  TrendingUp, 
-  Camera, 
-  Trophy, 
-  Plus, 
+import {
+  TrendingUp,
+  Camera,
+  Trophy,
+  Plus,
   Calendar,
   Weight,
   Ruler,
@@ -70,6 +70,7 @@ export default function MemberProgressPage() {
   const [loading, setLoading] = useState(true)
   const [showAddMeasurement, setShowAddMeasurement] = useState(false)
   const [showAddRecord, setShowAddRecord] = useState(false)
+  const [showAddPhoto, setShowAddPhoto] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -217,11 +218,11 @@ export default function MemberProgressPage() {
                       <XAxis dataKey="date" />
                       <YAxis />
                       <Tooltip />
-                      <Area 
-                        type="monotone" 
-                        dataKey="weight" 
-                        stroke="#3b82f6" 
-                        fill="#3b82f6" 
+                      <Area
+                        type="monotone"
+                        dataKey="weight"
+                        stroke="#3b82f6"
+                        fill="#3b82f6"
                         fillOpacity={0.3}
                       />
                     </AreaChart>
@@ -239,7 +240,7 @@ export default function MemberProgressPage() {
           </div>
 
           {showAddMeasurement && (
-            <AddMeasurementForm 
+            <AddMeasurementForm
               onClose={() => setShowAddMeasurement(false)}
               onSuccess={() => {
                 setShowAddMeasurement(false)
@@ -379,11 +380,25 @@ export default function MemberProgressPage() {
         {/* Photos Tab */}
         <TabsContent value="photos" className="space-y-6">
           <div className="flex justify-end">
-            <Button>
+            <Button onClick={() => setShowAddPhoto(true)}>
               <Camera className="h-4 w-4 mr-2" />
               Upload Photo
             </Button>
           </div>
+
+          {showAddPhoto && (
+            <AddProgressPhotoForm
+              onClose={() => setShowAddPhoto(false)}
+              onSuccess={() => {
+                setShowAddPhoto(false)
+                fetch("/api/member/progress-photos")
+                  .then(r => r.json())
+                  .then(data => {
+                    if (data.photos) setPhotos(data.photos)
+                  })
+              }}
+            />
+          )}
 
           {photos.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -665,6 +680,158 @@ function AddPersonalRecordForm({ onClose, onSuccess }: { onClose: () => void; on
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? "Saving..." : "Save PR"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  )
+}
+
+function AddProgressPhotoForm({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+  const [loading, setLoading] = useState(false)
+  const [file, setFile] = useState<File | null>(null)
+  const [formData, setFormData] = useState({
+    date: format(new Date(), "yyyy-MM-dd"),
+    type: "Front",
+    notes: "",
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!file) {
+      alert("Please select an image first")
+      return
+    }
+    setLoading(true)
+
+    try {
+      // 1. Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+      if (!allowedTypes.includes(file.type)) {
+        throw new Error(`Invalid file type: ${file.type}. Please upload a JPEG, PNG, WEBP, or GIF image.`)
+      }
+
+      // 2. Check file size (10MB limit)
+      const maxSizeMB = 10
+      const sizeMB = file.size / (1024 * 1024)
+      if (sizeMB > maxSizeMB) {
+        throw new Error(`File too large: ${sizeMB.toFixed(2)}MB. Maximum size is ${maxSizeMB}MB`)
+      }
+
+      console.log("Starting upload:", file.name, "size:", sizeMB.toFixed(2), "MB")
+
+      // 3. Upload to Blob storage
+      const uploadFormData = new FormData()
+      uploadFormData.append("file", file)
+      uploadFormData.append("path", `progress/${Date.now()}-${file.name}`)
+      uploadFormData.append("type", "image")
+
+      const uploadRes = await fetch("/api/blob/upload", {
+        method: "POST",
+        body: uploadFormData,
+      })
+
+      console.log("Upload response status:", uploadRes.status)
+
+      if (!uploadRes.ok) {
+        const errorData = await uploadRes.json()
+        console.error("Upload error details:", errorData)
+        throw new Error(errorData.error || `Upload failed with status ${uploadRes.status}`)
+      }
+
+      const uploadData = await uploadRes.json()
+      console.log("Upload successful, URL:", uploadData.url)
+
+      // 4. Save progress photo record
+      const response = await fetch("/api/member/progress-photos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          url: uploadData.url,
+        }),
+      })
+
+      console.log("Save photo response status:", response.status)
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to save progress photo")
+      }
+
+      console.log("Progress photo saved successfully")
+      onSuccess()
+    } catch (err) {
+      console.error("Error adding progress photo:", err)
+      alert(err instanceof Error ? err.message : "Failed to add progress photo. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Card className="mb-6">
+      <CardHeader>
+        <CardTitle>Upload Progress Photo</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="photo-date">Date</Label>
+              <Input
+                id="photo-date"
+                type="date"
+                value={formData.date}
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="photo-type">View Type</Label>
+              <select
+                id="photo-type"
+                value={formData.type}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                className="w-full h-10 px-3 rounded-md border border-input bg-background"
+              >
+                <option value="Front">Front View</option>
+                <option value="Side">Side View</option>
+                <option value="Back">Back View</option>
+                <option value="Relaxed">Relaxed</option>
+                <option value="Flexed">Flexed</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="photo-file">Select Image</Label>
+            <Input
+              id="photo-file"
+              type="file"
+              accept="image/*"
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="photo-notes">Notes (Optional)</Label>
+            <Input
+              id="photo-notes"
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              placeholder="Any comments about this photo?"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading || !file}>
+              {loading ? "Uploading..." : "Upload Photo"}
             </Button>
           </div>
         </form>

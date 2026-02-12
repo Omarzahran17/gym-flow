@@ -6,7 +6,10 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Calendar, Dumbbell, TrendingUp, Clock, Mail, Phone, ChevronRight, Trophy } from "lucide-react"
+import { ArrowLeft, Calendar, Dumbbell, TrendingUp, Clock, Mail, Phone, ChevronRight, Trophy, Camera, Plus } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { format } from "date-fns"
+import Image from "next/image"
 
 interface MemberDetail {
   id: number
@@ -39,6 +42,21 @@ interface MemberDetail {
     icon: string | null
     earnedAt: string
   }[]
+  progressPhotos: {
+    id: number
+    date: string
+    url: string
+    type: string
+    notes: string | null
+  }[]
+  measurements: {
+    id: number
+    date: string
+    weight: number | null
+    bodyFat: number | null
+    waist: number | null
+    notes: string | null
+  }[]
 }
 
 export default function TrainerMemberDetailPage() {
@@ -46,6 +64,7 @@ export default function TrainerMemberDetailPage() {
   const router = useRouter()
   const [member, setMember] = useState<MemberDetail | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showAddPhoto, setShowAddPhoto] = useState(false)
 
   useEffect(() => {
     fetch(`/api/trainer/members/${params.id}`)
@@ -152,25 +171,89 @@ export default function TrainerMemberDetailPage() {
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="border-border shadow-sm">
-          <CardHeader className="border-b border-border">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-semibold text-foreground">Workout Plans</CardTitle>
-              <Link href={`/trainer/workout-plans/new`}>
-                <Button variant="outline" size="sm" className="border-border">
-                  Create Plan
-                </Button>
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-4">
-            {member.workoutPlans.length === 0 ? (
-              <div className="text-center py-8">
-                <Dumbbell className="h-10 w-10 mx-auto text-zinc-300 mb-3" />
-                <p className="text-muted-foreground">No workout plans yet</p>
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="plans">Workout Plans</TabsTrigger>
+          <TabsTrigger value="progress">Progress & Photos</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Card className="border-border shadow-sm">
+              <CardHeader className="border-b border-border">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base font-semibold text-foreground">Active Plans</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-4">
+                {member.workoutPlans.filter(p => p.isActive).length === 0 ? (
+                  <div className="text-center py-8">
+                    <Dumbbell className="h-10 w-10 mx-auto text-zinc-300 mb-3" />
+                    <p className="text-muted-foreground">No active plans</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {member.workoutPlans.filter(p => p.isActive).map((plan) => (
+                      <Link key={plan.id} href={`/trainer/workout-plans/${plan.id}`}>
+                        <div className="p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors cursor-pointer border border-border">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-foreground">{plan.name}</p>
+                              <p className="text-sm text-muted-foreground">{plan.exercises.length} exercises</p>
+                            </div>
+                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="border-border shadow-sm">
+              <CardHeader className="border-b border-border">
+                <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
+                  <Trophy className="h-5 w-5" />
+                  Recent Achievements
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4">
+                {member.achievements.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Trophy className="h-10 w-10 mx-auto text-zinc-300 mb-3" />
+                    <p className="text-muted-foreground">No achievements yet</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
+                    {member.achievements.slice(0, 4).map((achievement) => (
+                      <div key={achievement.id} className="p-3 bg-muted/50 rounded-lg border border-border text-center">
+                        <div className="text-2xl mb-1">{achievement.icon || "🏆"}</div>
+                        <p className="text-sm font-medium text-foreground">{achievement.name}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="plans">
+          <Card className="border-border shadow-sm">
+            <CardHeader className="border-b border-border">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base font-semibold text-foreground">All Workout Plans</CardTitle>
+                <Link href={`/trainer/workout-plans/new?memberId=${member.id}`}>
+                  <Button variant="outline" size="sm" className="border-border">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Plan
+                  </Button>
+                </Link>
               </div>
-            ) : (
+            </CardHeader>
+            <CardContent className="pt-4">
               <div className="space-y-3">
                 {member.workoutPlans.map((plan) => (
                   <Link key={plan.id} href={`/trainer/workout-plans/${plan.id}`}>
@@ -191,39 +274,179 @@ export default function TrainerMemberDetailPage() {
                   </Link>
                 ))}
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-        <Card className="border-border shadow-sm">
-          <CardHeader className="border-b border-border">
-            <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
-              <Trophy className="h-5 w-5" />
-              Achievements
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-4">
-            {member.achievements.length === 0 ? (
-              <div className="text-center py-8">
-                <Trophy className="h-10 w-10 mx-auto text-zinc-300 mb-3" />
-                <p className="text-muted-foreground">No achievements yet</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3">
-                {member.achievements.map((achievement) => (
-                  <div key={achievement.id} className="p-3 bg-muted/50 rounded-lg border border-border text-center">
-                    <div className="text-2xl mb-1">{achievement.icon || "🏆"}</div>
-                    <p className="text-sm font-medium text-foreground">{achievement.name}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {new Date(achievement.earnedAt).toLocaleDateString()}
-                    </p>
+        <TabsContent value="progress" className="space-y-6">
+          <div className="flex justify-end">
+            <Button onClick={() => setShowAddPhoto(true)}>
+              <Camera className="h-4 w-4 mr-2" />
+              Upload Progress Photo
+            </Button>
+          </div>
+
+          {showAddPhoto && (
+            <AddProgressPhotoForm
+              memberId={member.id}
+              onClose={() => setShowAddPhoto(false)}
+              onSuccess={() => {
+                setShowAddPhoto(false)
+                // Refresh member data
+                setLoading(true)
+                fetch(`/api/trainer/members/${params.id}`)
+                  .then(res => res.json())
+                  .then(data => {
+                    if (data.member) setMember(data.member)
+                  })
+                  .finally(() => setLoading(false))
+              }}
+            />
+          )}
+
+          {member.progressPhotos.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {member.progressPhotos.map((photo) => (
+                <Card key={photo.id} className="overflow-hidden border-border shadow-sm">
+                  <div className="aspect-square relative bg-muted">
+                    <Image
+                      src={photo.url}
+                      alt={`Progress photo - ${photo.type}`}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                  <CardContent className="p-3">
+                    <p className="text-sm font-medium text-foreground">
+                      {format(new Date(photo.date), "MMMM d, yyyy")}
+                    </p>
+                    <Badge variant="outline" className="text-[10px] mt-1 uppercase tracking-wider">
+                      {photo.type}
+                    </Badge>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16 border-2 border-dashed border-border rounded-xl">
+              <Camera className="h-10 w-10 mx-auto text-zinc-300 mb-3" />
+              <p className="text-muted-foreground text-sm">No progress photos uploaded yet</p>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
+  )
+}
+
+function AddProgressPhotoForm({ memberId, onClose, onSuccess }: { memberId: number; onClose: () => void; onSuccess: () => void }) {
+  const [loading, setLoading] = useState(false)
+  const [file, setFile] = useState<File | null>(null)
+  const [formData, setFormData] = useState({
+    date: format(new Date(), "yyyy-MM-dd"),
+    type: "Front",
+    notes: "",
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!file) return
+    setLoading(true)
+
+    try {
+      const uploadFormData = new FormData()
+      uploadFormData.append("file", file)
+      uploadFormData.append("path", `progress/member-${memberId}/${Date.now()}-${file.name}`)
+      uploadFormData.append("type", "image")
+
+      const uploadRes = await fetch("/api/blob/upload", {
+        method: "POST",
+        body: uploadFormData,
+      })
+
+      if (!uploadRes.ok) {
+        const errorData = await uploadRes.json()
+        throw new Error(errorData.error || "Failed to upload image")
+      }
+
+      const { url } = await uploadRes.json()
+
+      const response = await fetch("/api/member/progress-photos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // Use a trick here: since this API usually takes the logged-in user's member ID,
+        // we might need a specific trainer-facing API if we want to upload as a trainer for a member.
+        // But for now, let's see if the API handles memberId in body.
+        body: JSON.stringify({
+          ...formData,
+          url,
+          memberId, // The API might need to be updated to respect this if the user is a trainer
+        }),
+      })
+
+      if (!response.ok) throw new Error("Failed to save progress photo")
+      onSuccess()
+    } catch (err) {
+      console.error("Error adding progress photo:", err)
+      alert(err instanceof Error ? err.message : "Failed to add progress photo")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Card className="border-border shadow-md">
+      <CardHeader>
+        <CardTitle className="text-lg">Upload Member Progress Photo</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Date</label>
+              <input
+                type="date"
+                className="w-full p-2 border border-border rounded-md bg-transparent"
+                value={formData.date}
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">View Type</label>
+              <select
+                className="w-full p-2 border border-border rounded-md bg-transparent"
+                value={formData.type}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+              >
+                <option value="Front">Front View</option>
+                <option value="Side">Side View</option>
+                <option value="Back">Back View</option>
+                <option value="Relaxed">Relaxed</option>
+                <option value="Flexed">Flexed</option>
+              </select>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Photo</label>
+            <input
+              type="file"
+              accept="image/*"
+              className="w-full"
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
+              required
+            />
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button type="button" variant="ghost" onClick={onClose} disabled={loading}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading || !file} className="bg-zinc-900 border-zinc-900">
+              {loading ? "Uploading..." : "Upload Photo"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   )
 }

@@ -1,6 +1,18 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { members, trainers, users } from "@/lib/db/schema"
+import {
+  members,
+  trainers,
+  users,
+  memberSubscriptions,
+  attendance,
+  workoutPlanAssignments,
+  measurements,
+  progressPhotos,
+  personalRecords,
+  memberAchievements,
+  classBookings
+} from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -14,52 +26,62 @@ export async function POST(
     })
 
     if (!session || (session.user as any).role !== "admin") {
-      console.log("Convert member to trainer: Unauthorized access attempt")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const { id } = await params
     const memberId = parseInt(id)
 
-    console.log(`Converting member ${memberId} to trainer`)
+    if (isNaN(memberId)) {
+      return NextResponse.json({ error: "Invalid member ID" }, { status: 400 })
+    }
 
     const member = await db.query.members.findFirst({
       where: eq(members.id, memberId),
     })
 
     if (!member) {
-      console.log(`Member ${memberId} not found`)
       return NextResponse.json({ error: "Member not found" }, { status: 404 })
     }
-
-    console.log(`Found member: ${member.userId}`)
 
     const existingTrainer = await db.query.trainers.findFirst({
       where: eq(trainers.userId, member.userId),
     })
 
     if (existingTrainer) {
-      console.log(`User ${member.userId} is already a trainer`)
       return NextResponse.json({ error: "User is already a trainer" }, { status: 400 })
     }
 
-    console.log(`Creating trainer record for user ${member.userId}`)
-    const [newTrainer] = await db.insert(trainers).values({
-      userId: member.userId,
-      specialization: "General Fitness",
-      maxClients: 20,
-    }).returning()
+    const result = await db.transaction(async (tx) => {
+      // 1. Create trainer record
+      const [newTrainer] = await tx.insert(trainers).values({
+        userId: member.userId,
+        specialization: "General Fitness",
+        maxClients: 20,
+      }).returning()
 
-    console.log(`Updating user ${member.userId} role to trainer`)
-    await db.update(users)
-      .set({ role: "trainer" })
-      .where(eq(users.id, member.userId))
+      // 2. Update user role in users table
+      await tx.update(users)
+        .set({ role: "trainer" })
+        .where(eq(users.id, member.userId))
 
-    console.log(`Deleting member record ${memberId}`)
-    await db.delete(members).where(eq(members.id, memberId))
+      // 3. Clean up related records to avoid FK constraints
+      await tx.delete(memberSubscriptions).where(eq(memberSubscriptions.memberId, memberId))
+      await tx.delete(attendance).where(eq(attendance.memberId, memberId))
+      await tx.delete(workoutPlanAssignments).where(eq(workoutPlanAssignments.memberId, memberId))
+      await tx.delete(measurements).where(eq(measurements.memberId, memberId))
+      await tx.delete(progressPhotos).where(eq(progressPhotos.memberId, memberId))
+      await tx.delete(personalRecords).where(eq(personalRecords.memberId, memberId))
+      await tx.delete(memberAchievements).where(eq(memberAchievements.memberId, memberId))
+      await tx.delete(classBookings).where(eq(classBookings.memberId, memberId))
 
-    console.log(`Successfully converted member ${memberId} to trainer ${newTrainer.id}`)
-    return NextResponse.json({ success: true, trainerId: newTrainer.id })
+      // 4. Delete member record
+      await tx.delete(members).where(eq(members.id, memberId))
+
+      return newTrainer
+    })
+
+    return NextResponse.json({ success: true, trainerId: result.id })
   } catch (error) {
     console.error("Convert member to trainer error:", error)
     console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace")

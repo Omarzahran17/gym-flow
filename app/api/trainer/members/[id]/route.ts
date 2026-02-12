@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { trainers, members, workoutPlans, workoutPlanAssignments, planExercises, exercises, attendance, memberAchievements, achievements } from "@/lib/db/schema"
+import { trainers, members, workoutPlans, workoutPlanAssignments, planExercises, exercises, attendance, memberAchievements, achievements, progressPhotos, measurements } from "@/lib/db/schema"
 import { eq, and, desc, inArray } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -88,6 +88,16 @@ export async function GET(
     )
     const attendanceRate = Math.round((recentAttendance.length / 30) * 100)
 
+    const memberPhotos = await db.query.progressPhotos.findMany({
+      where: eq(progressPhotos.memberId, memberIdNum),
+      orderBy: [desc(progressPhotos.date)],
+    })
+
+    const memberMeasurements = await db.query.measurements.findMany({
+      where: eq(measurements.memberId, memberIdNum),
+      orderBy: [desc(measurements.date)],
+    })
+
     const formattedMember = {
       id: member.id,
       name: member.user?.name || member.userId,
@@ -119,6 +129,8 @@ export async function GET(
         icon: ma.achievement?.icon,
         earnedAt: ma.earnedAt,
       })),
+      progressPhotos: memberPhotos,
+      measurements: memberMeasurements,
     }
 
     return NextResponse.json({ member: formattedMember })

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { Plus, Search, ChevronRight, Mail, Users, UserCog, ArrowRightLeft } from "lucide-react"
+import { Plus, Search, ChevronRight, Mail, Users, UserCog, ArrowRightLeft, Trash2 } from "lucide-react"
 
 interface Trainer {
   id: number
@@ -86,6 +86,25 @@ export default function TrainersPage() {
       }
     } catch (err) {
       alert("Failed to update trainer status")
+    }
+  }
+
+  const deleteTrainer = async (trainerId: number) => {
+    if (!confirm("Are you sure you want to delete this trainer? This action cannot be undone.")) return
+
+    try {
+      const response = await fetch(`/api/admin/trainers/${trainerId}`, {
+        method: "DELETE",
+      })
+
+      if (response.ok) {
+        fetchTrainers()
+      } else {
+        const data = await response.json()
+        alert(data.error || "Failed to delete trainer")
+      }
+    } catch (err) {
+      alert("Failed to delete trainer")
     }
   }
 
@@ -231,6 +250,15 @@ export default function TrainersPage() {
                     >
                       <ArrowRightLeft className="h-4 w-4 mr-1" />
                       Convert
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteTrainer(trainer.id)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Delete
                     </Button>
                   </div>
                   <Link href={`/admin/trainers/${trainer.id}`}>

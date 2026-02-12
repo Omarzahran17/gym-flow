@@ -174,9 +174,9 @@ export default function SubscriptionsPage() {
         </div>
         <Button
           onClick={() => setShowForm(true)}
-          className="bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-foreground dark:hover:bg-muted rounded-lg"
+          className="bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200 rounded-lg shadow-sm font-medium"
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="h-4 w-4 mr-2" strokeWidth={2.5} />
           Add Plan
         </Button>
       </div>
@@ -266,7 +266,7 @@ export default function SubscriptionsPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g., Premium Membership"
-                    className="bg-muted/50 dark:bg-zinc-800 border-border dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white focus:ring-zinc-900 dark:focus:ring-white"
+                    className="bg-muted/50 dark:bg-zinc-800 border-border dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white focus:ring-zinc-900 dark:focus:ring-white dark:text-white"
                     required
                   />
                 </div>
@@ -279,7 +279,7 @@ export default function SubscriptionsPage() {
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     placeholder="29.99"
-                    className="bg-muted/50 dark:bg-zinc-800 border-border dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white focus:ring-zinc-900 dark:focus:ring-white"
+                    className="bg-muted/50 dark:bg-zinc-800 border-border dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white focus:ring-zinc-900 dark:focus:ring-white dark:text-white"
                     required
                   />
                 </div>
@@ -292,7 +292,7 @@ export default function SubscriptionsPage() {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Brief description of the plan"
-                  className="bg-muted/50 dark:bg-zinc-800 border-border dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white focus:ring-zinc-900 dark:focus:ring-white transition-colors"
+                  className="bg-muted/50 dark:bg-zinc-800 border-border dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white focus:ring-zinc-900 dark:focus:ring-white transition-colors dark:text-white"
                 />
               </div>
 
@@ -303,7 +303,7 @@ export default function SubscriptionsPage() {
                     id="interval"
                     value={formData.interval}
                     onChange={(e) => setFormData({ ...formData, interval: e.target.value })}
-                    className="w-full p-2.5 bg-muted/50 dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
+                    className="w-full p-2.5 bg-muted/50 dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white dark:text-white"
                   >
                     <option value="month">Monthly</option>
                     <option value="year">Yearly</option>
@@ -316,7 +316,7 @@ export default function SubscriptionsPage() {
                     value={formData.stripePriceId}
                     onChange={(e) => setFormData({ ...formData, stripePriceId: e.target.value })}
                     placeholder="price_123..."
-                    className="bg-muted/50 dark:bg-zinc-800 border-border dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white focus:ring-zinc-900 dark:focus:ring-white transition-colors"
+                    className="bg-muted/50 dark:bg-zinc-800 border-border dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white focus:ring-zinc-900 dark:focus:ring-white transition-colors dark:text-white"
                   />
                 </div>
                 <div className="space-y-2">
@@ -326,7 +326,7 @@ export default function SubscriptionsPage() {
                     value={formData.stripeAnnualPriceId}
                     onChange={(e) => setFormData({ ...formData, stripeAnnualPriceId: e.target.value })}
                     placeholder="price_123... (optional)"
-                    className="bg-muted/50 dark:bg-zinc-800 border-border dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white focus:ring-zinc-900 dark:focus:ring-white transition-colors"
+                    className="bg-muted/50 dark:bg-zinc-800 border-border dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white focus:ring-zinc-900 dark:focus:ring-white transition-colors dark:text-white"
                   />
                 </div>
               </div>
@@ -338,7 +338,7 @@ export default function SubscriptionsPage() {
                   value={formData.features}
                   onChange={(e) => setFormData({ ...formData, features: e.target.value })}
                   placeholder="Unlimited access, Personal training, Nutrition plan"
-                  className="bg-muted/50 dark:bg-zinc-800 border-border dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white focus:ring-zinc-900 dark:focus:ring-white transition-colors"
+                  className="bg-muted/50 dark:bg-zinc-800 border-border dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white focus:ring-zinc-900 dark:focus:ring-white transition-colors dark:text-white"
                 />
               </div>
 
@@ -351,7 +351,7 @@ export default function SubscriptionsPage() {
                       id="tier"
                       value={formData.tier}
                       onChange={(e) => setFormData({ ...formData, tier: e.target.value })}
-                      className="w-full p-2.5 bg-muted/50 dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
+                      className="w-full p-2.5 bg-muted/50 dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white dark:text-white"
                     >
                       <option value="basic">Basic</option>
                       <option value="pro">Pro</option>
@@ -366,7 +366,7 @@ export default function SubscriptionsPage() {
                       value={formData.maxClassesPerWeek}
                       onChange={(e) => setFormData({ ...formData, maxClassesPerWeek: e.target.value })}
                       placeholder="3"
-                      className="bg-muted/50 dark:bg-zinc-800 border-border dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white focus:ring-zinc-900 dark:focus:ring-white transition-colors"
+                      className="bg-muted/50 dark:bg-zinc-800 border-border dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white focus:ring-zinc-900 dark:focus:ring-white transition-colors dark:text-white"
                     />
                     <p className="text-xs text-muted-foreground dark:text-muted-foreground">Use 999 for unlimited</p>
                   </div>
@@ -378,7 +378,7 @@ export default function SubscriptionsPage() {
                       value={formData.maxCheckInsPerDay}
                       onChange={(e) => setFormData({ ...formData, maxCheckInsPerDay: e.target.value })}
                       placeholder="1"
-                      className="bg-muted/50 dark:bg-zinc-800 border-border dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white focus:ring-zinc-900 dark:focus:ring-white transition-colors"
+                      className="bg-muted/50 dark:bg-zinc-800 border-border dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white focus:ring-zinc-900 dark:focus:ring-white transition-colors dark:text-white"
                     />
                   </div>
                   <div className="space-y-2">
