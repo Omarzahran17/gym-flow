@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { equipment } from "@/lib/db/schema"
+import { equipment, equipmentMaintenance } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -126,6 +126,8 @@ export async function DELETE(
     if (isNaN(equipmentId)) {
       return NextResponse.json({ error: "Invalid equipment ID" }, { status: 400 })
     }
+
+    await db.delete(equipmentMaintenance).where(eq(equipmentMaintenance.equipmentId, equipmentId))
 
     const [deleted] = await db.delete(equipment)
       .where(eq(equipment.id, equipmentId))
