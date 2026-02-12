@@ -76,24 +76,6 @@ export default function TrainerDetailPage({ params }: { params: Promise<{ id: st
     }
   }
 
-  const handleDelete = async () => {
-    if (!trainerId || !confirm("Are you sure you want to delete this trainer?")) return
-
-    try {
-      const response = await fetch(`/api/admin/trainers/${trainerId}`, {
-        method: "DELETE",
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to delete trainer")
-      }
-
-      router.push("/admin/trainers")
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete")
-    }
-  }
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -256,7 +238,8 @@ export default function TrainerDetailPage({ params }: { params: Promise<{ id: st
                     })
 
                     if (!response.ok) {
-                      throw new Error("Failed to convert trainer")
+                      const data = await response.json().catch(() => ({}))
+                      throw new Error(data.error || "Failed to convert trainer")
                     }
 
                     router.push("/admin/members")
@@ -266,14 +249,6 @@ export default function TrainerDetailPage({ params }: { params: Promise<{ id: st
                 }}
               >
                 Convert to Member
-              </Button>
-
-              <Button
-                variant="destructive"
-                className="w-full"
-                onClick={handleDelete}
-              >
-                Delete Trainer
               </Button>
             </div>
           </CardContent>

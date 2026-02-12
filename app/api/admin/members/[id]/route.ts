@@ -30,6 +30,10 @@ export async function GET(
     const { id } = await params
     const memberId = parseInt(id)
 
+    if (isNaN(memberId)) {
+      return NextResponse.json({ error: "Invalid member ID" }, { status: 400 })
+    }
+
     const member = await db.query.members.findFirst({
       where: eq(members.id, memberId),
     })
@@ -104,6 +108,10 @@ export async function PUT(
     const memberId = parseInt(id)
     const body = await request.json()
 
+    if (isNaN(memberId)) {
+      return NextResponse.json({ error: "Invalid member ID" }, { status: 400 })
+    }
+
     const [updatedMember] = await db.update(members)
       .set({
         phone: body.phone,
@@ -139,6 +147,10 @@ export async function DELETE(
 
     const { id } = await params
     const memberId = parseInt(id)
+
+    if (isNaN(memberId)) {
+      return NextResponse.json({ error: "Invalid member ID" }, { status: 400 })
+    }
 
     // Delete all related records first (to handle foreign key constraints)
     await db.delete(memberSubscriptions).where(eq(memberSubscriptions.memberId, memberId))
