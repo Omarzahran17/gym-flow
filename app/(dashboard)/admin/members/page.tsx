@@ -354,17 +354,19 @@ export default function MembersPage() {
                 </div>
               </section>
 
-              <section className="pt-4 border-t border-border">
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setDeleteConfirmOpen(true)}
-                  className="w-full"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Account
-                </Button>
-              </section>
+              {selectedMember?.isMember && (
+                <section className="pt-4 border-t border-border">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setDeleteConfirmOpen(true)}
+                    className="w-full"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Account
+                  </Button>
+                </section>
+              )}
             </div>
           </div>
         </DialogContent>
