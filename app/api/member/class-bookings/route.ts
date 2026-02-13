@@ -4,7 +4,7 @@ import { classBookings, classSchedules, classes, members } from "@/lib/db/schema
 import { checkAchievements } from "@/lib/achievements"
 import { eq, and, count } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
-import { addDays, startOfWeek } from "date-fns"
+import { addDays, startOfWeek, startOfMonth, endOfMonth } from "date-fns"
 import { checkMemberSubscription } from "@/lib/subscription"
 
 export async function GET(request: NextRequest) {
@@ -236,6 +236,31 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json(
         { error: "Booking ID is required" },
         { status: 400 }
+      )
+    }
+
+    // First, get the booking to check its date
+    const existingBooking = await db.query.classBookings.findFirst({
+      where: and(
+        eq(classBookings.id, parseInt(bookingId)),
+        eq(classBookings.memberId, member.id)
+      ),
+    })
+
+    if (!existingBooking) {
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 })
+    }
+
+    // Check if booking is in current month - cannot cancel if so
+    const now = new Date()
+    const bookingDate = new Date(existingBooking.bookingDate)
+    const monthStart = startOfMonth(now)
+    const monthEnd = endOfMonth(now)
+
+    if (bookingDate >= monthStart && bookingDate <= monthEnd) {
+      return NextResponse.json(
+        { error: "Cannot cancel bookings within the same month. You can cancel bookings for next month." },
+        { status: 403 }
       )
     }
 
