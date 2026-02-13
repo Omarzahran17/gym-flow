@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import {
   Dumbbell, Users, Calendar, Settings, LogOut, LayoutDashboard, CreditCard,
   ChevronLeft, ChevronRight, Menu, X, BarChart3, Trophy, Target, Zap,
-  ClipboardList, UserCheck, FileText, Wrench, Sun, Moon, MessageSquare
+  ClipboardList, UserCheck, FileText, Wrench, Sun, Moon, MessageSquare, Sparkles
 } from "lucide-react"
 import { authClient } from "@/lib/auth-client"
 
@@ -40,6 +40,7 @@ const iconMap: Record<string, React.ReactNode> = {
   Wrench: <Wrench className="h-5 w-5" />,
   Zap: <Zap className="h-5 w-5" />,
   MessageSquare: <MessageSquare className="h-5 w-5" />,
+  Sparkles: <Sparkles className="h-5 w-5" />,
 }
 
 export default function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
@@ -123,6 +124,7 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
       case "member":
         return [
           { href: "/member", label: "Dashboard", icon: "LayoutDashboard" },
+          { href: "/member/chat", label: "AI Coach", icon: "Sparkles" },
           { href: "/member/workout-plan", label: "Workout Plan", icon: "Dumbbell" },
           { href: "/member/classes", label: "Classes", icon: "Calendar" },
           { href: "/member/progress", label: "Progress", icon: "Target" },

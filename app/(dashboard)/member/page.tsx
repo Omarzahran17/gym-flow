@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Dumbbell, Calendar, TrendingUp, CreditCard, ArrowRight, Play, CalendarCheck, Target, Flame, QrCode } from "lucide-react"
+import { Dumbbell, Calendar, TrendingUp, CreditCard, ArrowRight, Play, CalendarCheck, Target, Flame, QrCode, MessageCircle } from "lucide-react"
 import { CheckInQRCode } from "@/components/member/CheckInQRCode"
 import { authClient } from "@/lib/auth-client"
 
@@ -69,9 +69,9 @@ export default function MemberDashboardPage() {
 
   const quickActions = [
     { href: "/member/workout-plan", label: "View Workout", icon: Dumbbell, color: "blue", gradient: "from-blue-500 to-blue-600" },
-    { href: "/member/classes", label: "Book Class", icon: Calendar, color: "purple", gradient: "from-purple-500 to-purple-600" },
-    { href: "/member/progress", label: "Track Progress", icon: TrendingUp, color: "green", gradient: "from-green-500 to-green-600" },
-    { href: "/member/subscription", label: "Manage Plan", icon: CreditCard, color: "orange", gradient: "from-orange-500 to-orange-600" },
+    { href: "/member/chat", label: "AI Coach", icon: MessageCircle, color: "purple", gradient: "from-purple-500 to-purple-600" },
+    { href: "/member/classes", label: "Book Class", icon: Calendar, color: "green", gradient: "from-green-500 to-green-600" },
+    { href: "/member/progress", label: "Track Progress", icon: TrendingUp, color: "orange", gradient: "from-orange-500 to-orange-600" },
   ]
 
   return (
