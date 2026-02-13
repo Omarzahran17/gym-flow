@@ -13,7 +13,7 @@ import {
   personalRecords,
   memberAchievements,
   classBookings,
-  session,
+  session as userSession,
   account,
   verification
 } from "@/lib/db/schema"
@@ -145,7 +145,7 @@ export async function DELETE(
       await tx.delete(trainers).where(eq(trainers.id, trainerId))
 
       // Delete better-auth related records
-      await tx.delete(session).where(eq(session.userId, userId))
+      await tx.delete(userSession).where(eq(userSession.userId, userId))
       await tx.delete(account).where(eq(account.userId, userId))
       await tx.delete(verification).where(eq(verification.userId, userId))
 
