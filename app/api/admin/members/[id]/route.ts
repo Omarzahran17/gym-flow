@@ -3,6 +3,7 @@ import { db } from "@/lib/db"
 import { 
   members, 
   users,
+  trainers,
   attendance, 
   workoutPlanAssignments,
   memberSubscriptions,
@@ -10,7 +11,10 @@ import {
   progressPhotos,
   personalRecords,
   memberAchievements,
-  classBookings
+  classBookings,
+  session,
+  account,
+  verification
 } from "@/lib/db/schema"
 import { eq, desc, and, sql } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
@@ -153,7 +157,6 @@ export async function DELETE(
       return NextResponse.json({ error: "Invalid member ID" }, { status: 400 })
     }
 
-    // Get the member first to get the userId
     const member = await db.query.members.findFirst({
       where: eq(members.id, memberId),
     })
@@ -162,21 +165,38 @@ export async function DELETE(
       return NextResponse.json({ error: "Member not found" }, { status: 404 })
     }
 
-    // Delete all related member records first (to handle foreign key constraints)
-    await db.delete(memberSubscriptions).where(eq(memberSubscriptions.memberId, memberId))
-    await db.delete(attendance).where(eq(attendance.memberId, memberId))
-    await db.delete(workoutPlanAssignments).where(eq(workoutPlanAssignments.memberId, memberId))
-    await db.delete(measurements).where(eq(measurements.memberId, memberId))
-    await db.delete(progressPhotos).where(eq(progressPhotos.memberId, memberId))
-    await db.delete(personalRecords).where(eq(personalRecords.memberId, memberId))
-    await db.delete(memberAchievements).where(eq(memberAchievements.memberId, memberId))
-    await db.delete(classBookings).where(eq(classBookings.memberId, memberId))
+    const userId = member.userId
 
-    // Delete the member record
-    await db.delete(members).where(eq(members.id, memberId))
+    await db.transaction(async (tx) => {
+      // Delete all related member records first (to handle foreign key constraints)
+      await tx.delete(memberSubscriptions).where(eq(memberSubscriptions.memberId, memberId))
+      await tx.delete(attendance).where(eq(attendance.memberId, memberId))
+      await tx.delete(workoutPlanAssignments).where(eq(workoutPlanAssignments.memberId, memberId))
+      await tx.delete(measurements).where(eq(measurements.memberId, memberId))
+      await tx.delete(progressPhotos).where(eq(progressPhotos.memberId, memberId))
+      await tx.delete(personalRecords).where(eq(personalRecords.memberId, memberId))
+      await tx.delete(memberAchievements).where(eq(memberAchievements.memberId, memberId))
+      await tx.delete(classBookings).where(eq(classBookings.memberId, memberId))
 
-    // Delete the user record (this will cascade delete sessions, accounts, etc.)
-    await db.delete(users).where(eq(users.id, member.userId))
+      // Delete the member record
+      await tx.delete(members).where(eq(members.id, memberId))
+
+      // Check if user is also a trainer and delete trainer record
+      const trainer = await tx.query.trainers.findFirst({
+        where: eq(trainers.userId, userId),
+      })
+      if (trainer) {
+        await tx.delete(trainers).where(eq(trainers.id, trainer.id))
+      }
+
+      // Delete better-auth related records
+      await tx.delete(session).where(eq(session.userId, userId))
+      await tx.delete(account).where(eq(account.userId, userId))
+      await tx.delete(verification).where(eq(verification.userId, userId))
+
+      // Delete the user record (this will cascade delete sessions, accounts, etc.)
+      await tx.delete(users).where(eq(users.id, userId))
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {
