@@ -176,6 +176,10 @@ export async function DELETE(
       return NextResponse.json({ error: "Invalid plan ID" }, { status: 400 })
     }
 
+    // Delete related records first
+    await db.delete(planExercises).where(eq(planExercises.planId, planId))
+    await db.delete(workoutPlanAssignments).where(eq(workoutPlanAssignments.planId, planId))
+
     const [plan] = await db.delete(workoutPlans)
       .where(eq(workoutPlans.id, planId))
       .returning()

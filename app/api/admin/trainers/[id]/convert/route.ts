@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { trainers, users, classes, members, workoutPlans } from "@/lib/db/schema"
+import { trainers, users, classes, members, workoutPlans, trainerAttendance } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -57,7 +57,11 @@ export async function POST(
         .set({ trainerId: null })
         .where(eq(workoutPlans.trainerId, trainerId))
 
-      // 5. Delete trainer record
+      // 5. Delete trainer attendance records
+      console.log("Deleting trainer attendance records...")
+      await tx.delete(trainerAttendance).where(eq(trainerAttendance.trainerId, trainerId))
+
+      // 6. Delete trainer record
       console.log("Deleting trainer record:", trainerId)
       await tx.delete(trainers).where(eq(trainers.id, trainerId))
 

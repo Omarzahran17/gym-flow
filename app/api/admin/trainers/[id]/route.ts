@@ -14,7 +14,8 @@ import {
   memberAchievements,
   classBookings,
   session as userSession,
-  account
+  account,
+  trainerAttendance
 } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
@@ -118,6 +119,9 @@ export async function DELETE(
     const userId = trainer.userId
 
     await db.transaction(async (tx) => {
+      // Delete trainer attendance records
+      await tx.delete(trainerAttendance).where(eq(trainerAttendance.trainerId, trainerId))
+
       // Delete workout plans created by this trainer
       await tx.delete(workoutPlans).where(eq(workoutPlans.trainerId, trainerId))
 
