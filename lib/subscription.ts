@@ -1,6 +1,7 @@
 import { db } from "./db"
 import { members, memberSubscriptions, classBookings, attendance } from "./db/schema"
 import { eq, and, gte } from "drizzle-orm"
+import { startOfMonth } from "date-fns"
 
 export interface SubscriptionCheck {
   hasSubscription: boolean
@@ -9,7 +10,7 @@ export interface SubscriptionCheck {
     id: number
     name: string
     tier: string
-    maxClassesPerWeek: number
+    maxClassesPerMonth: number
     maxCheckInsPerDay: number
     hasTrainerAccess: boolean
     hasPersonalTraining: boolean
@@ -17,7 +18,7 @@ export interface SubscriptionCheck {
     hasAchievements: boolean
   }
   usage?: {
-    classesThisWeek: number
+    classesThisMonth: number
     checkInsToday: number
   }
   limits?: {
@@ -45,19 +46,17 @@ export async function checkMemberSubscription(memberId: number): Promise<Subscri
   }
 
   const now = new Date()
-  const startOfWeek = new Date(now)
-  startOfWeek.setDate(now.getDate() - now.getDay())
-  startOfWeek.setHours(0, 0, 0, 0)
+  const startOfMonthDate = startOfMonth(now)
 
   const todayStr = now.toISOString().split('T')[0]
   const todayStart = new Date(todayStr)
   todayStart.setHours(0, 0, 0, 0)
 
-  const weeklyBookings = await db.query.classBookings.findMany({
+  const monthlyBookings = await db.query.classBookings.findMany({
     where: and(
       eq(classBookings.memberId, memberId),
       eq(classBookings.status, "confirmed"),
-      gte(classBookings.createdAt, startOfWeek)
+      gte(classBookings.createdAt, startOfMonthDate)
     ),
   })
 
@@ -69,10 +68,10 @@ export async function checkMemberSubscription(memberId: number): Promise<Subscri
   })
 
   const plan = subscription.plan
-  const classesThisWeek = weeklyBookings.length
+  const classesThisMonth = monthlyBookings.length
   const checkInsToday = todayAttendance.length
-  const maxClasses = plan.maxClassesPerWeek || 999
-  const maxCheckIns = plan.maxCheckInsPerDay || 999
+  const maxClasses = plan.maxClassesPerMonth || 12
+  const maxCheckIns = plan.maxCheckInsPerDay || 1
 
   return {
     hasSubscription: true,
@@ -81,7 +80,7 @@ export async function checkMemberSubscription(memberId: number): Promise<Subscri
       id: plan.id,
       name: plan.name,
       tier: plan.tier || "basic",
-      maxClassesPerWeek: maxClasses,
+      maxClassesPerMonth: maxClasses,
       maxCheckInsPerDay: maxCheckIns,
       hasTrainerAccess: plan.hasTrainerAccess ?? false,
       hasPersonalTraining: plan.hasPersonalTraining ?? false,
@@ -89,11 +88,11 @@ export async function checkMemberSubscription(memberId: number): Promise<Subscri
       hasAchievements: plan.hasAchievements ?? true,
     },
     usage: {
-      classesThisWeek,
+      classesThisMonth,
       checkInsToday,
     },
     limits: {
-      classesRemaining: Math.max(0, maxClasses - classesThisWeek),
+      classesRemaining: Math.max(0, maxClasses - classesThisMonth),
       canCheckIn: checkInsToday < maxCheckIns,
     },
   }

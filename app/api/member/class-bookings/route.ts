@@ -111,10 +111,10 @@ export async function POST(request: NextRequest) {
     if (subscriptionCheck.limits && subscriptionCheck.limits.classesRemaining <= 0) {
       return NextResponse.json(
         { 
-          error: `You've reached your weekly class limit (${subscriptionCheck.plan?.maxClassesPerWeek} classes). Upgrade your plan for more access.`,
+          error: `You've reached your monthly class limit (${subscriptionCheck.plan?.maxClassesPerMonth} classes). Upgrade your plan for more access.`,
           code: "CLASS_LIMIT_REACHED",
-          limit: subscriptionCheck.plan?.maxClassesPerWeek,
-          used: subscriptionCheck.usage?.classesThisWeek
+          limit: subscriptionCheck.plan?.maxClassesPerMonth,
+          used: subscriptionCheck.usage?.classesThisMonth
         },
         { status: 403 }
       )

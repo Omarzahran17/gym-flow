@@ -43,7 +43,7 @@ interface SubscriptionStatus {
     id: number
     name: string
     tier: string
-    maxClassesPerWeek: number
+    maxClassesPerMonth: number
     maxCheckInsPerDay: number
     hasTrainerAccess: boolean
     hasPersonalTraining: boolean
@@ -51,7 +51,7 @@ interface SubscriptionStatus {
     hasAchievements: boolean
   }
   usage?: {
-    classesThisWeek: number
+    classesThisMonth: number
     checkInsToday: number
   }
   limits?: {
@@ -256,32 +256,32 @@ export default function MemberClassesPage() {
                     <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">Active</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {subscriptionStatus.usage?.classesThisWeek || 0} of {subscriptionStatus.plan.maxClassesPerWeek === 999 ? "∞" : subscriptionStatus.plan.maxClassesPerWeek} classes used this week
+                    {subscriptionStatus.usage?.classesThisMonth || 0} of {subscriptionStatus.plan.maxClassesPerMonth === 999 ? "∞" : subscriptionStatus.plan.maxClassesPerMonth} classes used this month
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                {subscriptionStatus.limits && subscriptionStatus.plan.maxClassesPerWeek !== 999 && (
+                {subscriptionStatus.limits && subscriptionStatus.plan.maxClassesPerMonth !== 999 && (
                   <div className="text-right">
                     <p className="text-2xl font-bold text-foreground">{subscriptionStatus.limits.classesRemaining}</p>
                     <p className="text-xs text-muted-foreground">classes remaining</p>
                   </div>
                 )}
-                {subscriptionStatus.limits && subscriptionStatus.plan.maxClassesPerWeek === 999 && (
+                {subscriptionStatus.limits && subscriptionStatus.plan.maxClassesPerMonth === 999 && (
                   <Badge className="bg-purple-50 text-purple-700 border-purple-200">Unlimited Classes</Badge>
                 )}
               </div>
             </div>
-            {subscriptionStatus.plan.maxClassesPerWeek !== 999 && (
+            {subscriptionStatus.plan.maxClassesPerMonth !== 999 && (
               <div className="mt-4">
                 <div className="h-2 bg-muted rounded-full overflow-hidden">
                   <div 
                     className={`h-full rounded-full transition-all ${
-                      (subscriptionStatus.usage?.classesThisWeek || 0) >= subscriptionStatus.plan.maxClassesPerWeek ? "bg-red-500" :
-                      (subscriptionStatus.usage?.classesThisWeek || 0) >= subscriptionStatus.plan.maxClassesPerWeek * 0.8 ? "bg-amber-500" : 
+                      (subscriptionStatus.usage?.classesThisMonth || 0) >= subscriptionStatus.plan.maxClassesPerMonth ? "bg-red-500" :
+                      (subscriptionStatus.usage?.classesThisMonth || 0) >= subscriptionStatus.plan.maxClassesPerMonth * 0.8 ? "bg-amber-500" : 
                       "bg-emerald-500"
                     }`}
-                    style={{ width: `${Math.min(((subscriptionStatus.usage?.classesThisWeek || 0) / subscriptionStatus.plan.maxClassesPerWeek) * 100, 100)}%` }}
+                    style={{ width: `${Math.min(((subscriptionStatus.usage?.classesThisMonth || 0) / subscriptionStatus.plan.maxClassesPerMonth) * 100, 100)}%` }}
                   />
                 </div>
                 {subscriptionStatus.limits?.classesRemaining === 0 && (
@@ -580,7 +580,7 @@ export default function MemberClassesPage() {
                                     classSchedule.isFull || 
                                     bookingLoading === classSchedule.id ||
                                     !subscriptionStatus?.hasSubscription ||
-                                    (subscriptionStatus?.limits?.classesRemaining === 0 && subscriptionStatus?.plan?.maxClassesPerWeek !== 999)
+                                    (subscriptionStatus?.limits?.classesRemaining === 0 && subscriptionStatus?.plan?.maxClassesPerMonth !== 999)
                                   }
                                   className="bg-zinc-900 hover:bg-zinc-800 text-white disabled:bg-zinc-300"
                                 >
@@ -591,7 +591,7 @@ export default function MemberClassesPage() {
                                     </>
                                   ) : !subscriptionStatus?.hasSubscription ? (
                                     "Subscribe to Book"
-                                  ) : subscriptionStatus?.limits?.classesRemaining === 0 && subscriptionStatus?.plan?.maxClassesPerWeek !== 999 ? (
+                                  ) : subscriptionStatus?.limits?.classesRemaining === 0 && subscriptionStatus?.plan?.maxClassesPerMonth !== 999 ? (
                                     "Limit Reached"
                                   ) : classSchedule.isFull ? (
                                     "Class Full"

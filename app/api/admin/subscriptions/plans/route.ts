@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const {
       name, description, price, interval, stripePriceId, stripeAnnualPriceId, features,
-      tier, maxClassesPerWeek, maxCheckInsPerDay, hasTrainerAccess, hasPersonalTraining,
+      tier, maxClassesPerMonth, maxCheckInsPerDay, hasTrainerAccess, hasPersonalTraining,
       hasProgressTracking, hasAchievements
     } = body
 
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
       features: features || [],
       isActive: true,
       tier: tier || "basic",
-      maxClassesPerWeek: maxClassesPerWeek ?? 3,
+      maxClassesPerMonth: maxClassesPerMonth ?? 12,
       maxCheckInsPerDay: maxCheckInsPerDay ?? 1,
       hasTrainerAccess: hasTrainerAccess ?? false,
       hasPersonalTraining: hasPersonalTraining ?? false,
@@ -99,7 +99,7 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json()
     const { id, name, description, price, interval, stripePriceId, stripeAnnualPriceId, features,
-      tier, maxClassesPerWeek, maxCheckInsPerDay, hasTrainerAccess, hasPersonalTraining,
+      tier, maxClassesPerMonth, maxCheckInsPerDay, hasTrainerAccess, hasPersonalTraining,
       hasProgressTracking, hasAchievements
     } = body
 
@@ -117,7 +117,7 @@ export async function PUT(request: NextRequest) {
         stripeAnnualPriceId,
         features: features || [],
         tier: tier || "basic",
-        maxClassesPerWeek: maxClassesPerWeek ?? 3,
+        maxClassesPerMonth: maxClassesPerMonth ?? 12,
         maxCheckInsPerDay: maxCheckInsPerDay ?? 1,
         hasTrainerAccess: hasTrainerAccess ?? false,
         hasPersonalTraining: hasPersonalTraining ?? false,

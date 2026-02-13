@@ -17,7 +17,7 @@ interface SubscriptionPlan {
   isActive: boolean
   memberCount: number
   tier?: string
-  maxClassesPerWeek?: number
+  maxClassesPerMonth?: number
   maxCheckInsPerDay?: number
   hasTrainerAccess?: boolean
   hasPersonalTraining?: boolean
@@ -40,7 +40,7 @@ export default function SubscriptionsPage() {
     stripeAnnualPriceId: "",
     features: "",
     tier: "basic",
-    maxClassesPerWeek: "3",
+    maxClassesPerMonth: "12",
     maxCheckInsPerDay: "1",
     hasTrainerAccess: false,
     hasPersonalTraining: false,
@@ -97,7 +97,7 @@ export default function SubscriptionsPage() {
           stripeAnnualPriceId: "",
           features: "",
           tier: "basic",
-          maxClassesPerWeek: "3",
+          maxClassesPerMonth: "12",
           maxCheckInsPerDay: "1",
           hasTrainerAccess: false,
           hasPersonalTraining: false,
@@ -127,7 +127,7 @@ export default function SubscriptionsPage() {
       stripeAnnualPriceId: "",
       features: plan.features.join(", "),
       tier: plan.tier || "basic",
-      maxClassesPerWeek: (plan.maxClassesPerWeek || 3).toString(),
+      maxClassesPerMonth: (plan.maxClassesPerMonth || 12).toString(),
       maxCheckInsPerDay: (plan.maxCheckInsPerDay || 1).toString(),
       hasTrainerAccess: plan.hasTrainerAccess || false,
       hasPersonalTraining: plan.hasPersonalTraining || false,
@@ -150,7 +150,7 @@ export default function SubscriptionsPage() {
       stripeAnnualPriceId: "",
       features: "",
       tier: "basic",
-      maxClassesPerWeek: "3",
+      maxClassesPerMonth: "12",
       maxCheckInsPerDay: "1",
       hasTrainerAccess: false,
       hasPersonalTraining: false,
@@ -359,12 +359,12 @@ export default function SubscriptionsPage() {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="maxClassesPerWeek" className="text-foreground dark:text-zinc-300">Classes/Week</Label>
+                    <Label htmlFor="maxClassesPerMonth" className="text-foreground dark:text-zinc-300">Classes/Month</Label>
                     <Input
-                      id="maxClassesPerWeek"
+                      id="maxClassesPerMonth"
                       type="number"
-                      value={formData.maxClassesPerWeek}
-                      onChange={(e) => setFormData({ ...formData, maxClassesPerWeek: e.target.value })}
+                      value={formData.maxClassesPerMonth}
+                      onChange={(e) => setFormData({ ...formData, maxClassesPerMonth: e.target.value })}
                       placeholder="3"
                       className="bg-muted/50 dark:bg-zinc-800 border-border dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-white focus:ring-zinc-900 dark:focus:ring-white transition-colors dark:text-white"
                     />

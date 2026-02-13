@@ -58,9 +58,26 @@ export async function POST(request: NextRequest) {
     const currentPeriodStart = subData.current_period_start 
       ? new Date(Number(subData.current_period_start) * 1000)
       : new Date()
-    const currentPeriodEnd = subData.current_period_end
+    let currentPeriodEnd = subData.current_period_end
       ? new Date(Number(subData.current_period_end) * 1000)
-      : new Date()
+      : null
+    
+    // Calculate end date based on plan interval if not provided by Stripe
+    if (!currentPeriodEnd || currentPeriodEnd.getTime() === currentPeriodStart.getTime()) {
+      const interval = plan?.interval || 'month'
+      const endDate = new Date(currentPeriodStart)
+      if (interval === 'year') {
+        endDate.setFullYear(endDate.getFullYear() + 1)
+      } else if (interval === 'month') {
+        endDate.setMonth(endDate.getMonth() + 1)
+      } else if (interval === 'week') {
+        endDate.setDate(endDate.getDate() + 7)
+      } else {
+        endDate.setMonth(endDate.getMonth() + 1) // default to monthly
+      }
+      currentPeriodEnd = endDate
+    }
+    
     const canceledAt = subData.canceled_at
       ? new Date(Number(subData.canceled_at) * 1000)
       : null

@@ -95,9 +95,28 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const currentPeriodStart = subscription.current_period_start 
     ? new Date(Number(subscription.current_period_start) * 1000) 
     : new Date()
-  const currentPeriodEnd = subscription.current_period_end 
+  let currentPeriodEnd = subscription.current_period_end 
     ? new Date(Number(subscription.current_period_end) * 1000) 
-    : new Date()
+    : null
+  
+  // Calculate end date based on plan interval if not provided by Stripe
+  if (!currentPeriodEnd || currentPeriodEnd.getTime() === currentPeriodStart.getTime()) {
+    const plan = await db.query.subscriptionPlans.findFirst({
+      where: eq(subscriptionPlans.id, planId),
+    })
+    const interval = plan?.interval || 'month'
+    const endDate = new Date(currentPeriodStart)
+    if (interval === 'year') {
+      endDate.setFullYear(endDate.getFullYear() + 1)
+    } else if (interval === 'month') {
+      endDate.setMonth(endDate.getMonth() + 1)
+    } else if (interval === 'week') {
+      endDate.setDate(endDate.getDate() + 7)
+    } else {
+      endDate.setMonth(endDate.getMonth() + 1)
+    }
+    currentPeriodEnd = endDate
+  }
 
   const existingSub = await db.query.memberSubscriptions.findFirst({
     where: eq(memberSubscriptions.stripeSubscriptionId, subscriptionId),
@@ -164,9 +183,31 @@ async function handleSubscriptionUpdated(subscription: any) {
   const currentPeriodStart = subscription.current_period_start 
     ? new Date(Number(subscription.current_period_start) * 1000) 
     : new Date()
-  const currentPeriodEnd = subscription.current_period_end 
+  let currentPeriodEnd = subscription.current_period_end 
     ? new Date(Number(subscription.current_period_end) * 1000) 
-    : new Date()
+    : null
+  
+  // Calculate end date based on plan interval if not provided by Stripe
+  if (!currentPeriodEnd || currentPeriodEnd.getTime() === currentPeriodStart.getTime()) {
+    const plan = existingSub.planId 
+      ? await db.query.subscriptionPlans.findFirst({
+          where: eq(subscriptionPlans.id, existingSub.planId),
+        })
+      : null
+    const interval = plan?.interval || 'month'
+    const endDate = new Date(currentPeriodStart)
+    if (interval === 'year') {
+      endDate.setFullYear(endDate.getFullYear() + 1)
+    } else if (interval === 'month') {
+      endDate.setMonth(endDate.getMonth() + 1)
+    } else if (interval === 'week') {
+      endDate.setDate(endDate.getDate() + 7)
+    } else {
+      endDate.setMonth(endDate.getMonth() + 1)
+    }
+    currentPeriodEnd = endDate
+  }
+  
   const canceledAt = subscription.canceled_at 
     ? new Date(Number(subscription.canceled_at) * 1000) 
     : null
