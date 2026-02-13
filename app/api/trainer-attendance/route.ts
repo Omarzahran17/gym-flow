@@ -1,8 +1,13 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { trainerAttendance, trainers, users } from "@/lib/db/schema";
-import { eq, and, gte, desc } from "drizzle-orm";
+import { eq, and, gte, desc, sql } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
+
+function getTodayDateString() {
+  const today = new Date();
+  return today.toISOString().split('T')[0];
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,13 +36,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = getTodayDateString();
 
     const existingToday = await db.query.trainerAttendance.findFirst({
       where: and(
         eq(trainerAttendance.trainerId, trainer.id),
-        gte(trainerAttendance.date, today)
+        eq(trainerAttendance.date, today)
       ),
     });
 
@@ -130,13 +134,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = getTodayDateString();
 
     const todayRecord = await db.query.trainerAttendance.findFirst({
       where: and(
         eq(trainerAttendance.trainerId, trainer.id),
-        gte(trainerAttendance.date, today)
+        eq(trainerAttendance.date, today)
       ),
       orderBy: [desc(trainerAttendance.checkInTime)],
     });
