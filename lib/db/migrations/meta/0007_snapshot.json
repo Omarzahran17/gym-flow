@@ -1,0 +1,115 @@
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "prevId": "808bbc36-1b13-4147-ba4d-5a4c87c09e27",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.trainer_attendance": {
+      "name": "trainer_attendance",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "trainer_id": {
+          "name": "trainer_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "check_in_time": {
+          "name": "check_in_time",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "check_out_time": {
+          "name": "check_out_time",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'checked_in'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "trainer_attendance_trainer_id_idx": {
+          "name": "trainer_attendance_trainer_id_idx",
+          "columns": [
+            {
+              "columnName": "trainer_id"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "nullsNotDistinct": false
+        },
+        "trainer_attendance_date_idx": {
+          "name": "trainer_attendance_date_idx",
+          "columns": [
+            {
+              "columnName": "date"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "nullsNotDistinct": false
+        }
+      },
+      "foreignKeys": {
+        "trainer_attendance_trainer_id_trainers_id_fk": {
+          "name": "trainer_attendance_trainer_id_trainers_id_fk",
+          "tableFrom": "trainer_attendance",
+          "tableTo": "trainers",
+          "columnsFrom": [
+            "trainer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "views": {},
+  "materializedViews": {},
+  "functions": [],
+  "procedures": [],
+  "types": {},
+  "triggers": {},
+  "policies": {},
+  "checkConstraints": {}
+}

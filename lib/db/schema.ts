@@ -176,6 +176,17 @@ export const attendance = pgTable('attendance', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+// Trainer Attendance (check-in/check-out)
+export const trainerAttendance = pgTable('trainer_attendance', {
+  id: serial('id').primaryKey(),
+  trainerId: integer('trainer_id').references(() => trainers.id),
+  checkInTime: timestamp('check_in_time').defaultNow(),
+  checkOutTime: timestamp('check_out_time'),
+  date: date('date').defaultNow(),
+  status: varchar('status', { length: 50 }).default('checked_in'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 // Exercise Library
 export const exercises = pgTable('exercises', {
   id: serial('id').primaryKey(),
@@ -495,6 +506,13 @@ export const attendanceRelations = relations(attendance, ({ one }) => ({
   }),
 }));
 
+export const trainerAttendanceRelations = relations(trainerAttendance, ({ one }) => ({
+  trainer: one(trainers, {
+    fields: [trainerAttendance.trainerId],
+    references: [trainers.id],
+  }),
+}));
+
 // Types
 export type Member = typeof members.$inferSelect;
 export type NewMember = typeof members.$inferInsert;
@@ -506,6 +524,8 @@ export type MemberSubscription = typeof memberSubscriptions.$inferSelect;
 export type NewMemberSubscription = typeof memberSubscriptions.$inferInsert;
 export type Attendance = typeof attendance.$inferSelect;
 export type NewAttendance = typeof attendance.$inferInsert;
+export type TrainerAttendance = typeof trainerAttendance.$inferSelect;
+export type NewTrainerAttendance = typeof trainerAttendance.$inferInsert;
 export type Exercise = typeof exercises.$inferSelect;
 export type NewExercise = typeof exercises.$inferInsert;
 export type WorkoutPlan = typeof workoutPlans.$inferSelect;

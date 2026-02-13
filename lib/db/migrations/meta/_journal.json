@@ -50,6 +50,13 @@
       "when": 1770915441401,
       "tag": "0006_illegal_starbolt",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1771000000000,
+      "tag": "0007_azure_nova",
+      "breakpoints": true
     }
   ]
 }

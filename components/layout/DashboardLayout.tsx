@@ -109,13 +109,14 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
           { href: "/admin/classes", label: "Classes", icon: "Calendar" },
           { href: "/admin/subscriptions", label: "Subscriptions", icon: "CreditCard" },
           { href: "/admin/equipment", label: "Equipment", icon: "Wrench" },
-          { href: "/admin/check-in", label: "Check-In", icon: "ClipboardList" },
+          { href: "/admin/attendance", label: "Attendance", icon: "ClipboardList" },
           { href: "/admin/reports", label: "Reports", icon: "BarChart3" },
           { href: "/admin/contact", label: "Contact Messages", icon: "MessageSquare" },
         ]
       case "trainer":
         return [
           { href: "/trainer", label: "Dashboard", icon: "LayoutDashboard" },
+          { href: "/trainer/check-in", label: "Attendance", icon: "ClipboardList" },
           { href: "/trainer/members", label: "My Members", icon: "Users" },
           { href: "/trainer/workout-plans", label: "Workout Plans", icon: "ClipboardList" },
           { href: "/trainer/exercises", label: "Exercises", icon: "Dumbbell" },
@@ -124,6 +125,7 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
       case "member":
         return [
           { href: "/member", label: "Dashboard", icon: "LayoutDashboard" },
+          { href: "/member/check-in", label: "Check-In", icon: "ClipboardList" },
           { href: "/member/chat", label: "AI Coach", icon: "Sparkles" },
           { href: "/member/workout-plan", label: "Workout Plan", icon: "Dumbbell" },
           { href: "/member/classes", label: "Classes", icon: "Calendar" },
