@@ -11,6 +11,7 @@ import {
   progressPhotos,
   personalRecords,
   memberAchievements,
+  achievements,
   classBookings,
   session as userSession,
   account
@@ -73,6 +74,16 @@ export async function GET(
     const months = Math.floor((now.getTime() - joinDate.getTime()) / (1000 * 60 * 60 * 24 * 30))
     const memberSince = `${months} months`
 
+    const earnedAchievements = await db.query.memberAchievements.findMany({
+      where: eq(memberAchievements.memberId, memberId),
+      with: {
+        achievement: true,
+      },
+      orderBy: [desc(memberAchievements.earnedAt)],
+    })
+
+    const totalPoints = earnedAchievements.reduce((sum, ea) => sum + (ea.achievement?.points || 0), 0)
+
     return NextResponse.json({
       member: {
         ...member,
@@ -85,6 +96,12 @@ export async function GET(
         attendanceRate,
         memberSince,
       },
+      achievements: earnedAchievements.map(ea => ({
+        ...ea.achievement,
+        earnedAt: ea.earnedAt,
+      })),
+      achievementsCount: earnedAchievements.length,
+      totalPoints,
     })
   } catch (error) {
     console.error("Get member error:", error)

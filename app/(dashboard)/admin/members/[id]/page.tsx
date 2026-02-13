@@ -6,7 +6,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { QRCodeSVG } from "qrcode.react"
-import { ArrowLeft, Edit, Calendar, Dumbbell, TrendingUp } from "lucide-react"
+import { ArrowLeft, Edit, Calendar, Dumbbell, TrendingUp, Trophy } from "lucide-react"
 
 interface Member {
   id: number
@@ -28,11 +28,23 @@ interface MemberStats {
   memberSince: string
 }
 
+interface Achievement {
+  id: number
+  name: string
+  description: string
+  icon: string
+  points: number
+  earnedAt: string
+}
+
 export default function MemberDetailPage() {
   const params = useParams()
   const memberId = params.id
   const [member, setMember] = useState<Member | null>(null)
   const [stats, setStats] = useState<MemberStats | null>(null)
+  const [achievements, setAchievements] = useState<Achievement[]>([])
+  const [achievementsCount, setAchievementsCount] = useState(0)
+  const [totalPoints, setTotalPoints] = useState(0)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -42,6 +54,9 @@ export default function MemberDetailPage() {
         if (data.member) {
           setMember(data.member)
           setStats(data.stats)
+          setAchievements(data.achievements || [])
+          setAchievementsCount(data.achievementsCount || 0)
+          setTotalPoints(data.totalPoints || 0)
         }
       })
       .catch((err) => console.error("Failed to fetch member:", err))
@@ -226,6 +241,46 @@ export default function MemberDetailPage() {
           </Card>
         </div>
       )}
+
+      <Card className="border-border shadow-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-medium flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-amber-500" />
+            Achievements
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-6 mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-bold text-foreground">{achievementsCount}</span>
+              <span className="text-sm text-muted-foreground">Earned</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-bold text-foreground">{totalPoints}</span>
+              <span className="text-sm text-muted-foreground">Points</span>
+            </div>
+          </div>
+          {achievements.length > 0 ? (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {achievements.map((achievement) => (
+                <div
+                  key={achievement.id}
+                  className="flex items-start gap-3 p-3 rounded-lg bg-amber-50 border border-amber-200"
+                >
+                  <span className="text-2xl">{achievement.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-foreground truncate">{achievement.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{achievement.description}</p>
+                    <p className="text-xs text-amber-600 mt-1">+{achievement.points} points</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No achievements earned yet</p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
