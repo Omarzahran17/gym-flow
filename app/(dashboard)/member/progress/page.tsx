@@ -23,7 +23,8 @@ import {
   Loader2,
   Target,
   TrendingDown,
-  Minus
+  Minus,
+  Trash2
 } from "lucide-react"
 import { format } from "date-fns"
 import {
@@ -138,6 +139,25 @@ export default function MemberProgressPage() {
     return {
       value: change.toFixed(1),
       isPositive: change > 0,
+    }
+  }
+
+  const handleDeletePhoto = async (photoId: number) => {
+    if (!confirm("Are you sure you want to delete this progress photo?")) return
+    
+    try {
+      const response = await fetch(`/api/member/progress-photos?id=${photoId}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to delete photo")
+      }
+
+      setPhotos(photos.filter(p => p.id !== photoId))
+    } catch (err) {
+      console.error("Error deleting photo:", err)
+      alert("Failed to delete photo. Please try again.")
     }
   }
 
@@ -606,6 +626,14 @@ export default function MemberProgressPage() {
                       fill
                       className="object-cover"
                     />
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-8 w-8 rounded-full opacity-80 hover:opacity-100"
+                      onClick={() => handleDeletePhoto(photo.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                   <CardContent className="p-3">
                     <p className="text-sm font-medium">

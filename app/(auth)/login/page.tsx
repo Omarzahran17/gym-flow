@@ -14,21 +14,27 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
     const checkSession = async () => {
       try {
         const { data } = await authClient.getSession()
         if (data?.user) {
-          setIsLoggedIn(true)
+          const user = data.user as { role?: string }
+          let redirectUrl = "/member"
+          if (user?.role === "admin") {
+            redirectUrl = "/admin"
+          } else if (user?.role === "trainer") {
+            redirectUrl = "/trainer"
+          }
+          router.push(redirectUrl)
         }
       } catch (e) {
         // Not logged in
       }
     }
     checkSession()
-  }, [])
+  }, [router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -61,76 +67,6 @@ export default function LoginPage() {
       setError(err instanceof Error ? err.message : "An error occurred")
       setLoading(false)
     }
-  }
-
-  if (isLoggedIn) {
-    return (
-      <div className="min-h-screen flex">
-        <div className="hidden lg:flex lg:w-1/2 bg-zinc-950 text-white flex-col justify-center px-12 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute inset-0" style={{
-              backgroundImage: `radial-gradient(circle at 25% 25%, #3b82f6 0%, transparent 50%), radial-gradient(circle at 75% 75%, #8b5cf6 0%, transparent 50%)`,
-            }} />
-          </div>
-
-          <div className="relative z-10">
-            <div className="flex items-center space-x-3 mb-8">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <Dumbbell className="h-7 w-7 text-white" />
-              </div>
-              <span className="text-2xl font-bold tracking-tight">GymFlow</span>
-            </div>
-
-            <h1 className="text-4xl font-bold mb-4 leading-tight">
-              Welcome back!
-            </h1>
-
-            <p className="text-zinc-400 text-lg max-w-md">
-              You are already signed in. Go to your dashboard to continue.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white dark:bg-zinc-900">
-          <div className="w-full max-w-md text-center">
-            <div className="lg:hidden flex items-center justify-center space-x-3 mb-8">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <Dumbbell className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-xl font-bold">GymFlow</span>
-            </div>
-
-            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30">
-              <LayoutDashboard className="h-10 w-10 text-white" />
-            </div>
-
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">You're already signed in</h2>
-            <p className="text-zinc-500 dark:text-zinc-400 mb-8">Go to your dashboard to manage your account</p>
-
-            <div className="space-y-3">
-              <Link href="/admin" className="block">
-                <Button className="w-full h-11 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all shadow-lg shadow-blue-500/25">
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Admin Dashboard
-                </Button>
-              </Link>
-              <Link href="/member" className="block">
-                <Button variant="outline" className="w-full h-11 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-900 dark:text-white font-medium rounded-lg transition-colors">
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Member Dashboard
-                </Button>
-              </Link>
-              <Link href="/trainer" className="block">
-                <Button variant="outline" className="w-full h-11 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-900 dark:text-white font-medium rounded-lg transition-colors">
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Trainer Dashboard
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
   }
 
   return (

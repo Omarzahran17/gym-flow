@@ -4,6 +4,7 @@ import { progressPhotos, members } from "@/lib/db/schema"
 import { checkAchievements } from "@/lib/achievements"
 import { eq, desc } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
+import { deleteBlob } from "@/lib/blob"
 
 export async function GET(request: NextRequest) {
   try {
@@ -100,6 +101,71 @@ export async function POST(request: NextRequest) {
     console.error("Create progress photo error:", error)
     return NextResponse.json(
       { error: "Failed to create progress photo" },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    })
+
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get("id")
+
+    if (!id) {
+      return NextResponse.json({ error: "Photo ID is required" }, { status: 400 })
+    }
+
+    const photoId = parseInt(id)
+
+    // Get member from user
+    const member = await db.query.members.findFirst({
+      where: eq(members.userId, session.user.id),
+    })
+
+    if (!member) {
+      return NextResponse.json({ error: "Member not found" }, { status: 404 })
+    }
+
+    // Get the photo to verify ownership
+    const photo = await db.query.progressPhotos.findFirst({
+      where: eq(progressPhotos.id, photoId),
+    })
+
+    if (!photo) {
+      return NextResponse.json({ error: "Photo not found" }, { status: 404 })
+    }
+
+    // Check if user is the owner or a trainer
+    const isOwner = photo.memberId === member.id
+    const isTrainer = (session.user as any).role === "trainer"
+
+    if (!isOwner && !isTrainer) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
+
+    // Delete from blob storage
+    try {
+      await deleteBlob(photo.url)
+    } catch (blobError) {
+      console.error("Failed to delete blob:", blobError)
+    }
+
+    // Delete from database
+    await db.delete(progressPhotos).where(eq(progressPhotos.id, photoId))
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Delete progress photo error:", error)
+    return NextResponse.json(
+      { error: "Failed to delete progress photo" },
       { status: 500 }
     )
   }

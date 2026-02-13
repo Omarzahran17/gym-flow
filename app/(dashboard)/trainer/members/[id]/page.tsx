@@ -6,7 +6,7 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Calendar, Dumbbell, TrendingUp, Clock, Mail, Phone, ChevronRight, Trophy, Camera, Plus } from "lucide-react"
+import { ArrowLeft, Calendar, Dumbbell, TrendingUp, Clock, Mail, Phone, ChevronRight, Trophy, Camera, Plus, Trash2, Loader2 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { format } from "date-fns"
 import Image from "next/image"
@@ -65,6 +65,7 @@ export default function TrainerMemberDetailPage() {
   const [member, setMember] = useState<MemberDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [showAddPhoto, setShowAddPhoto] = useState(false)
+  const [deletingPhoto, setDeletingPhoto] = useState<number | null>(null)
 
   useEffect(() => {
     fetch(`/api/trainer/members/${params.id}`)
@@ -82,6 +83,31 @@ export default function TrainerMemberDetailPage() {
       })
       .finally(() => setLoading(false))
   }, [params.id, router])
+
+  const handleDeletePhoto = async (photoId: number) => {
+    if (!confirm("Are you sure you want to delete this progress photo?")) return
+    
+    setDeletingPhoto(photoId)
+    try {
+      const response = await fetch(`/api/member/progress-photos?id=${photoId}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to delete photo")
+      }
+
+      setMember(prev => prev ? {
+        ...prev,
+        progressPhotos: prev.progressPhotos.filter(p => p.id !== photoId)
+      } : null)
+    } catch (err) {
+      console.error("Error deleting photo:", err)
+      alert("Failed to delete photo. Please try again.")
+    } finally {
+      setDeletingPhoto(null)
+    }
+  }
 
   if (loading) {
     return (
@@ -315,6 +341,19 @@ export default function TrainerMemberDetailPage() {
                       fill
                       className="object-cover"
                     />
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-8 w-8 rounded-full opacity-80 hover:opacity-100"
+                      onClick={() => handleDeletePhoto(photo.id)}
+                      disabled={deletingPhoto === photo.id}
+                    >
+                      {deletingPhoto === photo.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </Button>
                   </div>
                   <CardContent className="p-3">
                     <p className="text-sm font-medium text-foreground">
