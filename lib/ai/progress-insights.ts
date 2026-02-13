@@ -1,4 +1,4 @@
-import { generateText } from "ai"
+import { generateText, Output } from "ai"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
 import { z } from "zod"
 
@@ -82,41 +82,15 @@ INSTRUCTIONS:
 3. Provide meaningful interpretations (e.g., "weight down but waist down more = good fat loss")
 4. Predict goal completion if there's enough data (need at least 3 measurements)
 5. Give actionable recommendations
+6. Always provide all fields in your response`
 
-Respond with a JSON object containing:
-{
-  "summary": "2-3 sentence overview of overall progress",
-  "trends": [
-    {
-      "metric": "Weight",
-      "change": "-5.2 kg",
-      "percentage": "-8%",
-      "interpretation": "Significant weight loss indicating fat loss progress"
-    }
-  ],
-  "goalPrediction": {
-    "estimatedCompletion": "3-4 months",
-    "onTrack": true,
-    "factors": ["Consistent weekly progress", "Good adherence to workout plan"]
-  },
-  "recommendations": [
-    "Consider increasing protein intake to support muscle retention",
-    "Keep up the great consistency with measurements"
-  ]
-}`
-
-  const result = await generateText({
+  const { output } = await generateText({
     model: openrouter("openrouter/aurora-alpha"),
+    output: Output.object({
+      schema: insightSchema,
+    }),
     prompt,
   })
 
-  const text = result.text
-  
-  const jsonMatch = text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) {
-    throw new Error("Failed to parse AI response")
-  }
-
-  const parsed = JSON.parse(jsonMatch[0])
-  return insightSchema.parse(parsed)
+  return output
 }
