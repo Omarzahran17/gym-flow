@@ -1,10 +1,23 @@
 import { uploadImage } from "@/lib/blob"
 import { NextRequest, NextResponse } from "next/server"
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
+  let file: File | null = null
+  
   try {
-    const formData = await request.formData()
-    const file = formData.get("file") as File
+    try {
+      const formData = await request.formData()
+      file = formData.get("file") as File
+    } catch (formError) {
+      console.error("FormData parse error:", formError)
+      return NextResponse.json(
+        { error: "Failed to parse form data" },
+        { status: 400 }
+      )
+    }
 
     if (!file) {
       return NextResponse.json(
@@ -36,7 +49,16 @@ export async function POST(request: NextRequest) {
     
     console.log("Uploading profile picture:", file.name, "size:", sizeMB.toFixed(2), "MB")
 
-    const blob = await uploadImage(file, path)
+    let blob
+    try {
+      blob = await uploadImage(file, path)
+    } catch (uploadError) {
+      console.error("Blob upload error:", uploadError)
+      return NextResponse.json(
+        { error: uploadError instanceof Error ? uploadError.message : "Failed to upload to blob storage" },
+        { status: 500 }
+      )
+    }
 
     console.log("Upload successful:", blob.url)
 

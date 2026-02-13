@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Search, Mail, User, Shield, Crown, ArrowUpCircle, Phone, HeartPulse, ShieldAlert, Calendar, FileText, Award, Trash2 } from "lucide-react"
 
 interface Member {
-  id: string
+  id: string | number
   userId: string
   name?: string | null
   email?: string | null
@@ -24,6 +24,8 @@ interface Member {
   certifications?: string | null
   isMember: boolean
   isTrainer: boolean
+  memberId?: number | null
+  trainerId?: number | null
 }
 
 export default function MembersPage() {
@@ -103,10 +105,13 @@ export default function MembersPage() {
     }
   }
 
-  const handleDelete = async (memberId: string, memberName: string) => {
+  const handleDelete = async (memberId: string, memberName: string, isTrainer: boolean) => {
     setDeletingId(memberId)
     try {
-      const response = await fetch(`/api/admin/members/${memberId}`, {
+      const endpoint = isTrainer 
+        ? `/api/admin/trainers/${memberId}` 
+        : `/api/admin/members/${memberId}`
+      const response = await fetch(endpoint, {
         method: "DELETE",
       })
 
@@ -354,7 +359,7 @@ export default function MembersPage() {
                 </div>
               </section>
 
-              {selectedMember?.isMember && (
+              {selectedMember?.isMember || selectedMember?.isTrainer ? (
                 <section className="pt-4 border-t border-border">
                   <Button
                     variant="destructive"
@@ -366,7 +371,7 @@ export default function MembersPage() {
                     Delete Account
                   </Button>
                 </section>
-              )}
+              ) : null}
             </div>
           </div>
         </DialogContent>
@@ -398,7 +403,7 @@ export default function MembersPage() {
               </Button>
               <Button
                 variant="destructive"
-                onClick={() => selectedMember && handleDelete(selectedMember.id, selectedMember.name || selectedMember.userId)}
+                onClick={() => selectedMember && handleDelete(String(selectedMember.id), selectedMember.name || selectedMember.userId, !!selectedMember.isTrainer)}
                 disabled={deletingId !== null}
               >
                 {deletingId === selectedMember?.id ? (

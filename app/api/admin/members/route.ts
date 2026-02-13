@@ -31,13 +31,15 @@ export async function GET(request: NextRequest) {
         const trainerData = trainersMap.get(user.id)
 
         return {
-          id: memberData?.id || user.id,
+          id: memberData?.id || trainerData?.id || user.id,
           userId: user.id,
           email: user.email || null,
           name: user.name || null,
           role: user.role || "member",
           isMember: !!memberData,
           isTrainer: !!trainerData,
+          memberId: memberData?.id || null,
+          trainerId: trainerData?.id || null,
           createdAt: user.createdAt,
           // Member info
           phone: (user as any).phone || memberData?.phone || null,

@@ -108,12 +108,43 @@ export default function RegisterPage() {
         body: uploadFormData,
       })
 
+      let responseText = ""
+      try {
+        responseText = await response.text()
+      } catch {
+        setError("Failed to read server response")
+        setUploadingPic(false)
+        return
+      }
+      
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || "Upload failed")
+        let errorMessage = "Upload failed"
+        try {
+          const data = JSON.parse(responseText)
+          errorMessage = data.error || errorMessage
+        } catch {
+          errorMessage = responseText || errorMessage
+        }
+        setError(errorMessage)
+        setUploadingPic(false)
+        return
       }
 
-      const data = await response.json()
+      let data
+      try {
+        data = JSON.parse(responseText)
+      } catch {
+        setError("Invalid response from server: " + (responseText.substring(0, 100) || "empty response"))
+        setUploadingPic(false)
+        return
+      }
+      
+      if (!data.url) {
+        setError("No URL returned from server")
+        setUploadingPic(false)
+        return
+      }
+      
       setProfilePic(data.url)
       setProfilePicFile(file)
     } catch (err) {
