@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { members } from "@/lib/db/schema"
+import { members, memberSubscriptions } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
@@ -28,13 +28,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Member not found" }, { status: 404 })
     }
 
-    if (!member.stripeCustomerId) {
+    let stripeCustomerId = member.stripeCustomerId
+
+    if (!stripeCustomerId) {
+      const subscription = await db.query.memberSubscriptions.findFirst({
+        where: eq(memberSubscriptions.memberId, member.id),
+      })
+
+      if (subscription?.stripeSubscriptionId) {
+        const stripeSub = await stripe.subscriptions.retrieve(subscription.stripeSubscriptionId)
+        stripeCustomerId = stripeSub.customer as string
+      }
+    }
+
+    if (!stripeCustomerId) {
       return NextResponse.json({ error: "Stripe customer not found" }, { status: 400 })
     }
 
-    // Create billing portal session
     const portalSession = await stripe.billingPortal.sessions.create({
-      customer: member.stripeCustomerId,
+      customer: stripeCustomerId,
       return_url: `${process.env.NEXT_PUBLIC_APP_URL}/member/subscription`,
     })
 
