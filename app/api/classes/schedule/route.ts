@@ -75,19 +75,23 @@ export async function GET(request: NextRequest) {
         }
 
         const maxCapacity = classItem.maxCapacity ?? 20
+        const availableSpots = maxCapacity - bookingCount.count
+        if (availableSpots <= 0) {
+          return
+        }
         schedule.push({
           ...classSchedule,
           class: classItem,
           trainer: classItem.trainer,
           bookingsCount: bookingCount.count,
-          availableSpots: maxCapacity - bookingCount.count,
+          availableSpots,
           isFull: bookingCount.count >= maxCapacity,
           isBooked,
         })
       }
     }
 
-    return NextResponse.json({ schedule })
+    return NextResponse.json({ schedule: schedule.filter(Boolean) })
   } catch (error) {
     console.error("Get class schedule error:", error)
     return NextResponse.json(

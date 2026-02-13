@@ -56,6 +56,7 @@ export async function checkMemberSubscription(memberId: number): Promise<Subscri
   const weeklyBookings = await db.query.classBookings.findMany({
     where: and(
       eq(classBookings.memberId, memberId),
+      eq(classBookings.status, "confirmed"),
       gte(classBookings.createdAt, startOfWeek)
     ),
   })

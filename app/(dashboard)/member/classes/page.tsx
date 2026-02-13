@@ -109,11 +109,15 @@ export default function MemberClassesPage() {
           setMyBookings(bookingsData.bookings)
         }
         
-        setSchedule(schedule.map(s => 
-          s.id === scheduleId 
-            ? { ...s, isBooked: true, bookingsCount: s.bookingsCount + 1, availableSpots: s.availableSpots - 1 }
-            : s
-        ))
+        const scheduleRes = await fetch("/api/classes/schedule")
+        const scheduleData = await scheduleRes.json()
+        if (scheduleData.schedule) {
+          setSchedule(scheduleData.schedule)
+        }
+        
+        const subRes = await fetch("/api/member/subscription-status")
+        const subData = await subRes.json()
+        setSubscriptionStatus(subData)
       } else {
         const error = await response.json()
         alert(error.error || "Failed to book class")
@@ -139,9 +143,16 @@ export default function MemberClassesPage() {
         
         setSchedule(schedule.map(s => 
           s.id === scheduleId 
-            ? { ...s, isBooked: false, bookingsCount: s.bookingsCount - 1, availableSpots: s.availableSpots + 1 }
+            ? { ...s, isBooked: false, bookingsCount: Math.max(0, s.bookingsCount - 1), availableSpots: s.availableSpots + 1 }
             : s
         ))
+        
+        const subRes = await fetch("/api/member/subscription-status")
+        const subData = await subRes.json()
+        setSubscriptionStatus(subData)
+      } else {
+        const error = await response.json()
+        alert(error.error || "Failed to cancel booking")
       }
     } catch (err) {
       console.error("Cancel error:", err)

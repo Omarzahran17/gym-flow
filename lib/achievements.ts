@@ -1,5 +1,5 @@
 import { db } from "./db"
-import { achievements, memberAchievements, members, personalRecords, measurements, progressPhotos, classBookings } from "./db/schema"
+import { achievements, memberAchievements, members, personalRecords, measurements, progressPhotos, attendance } from "./db/schema"
 import { eq, and, gte, sql } from "drizzle-orm"
 
 // Check and award achievements for a member
@@ -105,12 +105,12 @@ async function getProgressPhotosCount(memberId: number): Promise<number> {
   return result[0]?.count || 0
 }
 
-// Get workouts count (using class bookings as workout proxy)
+// Get workouts count (using attendance/check-ins)
 async function getWorkoutsCount(memberId: number): Promise<number> {
   const result = await db
     .select({ count: sql<number>`count(*)` })
-    .from(classBookings)
-    .where(eq(classBookings.memberId, memberId))
+    .from(attendance)
+    .where(eq(attendance.memberId, memberId))
   
   return result[0]?.count || 0
 }

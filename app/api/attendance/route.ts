@@ -4,6 +4,7 @@ import { attendance, members, users } from "@/lib/db/schema";
 import { eq, and, gte, or, like } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { checkMemberSubscription } from "@/lib/subscription";
+import { checkAchievements } from "@/lib/achievements";
 
 export async function POST(request: NextRequest) {
   try {
@@ -107,6 +108,8 @@ export async function POST(request: NextRequest) {
       memberId: member.id,
       method,
     });
+
+    await checkAchievements(member.id);
 
     return NextResponse.json({
       success: true,
