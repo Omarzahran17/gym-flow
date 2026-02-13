@@ -7,7 +7,22 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, Plus, X, GripVertical, Save, Search } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { ArrowLeft, Plus, X, GripVertical, Save, Search, Sparkles, Loader2 } from "lucide-react"
 
 interface Exercise {
   id: number
@@ -46,12 +61,21 @@ export default function NewWorkoutPlanPage() {
   const [members, setMembers] = useState<Member[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedExercises, setSelectedExercises] = useState<PlanExercise[]>([])
+  const [aiDialogOpen, setAiDialogOpen] = useState(false)
+  const [generating, setGenerating] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     memberIds: [] as number[],
     startDate: "",
     endDate: "",
+  })
+  const [aiFormData, setAiFormData] = useState({
+    goals: "",
+    fitnessLevel: "intermediate",
+    injuries: "",
+    equipment: "",
+    experienceLevel: "intermediate",
   })
 
   const searchParams = useSearchParams()
@@ -85,6 +109,55 @@ export default function NewWorkoutPlanPage() {
       .catch((err) => console.error("Failed to load data:", err))
       .finally(() => setLoading(false))
   }, [preSelectedMemberId])
+
+  const handleGenerateAI = async () => {
+    setGenerating(true)
+    try {
+      const response = await fetch("/api/ai/workout-generator", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(aiFormData),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || "Failed to generate workout plan")
+      }
+
+      const { workoutPlan } = await response.json()
+
+      setFormData({
+        ...formData,
+        name: workoutPlan.name,
+        description: workoutPlan.description,
+      })
+
+      const newSelectedExercises: PlanExercise[] = []
+      for (const genEx of workoutPlan.exercises) {
+        const matched = exercises.find(
+          (e) => e.name.toLowerCase() === genEx.name.toLowerCase()
+        )
+        if (matched) {
+          newSelectedExercises.push({
+            exerciseId: matched.id,
+            sets: genEx.sets,
+            reps: genEx.reps,
+            restSeconds: genEx.restSeconds,
+            notes: genEx.notes || "",
+            exercise: matched,
+          })
+        }
+      }
+
+      setSelectedExercises(newSelectedExercises)
+      setAiDialogOpen(false)
+    } catch (err: any) {
+      console.error("AI generation error:", err)
+      alert(err.message || "Failed to generate workout plan. Make sure you have exercises in your library.")
+    } finally {
+      setGenerating(false)
+    }
+  }
 
   const filteredExercises = exercises.filter(
     (ex) =>
@@ -171,16 +244,121 @@ export default function NewWorkoutPlanPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      <div className="flex items-center space-x-4">
-        <Link href="/trainer/workout-plans">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold">Create Workout Plan</h1>
-          <p className="text-gray-600">Build a custom workout plan for a member</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Link href="/trainer/workout-plans">
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold">Create Workout Plan</h1>
+            <p className="text-gray-600">Build a custom workout plan for a member</p>
+          </div>
         </div>
+
+        <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="border-purple-500 text-purple-600 hover:bg-purple-50">
+              <Sparkles className="h-4 w-4 mr-2" />
+              AI Generate
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>AI Workout Plan Generator</DialogTitle>
+              <DialogDescription>
+                Enter the member's profile information to generate a personalized workout plan.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="goals">Fitness Goals *</Label>
+                <Input
+                  id="goals"
+                  placeholder="e.g., Build muscle, lose weight, improve endurance"
+                  value={aiFormData.goals}
+                  onChange={(e) => setAiFormData({ ...aiFormData, goals: e.target.value })}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Fitness Level</Label>
+                  <Select
+                    value={aiFormData.fitnessLevel}
+                    onValueChange={(v) => setAiFormData({ ...aiFormData, fitnessLevel: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="beginner">Beginner</SelectItem>
+                      <SelectItem value="intermediate">Intermediate</SelectItem>
+                      <SelectItem value="advanced">Advanced</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Experience Level</Label>
+                  <Select
+                    value={aiFormData.experienceLevel}
+                    onValueChange={(v) => setAiFormData({ ...aiFormData, experienceLevel: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="beginner">Beginner (0-1 years)</SelectItem>
+                      <SelectItem value="intermediate">Intermediate (1-3 years)</SelectItem>
+                      <SelectItem value="advanced">Advanced (3+ years)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="injuries">Injuries/Limitations</Label>
+                <Input
+                  id="injuries"
+                  placeholder="e.g., Knee injury, lower back pain, shoulder issues"
+                  value={aiFormData.injuries}
+                  onChange={(e) => setAiFormData({ ...aiFormData, injuries: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="equipment">Available Equipment</Label>
+                <Input
+                  id="equipment"
+                  placeholder="e.g., Dumbbells, barbell, machines, full gym"
+                  value={aiFormData.equipment}
+                  onChange={(e) => setAiFormData({ ...aiFormData, equipment: e.target.value })}
+                />
+              </div>
+
+              <Button
+                type="button"
+                className="w-full bg-purple-600 hover:bg-purple-700"
+                onClick={handleGenerateAI}
+                disabled={generating || !aiFormData.goals}
+              >
+                {generating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Generate Workout Plan
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
