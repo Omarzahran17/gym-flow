@@ -14,8 +14,7 @@ import {
   memberAchievements,
   classBookings,
   session as userSession,
-  account,
-  verification
+  account
 } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
@@ -147,7 +146,6 @@ export async function DELETE(
       // Delete better-auth related records
       await tx.delete(userSession).where(eq(userSession.userId, userId))
       await tx.delete(account).where(eq(account.userId, userId))
-      await tx.delete(verification).where(eq(verification.userId, userId))
 
       // Delete the user record
       await tx.delete(users).where(eq(users.id, userId))
