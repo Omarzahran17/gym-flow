@@ -128,7 +128,6 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
           { href: "/member/workout-plan", label: "Workout Plan", icon: "Dumbbell" },
           { href: "/member/classes", label: "Classes", icon: "Calendar" },
           { href: "/member/progress", label: "Progress", icon: "Target" },
-          { href: "/member/achievements", label: "Achievements", icon: "Trophy" },
           { href: "/member/subscription", label: "Subscription", icon: "CreditCard" },
         ]
       default:
