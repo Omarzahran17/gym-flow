@@ -63,13 +63,31 @@ export const auth = betterAuth({
                     });
 
                     if (planDetails && subscription.referenceId) {
+                        let currentPeriodStart = subscription.periodStart ? new Date(subscription.periodStart) : new Date()
+                        let currentPeriodEnd = subscription.periodEnd ? new Date(subscription.periodEnd) : null
+
+                        // Calculate end date based on plan interval if not provided
+                        if (!currentPeriodEnd || currentPeriodEnd.getTime() <= currentPeriodStart.getTime()) {
+                            const interval = planDetails.interval || 'month'
+                            currentPeriodEnd = new Date(currentPeriodStart)
+                            if (interval === 'year') {
+                                currentPeriodEnd.setFullYear(currentPeriodEnd.getFullYear() + 1)
+                            } else if (interval === 'month') {
+                                currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + 1)
+                            } else if (interval === 'week') {
+                                currentPeriodEnd.setDate(currentPeriodEnd.getDate() + 7)
+                            } else {
+                                currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + 1)
+                            }
+                        }
+
                         await db.insert(memberSubscriptions).values({
                             memberId: parseInt(subscription.referenceId),
                             stripeSubscriptionId: subscription.stripeSubscriptionId || undefined,
                             planId: planDetails.id,
                             status: 'active',
-                            currentPeriodStart: subscription.periodStart ? new Date(subscription.periodStart) : new Date(),
-                            currentPeriodEnd: subscription.periodEnd ? new Date(subscription.periodEnd) : new Date(),
+                            currentPeriodStart,
+                            currentPeriodEnd,
                         });
                     }
                 },
@@ -83,11 +101,37 @@ export const auth = betterAuth({
                 onSubscriptionUpdate: async ({ subscription }) => {
                     if (!subscription.stripeSubscriptionId) return;
 
+                    const existingSub = await db.query.memberSubscriptions.findFirst({
+                        where: eq(memberSubscriptions.stripeSubscriptionId, subscription.stripeSubscriptionId),
+                    })
+
+                    let currentPeriodEnd: Date | undefined
+                    if (subscription.periodEnd) {
+                        currentPeriodEnd = new Date(subscription.periodEnd)
+                    } else if (existingSub?.currentPeriodStart) {
+                        const plan = existingSub.planId 
+                            ? await db.query.subscriptionPlans.findFirst({
+                                where: eq(subscriptionPlans.id, existingSub.planId),
+                              })
+                            : null
+                        const interval = plan?.interval || 'month'
+                        currentPeriodEnd = new Date(existingSub.currentPeriodStart)
+                        if (interval === 'year') {
+                            currentPeriodEnd.setFullYear(currentPeriodEnd.getFullYear() + 1)
+                        } else if (interval === 'month') {
+                            currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + 1)
+                        } else if (interval === 'week') {
+                            currentPeriodEnd.setDate(currentPeriodEnd.getDate() + 7)
+                        } else {
+                            currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + 1)
+                        }
+                    }
+
                     await db.update(memberSubscriptions)
                         .set({
                             status: subscription.status,
                             currentPeriodStart: subscription.periodStart ? new Date(subscription.periodStart) : undefined,
-                            currentPeriodEnd: subscription.periodEnd ? new Date(subscription.periodEnd) : undefined,
+                            currentPeriodEnd,
                             cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
                         })
                         .where(eq(memberSubscriptions.stripeSubscriptionId, subscription.stripeSubscriptionId));
