@@ -26,7 +26,9 @@ export async function GET(request: NextRequest) {
     })
 
     const membersWithDetails = await Promise.all(
-      recentMembers.map(async (member) => {
+      recentMembers
+        .filter(member => member.user)
+        .map(async (member) => {
         const subscription = await db.query.memberSubscriptions.findFirst({
           where: eq(memberSubscriptions.memberId, member.id),
         })
