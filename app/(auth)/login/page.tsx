@@ -144,12 +144,12 @@ export default function LoginPage() {
         </div>
 
         <div className="absolute top-6 left-6 right-6 flex justify-between items-center">
-          <div className="flex items-center space-x-3">
+          <Link href="/" className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
               <Dumbbell className="h-5 w-5 text-white" />
             </div>
             <span className="text-lg font-bold tracking-tight">GymFlow</span>
-          </div>
+          </Link>
         </div>
 
         <div className="relative z-10 mt-12">
@@ -189,12 +189,12 @@ export default function LoginPage() {
       <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white dark:bg-zinc-950">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
-          <div className="lg:hidden flex items-center justify-center space-x-3 mb-8">
+          <Link href="/" className="lg:hidden flex items-center justify-center space-x-3 mb-8">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
               <Dumbbell className="h-6 w-6 text-white" />
             </div>
             <span className="text-xl font-bold text-zinc-900 dark:text-white">GymFlow</span>
-          </div>
+          </Link>
 
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">Welcome back</h2>

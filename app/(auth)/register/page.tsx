@@ -268,12 +268,12 @@ export default function RegisterPage() {
     <div className="min-h-screen flex bg-white dark:bg-zinc-950">
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
-          <div className="lg:hidden flex items-center justify-center space-x-3 mb-8">
+          <Link href="/" className="lg:hidden flex items-center justify-center space-x-3 mb-8">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
               <Dumbbell className="h-6 w-6 text-white" />
             </div>
             <span className="text-xl font-bold text-zinc-900 dark:text-white">GymFlow</span>
-          </div>
+          </Link>
 
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">Create your account</h2>
@@ -545,12 +545,12 @@ export default function RegisterPage() {
         </div>
 
         <div className="relative z-10 mt-12">
-          <div className="flex items-center space-x-3 mb-8">
+          <Link href="/" className="flex items-center space-x-3 mb-8">
             <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
               <Dumbbell className="h-8 w-8 text-white" />
             </div>
             <span className="text-3xl font-bold tracking-tight">GymFlow</span>
-          </div>
+          </Link>
 
           <h1 className="text-5xl font-bold mb-6 leading-tight">
             Everything you need<br />
