@@ -18,7 +18,12 @@ import {
   Ruler,
   Dumbbell,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Sparkles,
+  Loader2,
+  Target,
+  TrendingDown,
+  Minus
 } from "lucide-react"
 import { format } from "date-fns"
 import {
@@ -71,6 +76,10 @@ export default function MemberProgressPage() {
   const [showAddMeasurement, setShowAddMeasurement] = useState(false)
   const [showAddRecord, setShowAddRecord] = useState(false)
   const [showAddPhoto, setShowAddPhoto] = useState(false)
+  const [insights, setInsights] = useState<any>(null)
+  const [generatingInsights, setGeneratingInsights] = useState(false)
+  const [showGoalInput, setShowGoalInput] = useState(false)
+  const [goal, setGoal] = useState("")
 
   useEffect(() => {
     Promise.all([
@@ -84,6 +93,30 @@ export default function MemberProgressPage() {
     }).catch(err => console.error("Failed to load progress data:", err))
       .finally(() => setLoading(false))
   }, [])
+
+  const handleGenerateInsights = async () => {
+    setGeneratingInsights(true)
+    try {
+      const response = await fetch("/api/ai/progress-insights", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ goal: goal || undefined }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || "Failed to generate insights")
+      }
+
+      const data = await response.json()
+      setInsights(data.insights)
+    } catch (err: any) {
+      console.error("Failed to generate insights:", err)
+      alert(err.message || "Failed to generate insights. Make sure you have at least 2 measurements.")
+    } finally {
+      setGeneratingInsights(false)
+    }
+  }
 
   const chartData = measurements
     .slice()
@@ -188,10 +221,14 @@ export default function MemberProgressPage() {
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="measurements">
             <TrendingUp className="h-4 w-4 mr-2" />
             Measurements
+          </TabsTrigger>
+          <TabsTrigger value="insights">
+            <Sparkles className="h-4 w-4 mr-2" />
+            AI Insights
           </TabsTrigger>
           <TabsTrigger value="records">
             <Trophy className="h-4 w-4 mr-2" />
@@ -313,6 +350,164 @@ export default function MemberProgressPage() {
               </Card>
             ))}
           </div>
+        </TabsContent>
+
+        {/* AI Insights Tab */}
+        <TabsContent value="insights" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-purple-500" />
+                AI Progress Insights
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {!insights ? (
+                <div className="text-center py-8 space-y-4">
+                  <div className="w-16 h-16 mx-auto bg-purple-100 rounded-full flex items-center justify-center">
+                    <Target className="h-8 w-8 text-purple-500" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Get AI-Powered Insights</p>
+                    <p className="text-sm text-gray-500">Analyze your progress trends and get personalized recommendations</p>
+                  </div>
+                  
+                  {showGoalInput ? (
+                    <div className="max-w-md mx-auto space-y-3">
+                      <Input
+                        placeholder="Enter your fitness goal (e.g., lose 10kg, build muscle)"
+                        value={goal}
+                        onChange={(e) => setGoal(e.target.value)}
+                      />
+                      <div className="flex gap-2 justify-center">
+                        <Button variant="outline" onClick={() => setShowGoalInput(false)}>
+                          Cancel
+                        </Button>
+                        <Button 
+                          onClick={handleGenerateInsights} 
+                          disabled={generatingInsights || measurements.length < 2}
+                          className="bg-purple-600 hover:bg-purple-700"
+                        >
+                          {generatingInsights ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Analyzing...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="h-4 w-4 mr-2" />
+                              Generate Insights
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button 
+                      onClick={() => setShowGoalInput(true)} 
+                      disabled={measurements.length < 2}
+                      className="bg-purple-600 hover:bg-purple-700"
+                    >
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Generate Insights
+                    </Button>
+                  )}
+                  
+                  {measurements.length < 2 && (
+                    <p className="text-sm text-orange-500">Need at least 2 measurements to generate insights</p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* Summary */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h3 className="font-semibold text-purple-900 mb-2">Summary</h3>
+                    <p className="text-purple-800">{insights.summary}</p>
+                  </div>
+
+                  {/* Trends */}
+                  {insights.trends && insights.trends.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold mb-3">Progress Trends</h3>
+                      <div className="grid gap-3">
+                        {insights.trends.map((trend: any, idx: number) => (
+                          <div key={idx} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              {trend.change.includes("-") ? (
+                                <TrendingDown className="h-5 w-5 text-green-500" />
+                              ) : trend.change.includes("+") ? (
+                                <TrendingUp className="h-5 w-5 text-red-500" />
+                              ) : (
+                                <Minus className="h-5 w-5 text-gray-500" />
+                              )}
+                              <div>
+                                <p className="font-medium">{trend.metric}</p>
+                                <p className="text-sm text-gray-500">{trend.interpretation}</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className={`font-bold ${trend.change.includes("-") ? "text-green-600" : trend.change.includes("+") ? "text-red-600" : "text-gray-600"}`}>
+                                {trend.change} ({trend.percentage})
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Goal Prediction */}
+                  {insights.goalPrediction && (
+                    <div className="border rounded-lg p-4">
+                      <h3 className="font-semibold mb-3 flex items-center gap-2">
+                        <Target className="h-5 w-5" />
+                        Goal Prediction
+                      </h3>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Badge variant={insights.goalPrediction.onTrack ? "default" : "destructive"}>
+                          {insights.goalPrediction.onTrack ? "On Track" : "Needs Attention"}
+                        </Badge>
+                        <span className="text-sm text-gray-600">
+                          Estimated completion: {insights.goalPrediction.estimatedCompletion}
+                        </span>
+                      </div>
+                      {insights.goalPrediction.factors && insights.goalPrediction.factors.length > 0 && (
+                        <ul className="text-sm text-gray-600 space-y-1">
+                          {insights.goalPrediction.factors.map((factor: string, idx: number) => (
+                            <li key={idx} className="flex items-center gap-2">
+                              <span className="text-purple-500">•</span>
+                              {factor}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Recommendations */}
+                  {insights.recommendations && insights.recommendations.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold mb-3">Recommendations</h3>
+                      <div className="space-y-2">
+                        {insights.recommendations.map((rec: string, idx: number) => (
+                          <div key={idx} className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
+                            <Sparkles className="h-5 w-5 text-blue-500 mt-0.5" />
+                            <p className="text-blue-800">{rec}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex justify-center pt-4 border-t">
+                    <Button variant="outline" onClick={() => setInsights(null)}>
+                      Generate New Insights
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Personal Records Tab */}
