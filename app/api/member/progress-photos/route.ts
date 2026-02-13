@@ -153,7 +153,9 @@ export async function DELETE(request: NextRequest) {
 
     // Delete from blob storage
     try {
-      await deleteBlob(photo.url)
+      if (photo.url) {
+        await deleteBlob(photo.url)
+      }
     } catch (blobError) {
       console.error("Failed to delete blob:", blobError)
     }

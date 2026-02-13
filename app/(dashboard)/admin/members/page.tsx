@@ -222,7 +222,7 @@ export default function MembersPage() {
                           e.stopPropagation()
                           const name = member.name || member.userId
                           if (confirm(`Promote ${name} to trainer?`)) {
-                            handlePromoteToTrainer(member.id, name)
+                            handlePromoteToTrainer(member.userId, name)
                           }
                         }}
                         disabled={promotingId === member.id}
