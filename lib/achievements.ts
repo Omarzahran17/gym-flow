@@ -5,6 +5,8 @@ import { eq, and, gte, sql } from "drizzle-orm"
 // Check and award achievements for a member
 export async function checkAchievements(memberId: number) {
   try {
+    console.log("Checking achievements for member:", memberId)
+    
     // Get member
     const member = await db.query.members.findFirst({
       where: eq(members.id, memberId),
@@ -17,18 +19,27 @@ export async function checkAchievements(memberId: number) {
 
     // Get all achievements
     const allAchievements = await db.query.achievements.findMany()
+    console.log("Found achievements:", allAchievements.length)
+    
+    if (allAchievements.length === 0) {
+      console.log("No achievements found in database")
+      return
+    }
     
     // Get already earned achievements
     const earnedAchievementsList = await db.query.memberAchievements.findMany({
       where: eq(memberAchievements.memberId, memberId),
     })
     const earnedIds = new Set(earnedAchievementsList.map(ea => ea.achievementId))
+    console.log("Already earned:", earnedIds.size)
 
     // Get counts for different criteria
     const personalRecordsCount = await getPersonalRecordsCount(memberId)
     const measurementsCount = await getMeasurementsCount(memberId)
     const photosCount = await getProgressPhotosCount(memberId)
     const workoutsCount = await getWorkoutsCount(memberId)
+    
+    console.log("Counts - Workouts:", workoutsCount, "PRs:", personalRecordsCount, "Measurements:", measurementsCount, "Photos:", photosCount)
 
     // Check each achievement
     for (const achievement of allAchievements) {
@@ -51,6 +62,8 @@ export async function checkAchievements(memberId: number) {
           shouldAward = photosCount >= (achievement.criteriaValue || 1)
           break
       }
+
+      console.log(`Achievement "${achievement.name}" (${achievement.criteriaType}): need ${achievement.criteriaValue}, have ${workoutsCount}, awarded:`, shouldAward)
 
       if (shouldAward) {
         await awardAchievement(memberId, achievement.id)

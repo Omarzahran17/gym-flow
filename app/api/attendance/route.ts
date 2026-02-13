@@ -109,7 +109,9 @@ export async function POST(request: NextRequest) {
       method,
     });
 
+    console.log("Attendance recorded for member:", member.id, "checking achievements...")
     await checkAchievements(member.id);
+    console.log("Achievement check complete for member:", member.id)
 
     return NextResponse.json({
       success: true,

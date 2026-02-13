@@ -17,8 +17,10 @@ const defaultAchievements = [
 
 async function seedAchievements() {
   const existing = await db.query.achievements.findMany()
+  console.log("Seeding achievements, found:", existing.length)
   if (existing.length === 0) {
     await db.insert(achievements).values(defaultAchievements)
+    console.log("Inserted default achievements")
   }
 }
 
